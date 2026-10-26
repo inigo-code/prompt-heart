@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import type { Theme } from '@/lib/theme';
 
@@ -81,8 +81,11 @@ export function ToggleRow({ theme, icon, leading, label, value, onChange, last }
         <Switch
           value={value}
           onValueChange={onChange}
-          trackColor={{ true: theme.accent, false: theme.chip }}
+          trackColor={{ true: theme.accent, false: theme.dark ? '#3A3733' : '#CFC9BF' }}
           thumbColor="#ffffff"
+          // React Native for Web colours the "on" knob with its own prop (it would otherwise be teal).
+          {...(Platform.OS === 'web' ? ({ activeThumbColor: '#ffffff' } as object) : {})}
+          ios_backgroundColor={theme.dark ? '#3A3733' : '#CFC9BF'}
           accessibilityLabel={label}
         />
       }
@@ -92,7 +95,7 @@ export function ToggleRow({ theme, icon, leading, label, value, onChange, last }
 
 export function Segmented<T extends string | number>({ theme, options, value, onChange }: {
   theme: Theme;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; icon?: keyof typeof Ionicons.glyphMap }[];
   value: T;
   onChange: (v: T) => void;
 }) {
@@ -100,15 +103,21 @@ export function Segmented<T extends string | number>({ theme, options, value, on
     <View style={[styles.segmented, { backgroundColor: theme.chip }]}>
       {options.map((o) => {
         const active = o.value === value;
+        const color = active ? theme.accentText : theme.textMuted;
         return (
           <Pressable
             key={String(o.value)}
             onPress={() => onChange(o.value)}
             accessibilityRole="button"
+            accessibilityLabel={o.label}
             accessibilityState={{ selected: active }}
-            style={[styles.segment, active && { backgroundColor: theme.elevated, shadowOpacity: 0.08 }]}
+            style={({ pressed }) => [
+              styles.segment,
+              active ? { backgroundColor: theme.accent, shadowOpacity: 0.18 } : pressed ? { backgroundColor: theme.border } : null,
+            ]}
           >
-            <Text style={[styles.segmentText, { color: active ? theme.text : theme.textMuted }]}>{o.label}</Text>
+            {o.icon && <Ionicons name={o.icon} size={15} color={color} />}
+            <Text style={[styles.segmentText, { color }, active && styles.segmentTextActive]}>{o.label}</Text>
           </Pressable>
         );
       })}
@@ -117,10 +126,20 @@ export function Segmented<T extends string | number>({ theme, options, value, on
 }
 
 /** A labelled control row inside a Section (for Segmented and swatches). */
-export function ControlRow({ theme, label, children, last }: { theme: Theme; label: string; children: ReactNode; last?: boolean }) {
+export function ControlRow({ theme, label, value, children, last }: {
+  theme: Theme;
+  label: string;
+  /** Current choice, shown next to the label (e.g. the accent colour's name). */
+  value?: string;
+  children: ReactNode;
+  last?: boolean;
+}) {
   return (
     <View style={[styles.control, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border }]}>
-      <Text style={[styles.controlLabel, { color: theme.text }]}>{label}</Text>
+      <View style={styles.controlHead}>
+        <Text style={[styles.controlLabel, { color: theme.text }]}>{label}</Text>
+        {value !== undefined && <Text style={[styles.controlValue, { color: theme.textMuted }]}>{value}</Text>}
+      </View>
       {children}
     </View>
   );
@@ -136,11 +155,15 @@ const styles = StyleSheet.create({
   label: { flex: 1, fontSize: 15, fontWeight: '600' },
   value: { fontSize: 14, maxWidth: '45%' },
   control: { paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  controlHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   controlLabel: { fontSize: 15, fontWeight: '600' },
+  controlValue: { fontSize: 14, fontWeight: '600' },
   segmented: { flexDirection: 'row', borderRadius: 11, padding: 3 },
   segment: {
     flex: 1,
-    height: 34,
+    flexDirection: 'row',
+    gap: 6,
+    height: 36,
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
@@ -150,4 +173,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
   },
   segmentText: { fontSize: 14, fontWeight: '600' },
+  segmentTextActive: { fontWeight: '800' },
 });

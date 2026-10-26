@@ -514,8 +514,19 @@ export default function HomeScreen() {
         title={`Move ${plural(count)} to…`}
         onClose={() => setBulkSheet(null)}
         actions={[
-          { label: 'No category', onPress: () => moveTo(null, 'No category') },
-          ...folders.map((f) => ({ label: f.name, onPress: () => moveTo(f.id, f.name) })),
+          { label: 'No category', icon: 'remove-circle-outline', onPress: () => moveTo(null, 'No category') },
+          ...folders.map((f) => {
+            const app = aiAppForFolder(f.id);
+            return {
+              label: f.name,
+              leading: app ? <AppBadge app={app} size={30} /> : (
+                <View style={[styles.sheetDotWrap, { backgroundColor: f.color + '26' }]}>
+                  <View style={[styles.sheetDot, { backgroundColor: f.color }]} />
+                </View>
+              ),
+              onPress: () => moveTo(f.id, f.name),
+            };
+          }),
         ]}
       />
 
@@ -535,15 +546,22 @@ export default function HomeScreen() {
         visible={menuFor !== null}
         title={menuFor?.title || 'Untitled'}
         onClose={() => setMenuFor(null)}
+        quick={
+          menuFor && aiApps.length > 0
+            ? {
+                label: 'Copy & open in',
+                items: aiApps.map((a) => ({ key: a.key, label: a.label, leading: <AppBadge app={a} size={26} />, onPress: () => copy(menuFor, { openIn: a }) })),
+              }
+            : undefined
+        }
         actions={
           menuFor
             ? [
-                { label: 'Copy', onPress: () => copy(menuFor) },
-                ...aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(menuFor, { openIn: a }) })),
-                { label: menuFor.pinned ? 'Unpin' : 'Pin to top', onPress: () => togglePin(menuFor.id) },
-                { label: 'Select multiple…', onPress: () => setSelected([menuFor.id]) },
-                { label: 'Duplicate', onPress: () => duplicatePrompt(menuFor.id) },
-                { label: 'Move to Trash', destructive: true, onPress: () => remove(menuFor) },
+                { label: 'Copy', icon: 'copy-outline', onPress: () => copy(menuFor) },
+                { label: menuFor.pinned ? 'Unpin' : 'Pin to top', icon: menuFor.pinned ? 'pin' : 'pin-outline', onPress: () => togglePin(menuFor.id) },
+                { label: 'Select multiple…', icon: 'checkbox-outline', onPress: () => setSelected([menuFor.id]) },
+                { label: 'Duplicate', icon: 'duplicate-outline', onPress: () => duplicatePrompt(menuFor.id) },
+                { label: 'Move to Trash', icon: 'trash-outline', destructive: true, onPress: () => remove(menuFor) },
               ]
             : []
         }
@@ -655,6 +673,8 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
   emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 18, borderRadius: 21, marginTop: 10 },
   emptyBtnText: { fontSize: 14, fontWeight: '700' },
+  sheetDotWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  sheetDot: { width: 14, height: 14, borderRadius: 7 },
   fab: {
     position: 'absolute',
     right: 20,

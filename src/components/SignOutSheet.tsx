@@ -30,8 +30,8 @@ export function SignOutSheet({ visible, onClose, onBusy }: Props) {
       title="Sign out? Your prompts stay safe in your account. Any unsynced changes are uploaded first."
       onClose={onClose}
       actions={[
-        { label: 'Sign out and remove my data from this phone', destructive: true, onPress: () => run(true) },
-        { label: 'Sign out, keep my prompts on this phone', onPress: () => run(false) },
+        { label: 'Sign out and remove my data from this phone', icon: 'trash-outline', destructive: true, onPress: () => run(true) },
+        { label: 'Sign out, keep my prompts on this phone', icon: 'log-out-outline', onPress: () => run(false) },
       ]}
     />
   );

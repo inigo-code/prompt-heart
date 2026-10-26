@@ -206,8 +206,8 @@ export default function ProfileScreen() {
         title="Profile photo"
         onClose={() => setPhotoMenu(false)}
         actions={[
-          { label: profile.avatarUri ? 'Choose a new photo' : 'Choose a photo', onPress: () => run('photo', async () => ((await profile.pickAvatar()) ? 'Photo updated' : undefined)) },
-          ...(profile.avatarUri ? [{ label: 'Remove photo', destructive: true, onPress: () => run('photo', async () => (await profile.removeAvatar(), 'Photo removed')) }] : []),
+          { label: profile.avatarUri ? 'Choose a new photo' : 'Choose a photo', icon: 'image-outline', onPress: () => run('photo', async () => ((await profile.pickAvatar()) ? 'Photo updated' : undefined)) },
+          ...(profile.avatarUri ? [{ label: 'Remove photo', icon: 'trash-outline' as const, destructive: true, onPress: () => run('photo', async () => (await profile.removeAvatar(), 'Photo removed')) }] : []),
         ]}
       />
 
@@ -216,8 +216,8 @@ export default function ProfileScreen() {
         title={`Delete the account ${sync.user?.email ?? ''} for good? Your prompts, categories and images are removed from the cloud. This can't be undone.`}
         onClose={() => setDeleteMenu(false)}
         actions={[
-          { label: 'Delete account, keep prompts on this phone', destructive: true, onPress: () => deleteAccount(false) },
-          { label: 'Delete account and erase this phone', destructive: true, onPress: () => deleteAccount(true) },
+          { label: 'Delete account, keep prompts on this phone', icon: 'cloud-offline-outline', destructive: true, onPress: () => deleteAccount(false) },
+          { label: 'Delete account and erase this phone', icon: 'trash-outline', destructive: true, onPress: () => deleteAccount(true) },
         ]}
       />
     </KeyboardAvoidingView>
