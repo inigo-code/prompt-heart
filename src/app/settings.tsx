@@ -4,12 +4,14 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBadge } from '@/components/AppBadge';
+import { Avatar } from '@/components/Avatar';
 import { ControlRow, Row, Section, Segmented, ToggleRow } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
 import { AI_APPS } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { exportBackup, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
+import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { AccentKey } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
@@ -33,6 +35,7 @@ export default function SettingsScreen() {
   const { settings, update, reset } = useSettings();
   const store = usePromptStore();
   const sync = useSync();
+  const profile = useProfile();
   const [busy, setBusy] = useState<'backup' | 'markdown' | 'import' | null>(null);
 
   const run = async (kind: 'backup' | 'markdown' | 'import', fn: () => Promise<string | null>) => {
@@ -59,6 +62,17 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
+      <Section theme={theme} title="Profile">
+        <Row
+          theme={theme}
+          leading={<Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={40} />}
+          label={profile.displayName || 'Set up your profile'}
+          value={sync.user?.email ?? (sync.status === 'unconfigured' ? undefined : 'Not signed in')}
+          onPress={() => router.push('/profile')}
+          last
+        />
+      </Section>
+
       <Section theme={theme} title="Appearance">
         <ControlRow theme={theme} label="Theme">
           <Segmented

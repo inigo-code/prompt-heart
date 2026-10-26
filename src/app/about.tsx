@@ -26,7 +26,7 @@ export default function AboutScreen() {
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
       <View style={styles.hero}>
         <Image source={require('../../assets/icon.png')} style={styles.icon} />
-        <BrandTitle theme={theme} size={28} />
+        <BrandTitle theme={theme} size={28} align="center" />
         <Text style={[styles.tagline, { color: theme.textMuted }]}>{APP_TAGLINE}</Text>
       </View>
 

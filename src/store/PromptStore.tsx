@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { clearPending, mergeBackup, mergeRecords, migrate } from './merge';
+import { clearPending, emptySyncMeta, mergeBackup, mergeRecords, migrate } from './merge';
 import type { ImportResult } from './merge';
 import { seedData } from './seed';
 import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
@@ -79,6 +79,8 @@ type PromptStore = {
   deleteFolder: (id: string) => void;
   /** Creates folders with fixed ids if this device has never had them (deleted ones stay deleted). */
   ensureFolders: (folders: Pick<Folder, 'id' | 'name' | 'color'>[]) => void;
+  /** Removes every prompt and category from this device and starts over with the samples. Returns image ids to delete. */
+  eraseAll: () => string[];
   /** Merges a backup; image ids in it must already be saved locally. */
   importBackup: (backup: { prompts: Prompt[]; folders: Folder[] }) => ImportResult;
   sync: SyncStoreApi;
@@ -95,6 +97,8 @@ export type SyncStoreApi = {
   markImagesSynced: (done: { uploaded: string[]; deleted: string[] }) => void;
   /** Starts syncing with a new account: everything on this device gets uploaded. */
   resetForUser: (userId: string) => void;
+  /** After the account is deleted: forget it, so a later sign-in starts a fresh upload. */
+  forgetAccount: () => void;
 };
 
 const Ctx = createContext<PromptStore | null>(null);
@@ -369,9 +373,17 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const forgetAccount = useCallback(() => setData((d) => ({ ...d, sync: emptySyncMeta() })), []);
+
+  const eraseAll = useCallback(() => {
+    const images = [...new Set(snapshot.current.prompts.flatMap((p) => p.images))];
+    setData({ ...seedData, sync: emptySyncMeta() });
+    return images;
+  }, []);
+
   const sync = useMemo<SyncStoreApi>(
-    () => ({ meta: data.sync, localRevision, getSnapshot, applyRemote, markPushed, markImagesSynced, resetForUser }),
-    [data.sync, localRevision, getSnapshot, applyRemote, markPushed, markImagesSynced, resetForUser],
+    () => ({ meta: data.sync, localRevision, getSnapshot, applyRemote, markPushed, markImagesSynced, resetForUser, forgetAccount }),
+    [data.sync, localRevision, getSnapshot, applyRemote, markPushed, markImagesSynced, resetForUser, forgetAccount],
   );
 
   const value = useMemo<PromptStore>(() => {
@@ -411,6 +423,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       updateFolder,
       deleteFolder,
       ensureFolders,
+      eraseAll,
       importBackup,
       sync,
     };
@@ -432,6 +445,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     updateFolder,
     deleteFolder,
     ensureFolders,
+    eraseAll,
     importBackup,
     sync,
   ]);

@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState } from 'react-native';
 
-import { deleteRemoteImages, downloadMissingImages, imagesSupported, uploadImage } from '@/lib/images';
+import { IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
@@ -32,6 +32,15 @@ type SyncContext = {
   /** Resolves to true when signed in straight away, false if Supabase wants the email confirmed first. */
   signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  /** Signed-in user, with the profile fields saved on the account (name, photo version). */
+  user: { id: string; email: string | null; meta: Record<string, unknown> } | null;
+  /** Saves fields on the account (merged into what's there). */
+  updateProfile: (data: Record<string, unknown>) => Promise<void>;
+  /** 'changed' when it applies at once, 'confirm' when Supabase emails links to confirm first. */
+  updateEmail: (email: string) => Promise<'changed' | 'confirm'>;
+  updatePassword: (password: string) => Promise<void>;
+  /** Deletes the account, its prompts and its files from the cloud, then signs out. */
+  deleteAccount: () => Promise<void>;
 };
 
 const Ctx = createContext<SyncContext | null>(null);
@@ -119,7 +128,7 @@ async function pull(client: SupabaseClient, userId: string, store: SyncStoreApi)
 
 export function SyncProvider({ children }: { children: ReactNode }) {
   const { ready, sync: store } = usePromptStore();
-  const { meta, localRevision, resetForUser } = store;
+  const { meta, localRevision, resetForUser, forgetAccount } = store;
   const [session, setSession] = useState<Session | null>(null);
   const [state, setState] = useState<{ status: 'idle' | 'syncing' | 'synced' | 'error'; error: string | null; lastSyncedAt: number | null }>({
     status: 'idle',
@@ -229,6 +238,51 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     return data.session !== null;
   }, []);
 
+  const updateProfile = useCallback(async (data: Record<string, unknown>) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.updateUser({ data });
+    if (error) throw error;
+  }, []);
+
+  const updateEmail = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const next = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.updateUser({ email: next });
+    if (error) throw error;
+    return data.user?.email?.toLowerCase() === next ? 'changed' : 'confirm';
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    if (!supabase || !userId) throw new Error('Sign in first.');
+    const client = supabase;
+    // Storage files aren't removed by the database cascade, so delete everything in the user's folder first.
+    for (;;) {
+      const { data: files, error } = await client.storage.from(IMAGE_BUCKET).list(userId, { limit: 100 });
+      if (error) throw error;
+      if (!files || files.length === 0) break;
+      const { error: rmError } = await client.storage.from(IMAGE_BUCKET).remove(files.map((f) => `${userId}/${f.name}`));
+      if (rmError) throw rmError;
+      if (files.length < 100) break;
+    }
+    const { error } = await client.rpc('delete_my_account');
+    if (error) {
+      throw new Error(
+        /delete_my_account/.test(error.message)
+          ? "Account deletion isn't set up on the server yet (run supabase/delete_my_account.sql)."
+          : error.message,
+      );
+    }
+    await client.auth.signOut({ scope: 'local' }).catch(() => {});
+    forgetAccount();
+    setState({ status: 'idle', error: null, lastSyncedAt: null });
+  }, [userId, forgetAccount]);
+
   const signOut = useCallback(async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
@@ -241,6 +295,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       error: state.error,
       lastSyncedAt: state.lastSyncedAt,
       email: session?.user.email ?? null,
+      user: session ? { id: session.user.id, email: session.user.email ?? null, meta: session.user.user_metadata ?? {} } : null,
+      updateProfile,
+      updateEmail,
+      updatePassword,
+      deleteAccount,
       pendingCount: meta.pendingPrompts.length + meta.pendingFolders.length + meta.pendingImageUploads.length,
       imagesVersion,
       syncNow: () => void runSync(),
@@ -248,7 +307,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, imagesVersion, runSync, signIn, signUp, signOut],
+    [userId, session, state, meta, imagesVersion, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

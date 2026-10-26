@@ -1,4 +1,4 @@
-import { Fraunces_700Bold_Italic } from '@expo-google-fonts/fraunces/700Bold_Italic';
+import { Fredoka_700Bold } from '@expo-google-fonts/fredoka/700Bold';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
@@ -12,6 +12,7 @@ import { ToastProvider } from '@/components/Toast';
 import { useTheme } from '@/lib/theme';
 import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
+import { ProfileProvider } from '@/profile/ProfileProvider';
 import { SettingsProvider } from '@/settings/SettingsProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
@@ -23,7 +24,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 const shareDisabled = Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({ Fraunces_700Bold_Italic });
+  const [fontsLoaded, fontError] = useFonts({ Fredoka_700Bold });
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded, fontError]);
@@ -33,11 +34,13 @@ export default function RootLayout() {
       <SettingsProvider>
         <PromptStoreProvider>
           <SyncProvider>
+            <ProfileProvider>
             <ToastProvider>
               <CopyPromptProvider>
                 <Navigator />
               </CopyPromptProvider>
             </ToastProvider>
+            </ProfileProvider>
           </SyncProvider>
         </PromptStoreProvider>
       </SettingsProvider>
@@ -73,6 +76,7 @@ function Navigator() {
         <Stack.Screen name="prompt/[id]" options={{ title: '' }} />
         <Stack.Screen name="categories" options={{ title: 'Categories', presentation: 'modal' }} />
         <Stack.Screen name="account" options={{ title: 'Cloud sync' }} />
+        <Stack.Screen name="profile" options={{ title: 'Profile' }} />
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="about" options={{ title: 'About' }} />
         <Stack.Screen name="trash" options={{ title: 'Trash' }} />

@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
+import { Avatar } from '@/components/Avatar';
 import { BrandTitle, HeartMark } from '@/components/BrandTitle';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
@@ -15,9 +16,11 @@ import { useToast } from '@/components/Toast';
 import { aiAppForFolder } from '@/lib/ai';
 import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
+import { greeting, useHour } from '@/lib/greeting';
 import { useTheme } from '@/lib/theme';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
+import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { SortKey } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
@@ -38,14 +41,18 @@ const SORTS: Record<SortKey, { label: string; next: SortKey }> = {
   title: { label: 'A–Z', next: 'recent' },
 };
 
-const SYNC_ICON: Record<SyncStatus, keyof typeof Ionicons.glyphMap> = {
-  unconfigured: 'cloud-offline-outline',
-  'signed-out': 'cloud-offline-outline',
-  idle: 'cloud-outline',
-  syncing: 'sync',
-  synced: 'cloud-done-outline',
-  error: 'cloud-offline-outline',
+const SYNC_LABEL: Record<SyncStatus, string> = {
+  unconfigured: 'sync not set up',
+  'signed-out': 'signed out',
+  idle: 'sync on',
+  syncing: 'syncing',
+  synced: 'up to date',
+  error: 'sync problem',
 };
+
+/** Avatar dot: green synced, amber in progress, red problem, none when signed out. */
+const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
+  status === 'synced' ? '#3FB27F' : status === 'syncing' || status === 'idle' ? theme.accent : status === 'error' ? theme.danger : undefined;
 
 const sameFilter = (a: Filter, b: Filter) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -57,6 +64,8 @@ export default function HomeScreen() {
   const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt } = usePromptStore();
   const copy = useCopyPrompt();
   const { status: syncStatus } = useSync();
+  const profile = useProfile();
+  const hour = useHour();
   const folders = useVisibleFolders();
   const aiApps = useEnabledAiApps();
   const launchAppFor = useCallback(
@@ -121,15 +130,25 @@ export default function HomeScreen() {
 
       <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
         <View style={styles.titleRow}>
-          <View>
+          <View style={styles.titleBlock}>
             <BrandTitle theme={theme} />
+            <Text style={[styles.hello, { color: theme.text }]} numberOfLines={1}>
+              {greeting(hour, profile.displayName)}
+            </Text>
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>
               {prompts.length} prompt{prompts.length === 1 ? '' : 's'}
               {folders.length ? ` · ${folders.length} categor${folders.length === 1 ? 'y' : 'ies'}` : ''}
             </Text>
           </View>
           <View style={styles.headerActions}>
-            <IconButton theme={theme} icon={SYNC_ICON[syncStatus]} label="Cloud sync" tint={syncStatus === 'error' ? theme.danger : undefined} onPress={() => router.push('/account')} />
+            <Pressable
+              onPress={() => router.push('/profile')}
+              hitSlop={6}
+              accessibilityLabel={`Profile and sync (${SYNC_LABEL[syncStatus]})`}
+              style={({ pressed }) => [styles.avatarBtn, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={36} dot={syncDot(syncStatus, theme)} />
+            </Pressable>
             <IconButton theme={theme} icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
           </View>
         </View>
@@ -340,9 +359,12 @@ function IconButton({ theme, icon, label, tint, onPress }: {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   top: { paddingHorizontal: 16, gap: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  titleBlock: { flex: 1, minWidth: 0 },
+  hello: { fontSize: 15, fontWeight: '700', marginTop: 1 },
+  avatarBtn: { padding: 2 },
   subtitle: { fontSize: 13, marginTop: 2 },
-  headerActions: { flexDirection: 'row', gap: 4 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
   searchInput: { flex: 1, fontSize: 15, height: '100%' },
