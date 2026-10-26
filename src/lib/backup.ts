@@ -7,7 +7,7 @@ import { APP_NAME } from '@/lib/app';
 import { imageBase64, imagesSupported, writeImageBase64 } from '@/lib/images';
 import type { Folder, Prompt } from '@/store/types';
 
-const FORMAT = 'cuebox-backup';
+const FORMAT = 'promptheart-backup';
 const FORMAT_VERSION = 1;
 
 export type Backup = {

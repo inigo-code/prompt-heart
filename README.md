@@ -1,4 +1,4 @@
-# Cuebox
+# Promptheart
 
 *Your AI prompts, one tap away.* A notes-style app for saving AI prompts and copying them with one tap. Built with Expo (SDK 58), Expo Router and TypeScript. Runs on Android, iOS and web. (Formerly "Prompt Notes".)
 
@@ -30,7 +30,7 @@ Press `w` for web, or scan the QR code with Expo Go. Saving from other apps and 
 - **Trash**: deleted prompts stay for 30 days, with Undo and Restore.
 
 **Capture and backup**
-- **Save from other apps**: use Share → Cuebox from Chrome, ChatGPT, Photos or anywhere else to save text, links or images as a prompt (Android).
+- **Save from other apps**: use Share → Promptheart from Chrome, ChatGPT, Photos or anywhere else to save text, links or images as a prompt (Android).
 - **Export / import**: a JSON backup that includes images, plus a readable Markdown export. Importing merges and never deletes.
 
 **App**
@@ -147,4 +147,4 @@ All data access goes through `usePromptStore()`. The sync engine (`src/sync/`) s
   ```bash
   npx eas-cli@latest build --platform android --profile preview
   ```
-  Then attach the APK to a GitHub release: `gh release create vX.Y.Z cuebox-X.Y.Z.apk`.
+  Then attach the APK to a GitHub release: `gh release create vX.Y.Z promptheart-X.Y.Z.apk`.

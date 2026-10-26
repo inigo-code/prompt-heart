@@ -15,7 +15,7 @@ export const seedData: StoreData = {
   prompts: [
     {
       id: 'p-welcome',
-      title: 'Welcome to Cuebox',
+      title: 'Welcome to Promptheart',
       body: 'Tap the copy icon on any card to put the prompt on your clipboard. Tap the card itself to edit it.\n\nUse categories to file prompts, and #tags to group related ones across categories.',
       folderId: null,
       tags: ['tips'],

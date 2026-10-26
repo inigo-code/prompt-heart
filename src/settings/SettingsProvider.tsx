@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-const STORAGE_KEY = 'cuebox/settings';
+const STORAGE_KEY = 'promptheart/settings';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type AccentKey = 'amber' | 'blue' | 'green' | 'rose' | 'violet';
