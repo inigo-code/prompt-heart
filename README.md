@@ -1,150 +1,121 @@
-# Prompt Heart
+<p align="center">
+  <img src="assets/icon.png" width="112" alt="Prompt Heart icon: a smiling prompt card" />
+</p>
 
-*Your AI prompts, one tap away.* A notes-style app for saving AI prompts and copying them with one tap. Built with Expo (SDK 58), Expo Router and TypeScript. Runs on Android, iOS and web. (Formerly "Prompt Notes".)
+<h1 align="center">Prompt Heart</h1>
 
-## Install
+<p align="center"><b>Your AI prompts, one tap away.</b><br/>
+A notes-style app for saving, organising and launching the prompts you use with ChatGPT, Claude, Gemini, Grok and more.</p>
 
-Download the latest Android APK from this repo's **Releases** page, or from the EAS build page. Installed builds update themselves over the air for code-only changes.
+<p align="center">
+  <a href="../../releases/latest"><b>Download the latest Android APK</b></a> ·
+  Android · iOS (build from source) · Web
+</p>
 
-## Run it locally
+---
 
-```bash
-npm install
-npx expo start
-```
+## Why Prompt Heart
 
-Press `w` for web, or scan the QR code with Expo Go. Saving from other apps and image attachments need a real build: Expo Go and web don't include those native modules.
+Good prompts get lost in chats, notes apps and screenshots. Prompt Heart keeps them in one place, so you can find one in seconds, fill in the blanks, and paste it into any AI app with one tap.
 
 ## Features
 
-**Prompts**
-- **One-tap copy**: every card has a copy button. Only the text is copied, never attached images.
-- **Templates**: `{{placeholders}}` open a fill-in sheet with a live preview before copying. `{{tone|friendly}}` sets a default. The app remembers the last values you used.
-- **Copy & open in ChatGPT, Claude, Perplexity or Gemini**: copies the prompt and opens the app, prefilled where supported.
-- **Image attachments**: attach reference screenshots or photos. They're resized, stored on the device and synced to private cloud storage.
-- **Notes-style editor**: autosaves, with categories, tags, pin, word count and a token estimate.
+**Save and reuse**
+- **One-tap copy** from every card. Only the text is copied, never attached images.
+- **Templates:** write `{{topic}}` and the app asks for it when you copy, with a live preview. `{{tone|friendly}}` sets a default.
+- **Notes-style editor** that autosaves, with a word count and token estimate.
+- **Reference images:** attach screenshots or photos to a prompt for context.
 
-**Organising**
+**Launch in your AI apps**
+- **ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot, DeepSeek and Le Chat.** Switch each one on or off in Settings.
+- Each app gets its own category. Prompts saved there get an **Open in Claude** (or another app) button that copies the prompt and opens the app. ChatGPT, Claude, Grok and Perplexity open with it already typed in.
+- A quick-launch bar opens any of your apps straight from the home screen.
+
+**Organise**
 - **Categories** with colours, **#tags**, **pins**, **search**, and a **Recently copied** filter.
-- **List or grid** home layout. Sort by recent, most copied or A–Z.
-- **Trash**: deleted prompts stay for 30 days, with Undo and Restore.
+- **List or grid** view. Sort by recently edited, most copied or A–Z.
+- **Trash:** deleted prompts stay for 30 days, with Undo and Restore.
 
-**Capture and backup**
-- **Save from other apps**: use Share → Prompt Heart from Chrome, ChatGPT, Photos or anywhere else to save text, links or images as a prompt (Android).
-- **Export / import**: a JSON backup that includes images, plus a readable Markdown export. Importing merges and never deletes.
+**Capture**
+- **Save from any app:** share text, links or images to Prompt Heart from Chrome, ChatGPT, Photos and more (Android).
+- **Backups:** export everything, images included, to a JSON file, or export a readable Markdown file. Importing merges and never deletes.
 
-**App**
-- **Settings**: theme (System, Light or Dark), five accent colours, layout, preview length, vibrate on copy, token estimates.
-- **Cloud sync** across devices (Supabase). Works offline and updates live.
-- **Over-the-air updates**, plus a Check for updates button in About.
-- **About** screen with version and developer info.
+**Make it yours**
+- **Profile:** your name and photo, and a welcome that changes through the day ("Good morning, Inigo!", "Still up?").
+- **Themes:** System, Light or Dark, five accent colours, and a smiling heart that switches between an awake face (light) and a sleepy one (dark).
+- **Cloud sync** across devices. It works offline and updates live. You can change your email or password, or delete your account, from the app.
 
-## Set up cloud sync
+<p align="center">
+  <img src="docs/hearts.png" width="520" alt="The smiling heart in light mode (awake) and dark mode (sleepy, with a star)" />
+</p>
 
-You do this once, and it takes about 5 minutes. Until it's done, the app runs local-only.
+## Install
 
-1. **Create a project** at [supabase.com](https://supabase.com). The free tier is fine.
-2. **Create the tables.** Open **SQL Editor → New query**, paste in all of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. It's safe to run again later.
-3. **Turn off email confirmation.** Go to **Authentication → Sign In / Providers → Email** and switch off **Confirm email**. New accounts can then sign in straight away, with no emails sent.
-4. **Add your keys.** Copy `.env.example` to `.env.local` and fill in your project URL and **publishable** key from **Project Settings → API Keys**.
-5. **Restart the dev server** with `npx expo start --clear`. Then tap the cloud icon on the home screen, choose **Create an account**, and use the same email and password on your other devices.
+1. Open the [latest release](../../releases/latest) on your Android phone and download `promptheart-x.y.z.apk`.
+2. Open the file. If Android asks, allow your browser to install apps. If Play Protect warns, choose **Install anyway**.
+3. New versions install over the old one and keep your prompts. Smaller updates arrive automatically. To get one straight away, go to **Settings → About → Check for updates**.
 
-Notes:
+## Your data
 
-- **Before launch**, add your own email sender under **Authentication → Emails → SMTP Settings** (for example Resend). Then turn **Confirm email** back on, so people must own the address they sign up with. You'll also need an email sender to add "Forgot password".
-- **First sign-in.** Everything already on the device is uploaded and merged with what's in the account. Records are matched by id, so the sample prompts don't get duplicated.
-- **Conflicts.** If the same prompt is edited on two devices, the most recent edit wins (*last write wins*). This is decided per prompt, not per field.
-- **Deletes.** A delete is stored as a marker, a *tombstone*, so it reaches your other devices. Deleted rows stay in the database, hidden.
-- **Signing out** keeps your prompts on the device. If you then sign in with a *different* account, the device's prompts are uploaded into that account.
+- **On your device:** prompts and images are stored on the phone and work fully offline.
+- **With an account:** your prompts, categories, images, name and photo are stored in a private Supabase project. Row Level Security means each account can only read and write its own data, and images sit in a private bucket under your own folder.
+- **Deleting your account** (Profile → Delete account) removes the account and all of its data from the cloud. You choose whether the prompts stay on your phone.
 
-### How sync works
+## Tech
 
-| Piece | File |
-| --- | --- |
-| Tables, last-write-wins trigger, Row Level Security, Realtime | `supabase/schema.sql` |
-| Supabase client (session saved in AsyncStorage) | `src/sync/supabase.ts` |
-| Upload pending changes, download newer ones, live updates, retry | `src/sync/SyncProvider.tsx` |
-| Merge rules and tracking of pending changes | `src/store/merge.ts`, `src/store/PromptStore.tsx` |
-| Sign-in and sync status screen | `src/app/account.tsx` |
-
-Each local edit stamps the record with `modifiedAt` and adds it to a list of pending changes. A sync uploads the pending records, then downloads rows whose server timestamp is newer than the last download, and merges them locally. The server ignores any upload that isn't newer than what it already has, so stale writes can't overwrite newer ones and devices can't keep echoing the same change back and forth.
-
-## Project layout
+[Expo](https://expo.dev) SDK 58 · React Native · Expo Router · TypeScript · [Supabase](https://supabase.com) (Auth, Postgres, Realtime, Storage) · EAS Build and EAS Update.
 
 ```
 src/
-  app/                 Screens (Expo Router)
-    _layout.tsx        Stack navigator + providers
-    index.tsx          Home: search, filter chips, prompt cards, + button
-    prompt/[id].tsx    Editor ("new" creates a prompt)
-    categories.tsx     Manage categories
-  components/          PromptCard, Chip, ActionSheet, Toast
-  lib/                 theme, useCopyPrompt
-  store/               PromptStore (state + persistence), merge rules, types, seed data
-  sync/                Supabase client, sync engine, row mapping
-supabase/schema.sql    Database tables, policies and sync trigger
+  app/          Screens: home, editor, categories, settings, profile, account, about, trash, share
+  components/   Cards, chips, sheets, avatar, brand title, settings building blocks
+  lib/          Theme, templates, AI apps, images, backups, greetings
+  profile/      Name and photo, synced to the account
+  settings/     App settings (theme, accent, layout, AI apps…)
+  store/        Prompts and categories, merge rules, seed data
+  sync/         Supabase client, sync engine, row mapping
+supabase/       Database schema, policies, storage bucket, account deletion
 ```
 
-All data access goes through `usePromptStore()`. The sync engine (`src/sync/`) sits beside the store, so screens don't know about the network.
+## Development
 
-## Roadmap: suggested features
+```bash
+npm install
+npx expo start        # press w for web; scan the QR code for Expo Go
+npx tsc --noEmit      # typecheck
+npx expo lint         # lint
+```
 
-### 1. Sync extras
+Saving from other apps and image attachments need a real build, because Expo Go and the web version don't include those native parts.
 
-- **Sign in with Apple or Google.** This needs a development build, because it does not work in Expo Go.
-- Merge edits **field by field**, so editing the title on one device and the body on another keeps both.
-- Periodically clean up old deletion markers (tombstones) on the server.
-- Add a "Delete my account and data" option. The App Store requires this once you have sign-in.
+### Cloud sync setup (once)
 
-### 2. Prompt power features
+1. Create a project at [supabase.com](https://supabase.com). The free tier is fine.
+2. In **SQL Editor**, run [`supabase/schema.sql`](supabase/schema.sql), which creates the tables, policies, sync trigger and image bucket, then [`supabase/delete_my_account.sql`](supabase/delete_my_account.sql). Both are safe to re-run.
+3. Under **Authentication → Sign In / Providers → Email**, turn off **Confirm email** for testing.
+4. Copy `.env.example` to `.env.local` and add your project URL and **publishable** key. For cloud builds, set the same two values as EAS environment variables.
 
-- **Variable defaults and choices**: e.g. `{{tone|friendly}}` or `{{tone:formal,casual}}` as a dropdown. Also save the last-used values permanently.
-- **Version history**: keep earlier versions of a prompt and restore any of them.
-- **"Open in…" buttons**: copy and jump straight to the ChatGPT, Claude or Gemini app.
-- **Prompt chains**: an ordered set of prompts to run one after another.
-- **Markdown preview** of the prompt body.
+How sync works: each change gets a timestamp and is queued. A sync uploads the queue (images first), then downloads anything newer on the server. If two devices edit the same prompt, the most recent edit wins. Deletes are kept as markers so every device hears about them.
 
-### 3. Capture and organisation
+### Releasing
 
-- **Share sheet extension**: save a prompt from any app (Safari, X, Reddit) using "Share → Prompt Notes".
-- **Nested categories / sub-folders**, and drag-to-reorder.
-- **Favourites and recently used** sections on home.
-- **Grid / masonry view**, like Google Keep.
-- **Bulk select**: move, tag or delete many prompts at once.
+```bash
+# Code-only changes: published over the air to installed apps
+npx eas-cli@latest update --channel preview --environment preview --message "What changed"
 
-### 4. Speed
+# Native changes (new native modules, app name or icon): new build, then a GitHub release
+npx eas-cli@latest build --platform android --profile preview
+gh release create vX.Y.Z promptheart-X.Y.Z.apk
+```
 
-- **Home-screen widget**: copy your pinned prompts without opening the app.
-- **iOS Shortcuts / Android quick settings tile**.
-- **Keyboard extension**: insert prompts directly into any text field. This is the most powerful option, and the most work.
-- **Biometric lock** for private prompts.
+The runtime version uses the `fingerprint` policy, so an over-the-air update only reaches builds whose native code it matches.
 
-### 5. Sharing and community
+## Roadmap
 
-- **Import and export** as JSON, CSV or Markdown, also useful for backups.
-- **Share a prompt** via a link or QR code.
-- **Shared team libraries**, which become straightforward once cloud sync exists.
-- **A starter pack** of curated prompts on first launch.
+- Play Store release: proper sign-in emails with password reset, a privacy policy and a store listing
+- Home-screen widget for pinned prompts
+- Bulk select (move, tag or delete many prompts), and version history
 
-### 6. AI assist (optional)
+## Credits
 
-- "Improve this prompt" and "Suggest tags", using the Claude API through your own backend. Never ship an API key inside the app.
-- Semantic search ("that prompt about cold emails").
-
-## Next steps to ship
-
-1. Set the app icon and splash screen in `app.json` and `assets/`.
-2. `npx eas-cli@latest build --profile preview` builds an installable APK or iOS build.
-3. `npx eas-cli@latest submit` submits to the App Store and Play Store.
-
-## Releasing
-
-- **Code-only changes** (screens, logic, styles) can go out over the air, with no reinstall needed:
-  ```bash
-  npx eas-cli@latest update --channel preview --environment preview --message "What changed"
-  ```
-- **Native changes** (new native modules or app.json plugins) need a new build. The `fingerprint` runtime policy makes sure old builds never receive an update they can't run.
-  ```bash
-  npx eas-cli@latest build --platform android --profile preview
-  ```
-  Then attach the APK to a GitHub release: `gh release create vX.Y.Z promptheart-X.Y.Z.apk`.
+Made by [Inigo](https://github.com/inigo-code). The title font is [Fredoka](https://fonts.google.com/specimen/Fredoka), and icons are from [Ionicons](https://ionic.io/ionicons).

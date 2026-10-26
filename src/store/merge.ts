@@ -1,3 +1,4 @@
+import { seedData } from './seed';
 import type { Folder, Prompt, StoreData, SyncMeta } from './types';
 
 type Versioned = { id: string; modifiedAt: number };
@@ -31,13 +32,23 @@ export const emptySyncMeta = (): SyncMeta => ({
   pendingImageDeletes: [],
 });
 
+/**
+ * Sample prompts the user never touched (modifiedAt 0, not deleted) get the current sample text,
+ * so they don't keep an old app name after a rename. Edited samples are the user's and stay as they are.
+ */
+function refreshSample(p: Prompt): Prompt {
+  if (p.modifiedAt !== 0 || p.deletedAt !== null) return p;
+  const fresh = seedData.prompts.find((s) => s.id === p.id);
+  return fresh ? { ...p, title: fresh.title, body: fresh.body, tags: fresh.tags } : p;
+}
+
 /** Upgrades data saved by older app versions, and fills fields added since. */
 export function migrate(raw: unknown): StoreData {
   const d = raw as Partial<StoreData> & { version?: number };
   if (d.version === 2) {
     return {
       ...(d as StoreData),
-      prompts: (d.prompts ?? []).map((p) => ({ ...p, images: p.images ?? [] })),
+      prompts: (d.prompts ?? []).map((p) => refreshSample({ ...p, images: p.images ?? [] })),
       sync: { ...emptySyncMeta(), ...d.sync },
     };
   }
