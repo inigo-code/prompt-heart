@@ -30,6 +30,10 @@ YOUR AI APPS, ONE TAP AWAY
 • Works with ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot, DeepSeek and Le Chat
 • Turn apps on or off in Settings
 
+A LIBRARY OF 100 GREAT PROMPTS
+• Ready-made prompts for image generation, productivity, business, marketing, writing, coding, research, learning and careers
+• Copy one as it is, or save it and make it your own
+
 ORGANISED YOUR WAY
 • Categories with colours, tags and pins
 • Bulk select to move, tag, pin or delete many prompts at once
