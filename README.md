@@ -48,7 +48,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
     </td>
     <td valign="top">
       <h4>☁️ Sync &amp; backup</h4>
-      Cloud sync across devices that works offline and updates live, plus JSON and Markdown export.
+      Cloud sync across devices that works offline and stays light on data, plus JSON and Markdown export.
     </td>
   </tr>
   <tr>
@@ -63,6 +63,12 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
     <td valign="top">
       <h4>🔔 Always up to date</h4>
       Improvements arrive automatically, and a friendly pop-up tells you when an update is ready.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" valign="top">
+      <h4>📚 Prompt library</h4>
+      51 ready-made prompts for image generation, productivity, business, marketing, writing, coding, learning and careers. Copy one as it is, or save it to your prompts and make it your own.
     </td>
   </tr>
 </table>

@@ -86,6 +86,7 @@ function Navigator() {
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="about" options={{ title: 'About' }} />
         <Stack.Screen name="trash" options={{ title: 'Trash' }} />
+        <Stack.Screen name="library" options={{ title: 'Prompt library' }} />
         <Stack.Screen name="share" options={{ title: 'Save prompt' }} />
       </Stack>
     </>
