@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
+  <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
   <img alt="Version" src="https://img.shields.io/badge/version-1.4.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
@@ -75,9 +76,32 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 
 ## ⬇️ Install
 
+### With F-Droid (recommended, updates automatically)
+
+1. Install [F-Droid](https://f-droid.org) (or Neo Store / Droid-ify) on your phone.
+2. Open the **[Prompt Heart F-Droid page](https://inigo-code.github.io/prompt-heart-site/fdroid.html)** on your phone and tap **Add to F-Droid**, or scan its QR code from another screen.
+3. Search for **Prompt Heart** in F-Droid and install it. New versions show up in F-Droid like any other app.
+
+<details>
+<summary>Add the repository by hand</summary>
+
+In F-Droid, go to **Settings → Repositories → +** and enter:
+
+- **Address:** `https://inigo-code.github.io/prompt-heart-site/fdroid/repo`
+- **Fingerprint (SHA-256):** `7D5DC9786FCF003B861F79C3B3CA0492BEF9BC83BA05A3A8FDB3C972E5105A75`
+
+F-Droid checks the repository against this fingerprint, so you only ever get APKs signed by Prompt Heart.
+</details>
+
+> Prompt Heart is in its own F-Droid repository, not the main F-Droid one, so it only shows up in F-Droid's search after you add the repository.
+
+### Direct download
+
 1. Open the **[latest release](../../releases/latest)** on your Android phone and download `promptheart-x.y.z.apk`.
 2. Open the file. If Android asks, allow your browser to install apps. If Play Protect warns, choose **Install anyway**.
-3. That's it. New versions install over the old one and keep your prompts, and smaller updates arrive by themselves with a pop-up when they're ready.
+3. That's it. New versions install over the old one and keep your prompts.
+
+Both ways install the same signed APK, so you can switch between them without losing anything. Smaller updates also arrive by themselves, with a pop-up when they're ready.
 
 > Prompt Heart asks for just two Android permissions: **Internet**, for sync and updates, and **Vibrate**, for copy feedback. Photos are picked with Android's own photo picker, so the app never needs access to your gallery.
 
