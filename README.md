@@ -182,3 +182,9 @@ The runtime version uses the `fingerprint` policy, so an update only reaches bui
 ## 💛 Credits
 
 Made with care by **[Inigo](https://github.com/inigo-code)**. The title font is [Fredoka](https://fonts.google.com/specimen/Fredoka), and icons are from [Ionicons](https://ionic.io/ionicons).
+
+## ©️ Copyright
+
+Copyright © 2026 Inigo. All rights reserved.
+
+The source is public so you can see how Prompt Heart works and check what it does with your data. It is not open source: you may not copy, modify or redistribute the code, or publish apps built from it, without written permission. To ask, email inigo@tosstheworld.org.
