@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -82,13 +83,13 @@ export default function SettingsScreen() {
             value={settings.themeMode}
             onChange={(themeMode) => update({ themeMode })}
             options={[
-              { value: 'system', label: 'System' },
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
+              { value: 'system', label: 'System', icon: 'phone-portrait-outline' },
+              { value: 'light', label: 'Light', icon: 'sunny-outline' },
+              { value: 'dark', label: 'Dark', icon: 'moon-outline' },
             ]}
           />
         </ControlRow>
-        <ControlRow theme={theme} label="Accent colour">
+        <ControlRow theme={theme} label="Accent colour" value={ACCENTS[settings.accent].label}>
           <View style={styles.swatches}>
             {(Object.keys(ACCENTS) as AccentKey[]).map((key) => {
               const color = ACCENTS[key][theme.dark ? 'dark' : 'light'][0];
@@ -99,9 +100,11 @@ export default function SettingsScreen() {
                   onPress={() => update({ accent: key })}
                   accessibilityLabel={`${ACCENTS[key].label} accent`}
                   accessibilityState={{ selected: active }}
-                  style={[styles.swatchRing, { borderColor: active ? theme.text : 'transparent' }]}
+                  style={[styles.swatchRing, { borderColor: active ? color : 'transparent' }]}
                 >
-                  <View style={[styles.swatch, { backgroundColor: color }]} />
+                  <View style={[styles.swatch, { backgroundColor: color }]}>
+                    {active && <Ionicons name="checkmark" size={20} color={ACCENTS[key][theme.dark ? 'dark' : 'light'][1]} />}
+                  </View>
                 </Pressable>
               );
             })}
@@ -113,8 +116,8 @@ export default function SettingsScreen() {
             value={settings.layout}
             onChange={(layout) => update({ layout })}
             options={[
-              { value: 'list', label: 'List' },
-              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List', icon: 'list-outline' },
+              { value: 'grid', label: 'Grid', icon: 'grid-outline' },
             ]}
           />
         </ControlRow>
@@ -124,9 +127,9 @@ export default function SettingsScreen() {
             value={settings.previewLines}
             onChange={(previewLines) => update({ previewLines })}
             options={[
-              { value: 2, label: 'Short' },
-              { value: 4, label: 'Medium' },
-              { value: 6, label: 'Long' },
+              { value: 2, label: 'Short', icon: 'reorder-two-outline' },
+              { value: 4, label: 'Medium', icon: 'reorder-three-outline' },
+              { value: 6, label: 'Long', icon: 'reorder-four-outline' },
             ]}
           />
         </ControlRow>
@@ -225,7 +228,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 24 },
-  swatches: { flexDirection: 'row', gap: 12 },
-  swatchRing: { width: 38, height: 38, borderRadius: 19, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  swatch: { width: 28, height: 28, borderRadius: 14 },
+  swatches: { flexDirection: 'row', gap: 10 },
+  swatchRing: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
+  swatch: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
 });

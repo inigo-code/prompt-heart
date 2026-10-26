@@ -89,6 +89,7 @@ export default function TrashScreen() {
         actions={[
           {
             label: 'Delete forever',
+            icon: 'trash-outline',
             destructive: true,
             onPress: () => {
               const orphans = confirm?.kind === 'all' ? emptyTrash() : confirm ? purgePrompt(confirm.prompt.id) : [];

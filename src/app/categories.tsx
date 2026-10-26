@@ -65,9 +65,14 @@ export default function CategoriesScreen() {
             <Pressable
               key={c}
               accessibilityLabel={`Colour ${c}`}
+              accessibilityState={{ selected: color === c }}
               onPress={() => setColor(c)}
-              style={[styles.swatch, { backgroundColor: c, borderColor: color === c ? theme.text : 'transparent' }]}
-            />
+              style={[styles.swatchRing, { borderColor: color === c ? c : 'transparent' }]}
+            >
+              <View style={[styles.swatch, { backgroundColor: c }]}>
+                {color === c && <Ionicons name="checkmark" size={15} color="#ffffff" />}
+              </View>
+            </Pressable>
           ))}
         </View>
         <Pressable
@@ -82,9 +87,16 @@ export default function CategoriesScreen() {
       <FlatList
         data={folders}
         keyExtractor={(f) => f.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24, gap: 8 }}
-        renderItem={({ item }) => (
-          <View style={[styles.row, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24 }}
+        renderItem={({ item, index }) => (
+          <View
+            style={[
+              styles.row,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              index === 0 && styles.first,
+              index === folders.length - 1 ? styles.last : { borderBottomWidth: StyleSheet.hairlineWidth },
+            ]}
+          >
             <Pressable
               onPress={() => {
                 const i = FOLDER_COLORS.indexOf(item.color);
@@ -108,7 +120,9 @@ export default function CategoriesScreen() {
                 {item.name}
               </Text>
             )}
-            <Text style={{ color: theme.textMuted }}>{countFor(item.id)}</Text>
+            <View style={[styles.count, { backgroundColor: theme.chip }]}>
+              <Text style={[styles.countText, { color: theme.textMuted }]}>{countFor(item.id)}</Text>
+            </View>
             <Pressable hitSlop={8} onPress={() => setMenuFor(item)} accessibilityLabel="Category options">
               <Ionicons name="ellipsis-horizontal" size={20} color={theme.textMuted} />
             </Pressable>
@@ -129,8 +143,8 @@ export default function CategoriesScreen() {
         actions={
           menuFor
             ? [
-                { label: 'Rename', onPress: () => startRename(menuFor) },
-                { label: 'Delete category', destructive: true, onPress: () => deleteFolder(menuFor.id) },
+                { label: 'Rename', icon: 'create-outline', onPress: () => startRename(menuFor) },
+                { label: 'Delete category', icon: 'trash-outline', destructive: true, onPress: () => deleteFolder(menuFor.id) },
               ]
             : []
         }
@@ -143,19 +157,25 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   newBox: { margin: 16, padding: 14, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   input: { fontSize: 16, paddingVertical: 4 },
-  swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  swatch: { width: 28, height: 28, borderRadius: 14, borderWidth: 2 },
+  swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  swatchRing: { width: 35, height: 35, borderRadius: 17.5, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
+  swatch: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   addBtn: { height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   addText: { fontSize: 15, fontWeight: '700' },
+  // Rows form one grouped card: outer edges and rounded corners on the first and last row, dividers between.
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 14,
-    height: 54,
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
+    height: 52,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderRightWidth: StyleSheet.hairlineWidth,
   },
+  first: { borderTopWidth: StyleSheet.hairlineWidth, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
+  last: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
+  count: { minWidth: 26, height: 22, borderRadius: 11, paddingHorizontal: 7, alignItems: 'center', justifyContent: 'center' },
+  countText: { fontSize: 12, fontWeight: '700' },
   dot: { width: 18, height: 18, borderRadius: 9 },
   rowName: { flex: 1, fontSize: 16, fontWeight: '600' },
   empty: { textAlign: 'center', paddingTop: 40 },

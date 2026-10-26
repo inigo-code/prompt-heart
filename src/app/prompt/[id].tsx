@@ -320,14 +320,23 @@ function PromptEditor() {
       <ActionSheet
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
+        quick={
+          prompt && aiApps.length > 0
+            ? {
+                label: 'Copy & open in',
+                items: aiApps.map((a) => ({ key: a.key, label: a.label, leading: <AppBadge app={a} size={26} />, onPress: () => copy(prompt, { openIn: a }) })),
+              }
+            : undefined
+        }
         actions={[
-          ...(prompt ? aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(prompt, { openIn: a }) })) : []),
           {
+            icon: 'time-outline',
             label: `Version history${id && history.versionsFor(id).length ? ` (${history.versionsFor(id).length})` : ''}`,
             onPress: () => id && router.push({ pathname: '/history/[id]', params: { id } }),
           },
           {
             label: 'Duplicate',
+            icon: 'duplicate-outline',
             onPress: () => {
               const dup = id && store.duplicatePrompt(id);
               if (dup) router.replace({ pathname: '/prompt/[id]', params: { id: dup.id } });
@@ -335,6 +344,7 @@ function PromptEditor() {
           },
           {
             label: 'Move to Trash',
+            icon: 'trash-outline',
             destructive: true,
             onPress: () => {
               if (!id) return;
