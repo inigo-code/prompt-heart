@@ -10,6 +10,8 @@ type Props = {
   size?: number;
   /** Small status dot in the corner (e.g. sync state). */
   dot?: string;
+  /** Draw the dot as a ring (outline only), e.g. for changes waiting to sync. */
+  dotRing?: boolean;
 };
 
 const initials = (name: string) =>
@@ -21,7 +23,7 @@ const initials = (name: string) =>
     .join('');
 
 /** Profile photo, or initials on the accent colour, or a person icon when there's no name. */
-export function Avatar({ theme, uri, name, size = 36, dot }: Props) {
+export function Avatar({ theme, uri, name, size = 36, dot, dotRing }: Props) {
   const box = { width: size, height: size, borderRadius: size / 2 };
   const letters = initials(name);
   return (
@@ -41,7 +43,8 @@ export function Avatar({ theme, uri, name, size = 36, dot }: Props) {
         <View
           style={[
             styles.dot,
-            { width: size * 0.32, height: size * 0.32, borderRadius: size * 0.16, backgroundColor: dot, borderColor: theme.bg },
+            { width: size * 0.32, height: size * 0.32, borderRadius: size * 0.16, backgroundColor: dotRing ? theme.bg : dot, borderColor: dotRing ? dot : theme.bg },
+            dotRing && styles.ring,
           ]}
         />
       )}
@@ -53,4 +56,5 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   letters: { fontWeight: '800', letterSpacing: -0.3 },
   dot: { position: 'absolute', right: -1, bottom: -1, borderWidth: 2 },
+  ring: { borderWidth: 3 },
 });

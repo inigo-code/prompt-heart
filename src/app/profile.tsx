@@ -24,6 +24,7 @@ const SYNC_LABEL = {
   'signed-out': 'Signed out',
   idle: 'On',
   syncing: 'Syncing…',
+  waiting: 'Changes waiting',
   synced: 'Up to date',
   error: 'Needs attention',
 } as const;

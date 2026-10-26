@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { SignOutSheet } from '@/components/SignOutSheet';
@@ -150,12 +150,30 @@ const STATUS: Record<SyncStatus, { icon: keyof typeof Ionicons.glyphMap; label: 
   'signed-out': { icon: 'cloud-offline-outline', label: 'Signed out' },
   idle: { icon: 'cloud-outline', label: 'Waiting to sync' },
   syncing: { icon: 'sync', label: 'Syncing…' },
+  waiting: { icon: 'time-outline', label: 'Changes waiting to sync' },
   synced: { icon: 'cloud-done-outline', label: 'Up to date' },
   error: { icon: 'cloud-offline-outline', label: "Couldn't sync, retrying soon" },
 };
 
+/** Whole seconds until `at`, ticking every second; null when nothing is planned. */
+function useSecondsUntil(at: number | null) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (at === null) return;
+    const tick = () => setNow(Date.now());
+    const first = setTimeout(tick, 0); // catch up straight away when a new time is planned
+    const every = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(every);
+    };
+  }, [at]);
+  return at === null ? null : Math.max(0, Math.ceil((at - now) / 1000));
+}
+
 function SignedIn({ theme }: { theme: Theme }) {
-  const { status, email, lastSyncedAt, pendingCount, error, syncNow, imageUsage } = useSync();
+  const { status, email, lastSyncedAt, unsentCount, nextSyncAt, error, syncNow, imageUsage } = useSync();
+  const secondsLeft = useSecondsUntil(status === 'waiting' ? nextSyncAt : null);
   const [busy, setBusy] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const s = STATUS[status];
@@ -174,8 +192,14 @@ function SignedIn({ theme }: { theme: Theme }) {
         </View>
         <Text style={[styles.p, { color: theme.textMuted }]}>
           {lastSyncedAt ? `Last synced ${new Date(lastSyncedAt).toLocaleTimeString()}` : 'Not synced yet this session'}
-          {pendingCount > 0 ? ` · ${pendingCount} change${pendingCount === 1 ? '' : 's'} waiting` : ''}
+          {unsentCount > 0 ? ` · ${unsentCount} change${unsentCount === 1 ? '' : 's'} waiting` : ''}
+          {status === 'waiting' ? (secondsLeft ? ` · syncs in ${secondsLeft} s` : ' · syncs soon') : ''}
         </Text>
+        {status === 'waiting' && (
+          <Text style={[styles.p, { color: theme.textMuted }]}>
+            To save data, the app syncs at most once a minute. Tap Sync now to send changes straight away.
+          </Text>
+        )}
         {status === 'error' && error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
         {imageUsage && (
           <Text style={[styles.p, { color: imageUsage.waiting ? theme.text : theme.textMuted }]}>
