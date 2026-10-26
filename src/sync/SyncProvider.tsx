@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
+import { promptVersion } from '@/store/merge';
 import { AUTO_SYNC_COOLDOWN_MS, createAutoSync } from './autoSync';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
 import type { FolderRow, PromptRow } from './rows';
@@ -86,7 +87,7 @@ async function push(client: SupabaseClient, userId: string, store: SyncStoreApi)
   }
   store.markPushed({
     folders: Object.fromEntries(folders.map((f) => [f.id, f.modifiedAt])),
-    prompts: Object.fromEntries(prompts.map((p) => [p.id, p.modifiedAt])),
+    prompts: Object.fromEntries(prompts.map((p) => [p.id, promptVersion(p)])),
   });
 }
 

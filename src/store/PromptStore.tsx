@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { clearPending, emptySyncMeta, mergeBackup, mergeRecords, migrate } from './merge';
+import { clearPending, emptySyncMeta, mergeBackup, mergePrompts, mergeRecords, migrate, promptVersion } from './merge';
 import type { ImportResult } from './merge';
 import { seedData } from './seed';
 import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
@@ -99,7 +99,8 @@ export type SyncStoreApi = {
   /** Latest data, including soft-deleted records. Safe to call from async code. */
   getSnapshot: () => StoreData;
   applyRemote: (remote: { prompts: Prompt[]; folders: Folder[] }, lastPulledAt: string | null) => void;
-  markPushed: (sent: { prompts: Record<string, number>; folders: Record<string, number> }) => void;
+  /** `prompts` maps ids to promptVersion() of what was sent; `folders` to modifiedAt. */
+  markPushed: (sent: { prompts: Record<string, string>; folders: Record<string, number> }) => void;
   markImagesSynced: (done: { uploaded: string[]; deleted: string[] }) => void;
   /** Starts syncing with a new account: everything on this device gets uploaded. */
   resetForUser: (userId: string) => void;
@@ -276,9 +277,14 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       // Prompts copied straight from the library aren't saved, so there's nothing to count (or sync).
       if (!snapshot.current.prompts.some((p) => p.id === id)) return;
-      mutatePrompt(id, (p) => ({ copyCount: p.copyCount + 1, lastCopiedAt: Date.now() }));
+      // A copy isn't an edit: modifiedAt stays, so this can never win over newer text from another
+      // device. The server only raises the copy stats (supabase/copy_stats.sql).
+      const now = Date.now();
+      commitLocal((d) =>
+        local(d, { folders: d.folders, prompts: d.prompts.map((p) => (p.id === id ? { ...p, copyCount: p.copyCount + 1, lastCopiedAt: now } : p)) }, [id]),
+      );
     },
-    [mutatePrompt],
+    [commitLocal],
   );
 
   const createFolder = useCallback(
@@ -367,7 +373,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
         ? d
         : {
             ...d,
-            prompts: mergeRecords(d.prompts, remote.prompts),
+            prompts: mergePrompts(d.prompts, remote.prompts),
             folders: mergeRecords(d.folders, remote.folders),
             sync: { ...d.sync, lastPulledAt },
           },
@@ -379,7 +385,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       ...d,
       sync: {
         ...d.sync,
-        pendingPrompts: clearPending(d.sync.pendingPrompts, d.prompts, sent.prompts),
+        pendingPrompts: clearPending(d.sync.pendingPrompts, d.prompts, sent.prompts, promptVersion),
         pendingFolders: clearPending(d.sync.pendingFolders, d.folders, sent.folders),
       },
     }));
