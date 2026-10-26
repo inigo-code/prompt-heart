@@ -284,7 +284,11 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const restorePrompts = useCallback((ids: string[]) => mutateMany(ids, () => ({ deletedAt: null })), [mutateMany]);
 
   const recordCopy = useCallback(
-    (id: string) => mutatePrompt(id, (p) => ({ copyCount: p.copyCount + 1, lastCopiedAt: Date.now() })),
+    (id: string) => {
+      // Prompts copied straight from the library aren't saved, so there's nothing to count (or sync).
+      if (!snapshot.current.prompts.some((p) => p.id === id)) return;
+      mutatePrompt(id, (p) => ({ copyCount: p.copyCount + 1, lastCopiedAt: Date.now() }));
+    },
     [mutatePrompt],
   );
 

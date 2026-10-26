@@ -11,6 +11,7 @@ import { AI_APPS } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { exportBackup, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
+import { LIBRARY_PROMPTS } from '@/library/prompts';
 import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { AccentKey } from '@/settings/SettingsProvider';
@@ -193,6 +194,13 @@ export default function SettingsScreen() {
           onPress={() => run('markdown', async () => (await exportMarkdown(store.prompts, store.folders), null))}
         />
         <Row theme={theme} icon="push-outline" label="Import backup" busy={busy === 'import'} onPress={doImport} />
+        <Row
+          theme={theme}
+          icon="library-outline"
+          label="Prompt library"
+          value={String(LIBRARY_PROMPTS.length)}
+          onPress={() => router.push('/library')}
+        />
         <Row theme={theme} icon="trash-outline" label="Trash" value={String(store.trash.length)} onPress={() => router.push('/trash')} last />
       </Section>
 

@@ -22,6 +22,7 @@ import { useTheme } from '@/lib/theme';
 import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
+import { LIBRARY_PROMPTS } from '@/library/prompts';
 import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { SortKey } from '@/settings/SettingsProvider';
@@ -295,6 +296,13 @@ export default function HomeScreen() {
 
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+          <Chip
+            label="Library"
+            variant="action"
+            theme={theme}
+            accessibilityLabel="Browse the prompt library"
+            onPress={() => router.push('/library')}
+          />
           {chip('All', { kind: 'all' })}
           {chip('Pinned', { kind: 'pinned' })}
           {chip('Recently copied', { kind: 'copied' })}
@@ -385,6 +393,17 @@ export default function HomeScreen() {
               <Text style={{ fontWeight: '800' }}>Open in Claude</Text> button that copies it and opens the app. Tap an app in the{' '}
               <Text style={{ fontWeight: '800' }}>Open</Text> bar above to jump straight to it.
             </TipCard>
+          ) : !settings.dismissedTips.includes('library') ? (
+            <TipCard
+              theme={theme}
+              icon={<Ionicons name="library-outline" size={20} color={theme.text} />}
+              title="Need ideas? Try the prompt library"
+              onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'library'] })}
+              action={{ label: 'Browse prompts', onPress: () => router.push('/library') }}
+            >
+              {LIBRARY_PROMPTS.length} ready-made prompts for image generation, productivity, business, marketing, writing, coding and
+              more. Copy one as it is, or save it to make it your own.
+            </TipCard>
           ) : undefined
         }
         renderItem={({ item }) => (
@@ -418,6 +437,16 @@ export default function HomeScreen() {
                   ? 'Try a different search or filter.'
                   : 'Tap + to write one, or share text to ' + APP_NAME + ' from any app.'}
               </Text>
+              {!query && filter.kind === 'all' && (
+                <Pressable
+                  onPress={() => router.push('/library')}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                >
+                  <Ionicons name="library-outline" size={16} color={theme.accentText} />
+                  <Text style={[styles.emptyBtnText, { color: theme.accentText }]}>Browse the prompt library</Text>
+                </Pressable>
+              )}
             </View>
           ) : undefined
         }
@@ -600,6 +629,8 @@ const styles = StyleSheet.create({
   emptyIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   emptyTitle: { fontSize: 17, fontWeight: '700' },
   emptyText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 18, borderRadius: 21, marginTop: 10 },
+  emptyBtnText: { fontSize: 14, fontWeight: '700' },
   fab: {
     position: 'absolute',
     right: 20,
