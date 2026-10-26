@@ -49,6 +49,13 @@ type SyncContext = {
   signIn: (email: string, password: string) => Promise<void>;
   /** Resolves to true when signed in straight away, false if Supabase wants the email confirmed first. */
   signUp: (email: string, password: string) => Promise<boolean>;
+  /** Confirms a new account with the 6-digit code from the sign-up email (when "Confirm email" is on). */
+  confirmSignUp: (email: string, code: string) => Promise<void>;
+  resendSignUpCode: (email: string) => Promise<void>;
+  /** Emails a 6-digit code for choosing a new password. */
+  sendPasswordReset: (email: string) => Promise<void>;
+  /** Signs in with the emailed code and sets the new password. */
+  resetPassword: (email: string, code: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   /** Signed-in user, with the profile fields saved on the account (name, photo version). */
   user: { id: string; email: string | null; meta: Record<string, unknown> } | null;
@@ -324,6 +331,34 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     return data.session !== null;
   }, []);
 
+  // The email codes need {{ .Token }} in the Supabase "Confirm signup" and "Reset password" email
+  // templates; see supabase/EMAIL_SETUP.md.
+  const confirmSignUp = useCallback(async (email: string, code: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'signup' });
+    if (error) throw error;
+  }, []);
+
+  const resendSignUpCode = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() });
+    if (error) throw error;
+  }, []);
+
+  const sendPasswordReset = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    if (error) throw error;
+  }, []);
+
+  const resetPassword = useCallback(async (email: string, code: string, password: string) => {
+    if (!supabase) throw new Error('Cloud sync is not configured.');
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'recovery' });
+    if (error) throw error;
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    if (updateError) throw updateError;
+  }, []);
+
   const updateProfile = useCallback(async (data: Record<string, unknown>) => {
     if (!supabase) throw new Error('Cloud sync is not configured.');
     const { error } = await supabase.auth.updateUser({ data });
@@ -409,9 +444,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       imageUsage: userId ? imageUsage : null,
       signIn,
       signUp,
+      confirmSignUp,
+      resendSignUpCode,
+      sendPasswordReset,
+      resetPassword,
       signOut,
     }),
-    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, autoSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, autoSync, signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

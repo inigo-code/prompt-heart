@@ -54,6 +54,9 @@ function Button({ theme, label, onPress, busy, disabled, kind = 'primary' }: {
     <Pressable
       onPress={onPress}
       disabled={disabled || busy}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled || busy, busy }}
       style={[styles.btn, { backgroundColor: bg, opacity: disabled ? 0.5 : 1 }]}
     >
       {busy ? <ActivityIndicator color={fg} /> : <Text style={[styles.btnText, { color: fg }]}>{label}</Text>}
@@ -62,84 +65,201 @@ function Button({ theme, label, onPress, busy, disabled, kind = 'primary' }: {
 }
 
 const MIN_PASSWORD = 6; // Supabase's default minimum
+const RESEND_WAIT_S = 60; // Supabase allows one code email per address per minute
+
+type Mode = 'sign-in' | 'sign-up' | 'confirm' | 'forgot' | 'reset';
+
+const TITLES: Record<Mode, string> = {
+  'sign-in': 'Sync your prompts',
+  'sign-up': 'Create an account',
+  confirm: 'Confirm your email',
+  forgot: 'Reset your password',
+  reset: 'Choose a new password',
+};
+
+/** Friendlier wording for the auth errors people actually hit. */
+function authError(e: unknown) {
+  const text = errorText(e);
+  if (/rate limit|too many|for security purposes/i.test(text)) return 'Too many emails in a short time. Wait a minute and try again.';
+  if (/expired|invalid.*(otp|token)|token.*(invalid|expired)/i.test(text)) return "That code didn't work or has expired. Check it, or send a new one.";
+  if (/invalid login credentials/i.test(text)) return 'Wrong email or password.';
+  if (/email not confirmed/i.test(text)) return 'Confirm your email first: enter the code we sent you.';
+  return text;
+}
 
 function SignIn({ theme }: { theme: Theme }) {
-  const { signIn, signUp } = useSync();
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const { signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword } = useSync();
+  const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [resendAt, setResendAt] = useState(0);
+  const resendIn = useSecondsUntil(resendAt > 0 ? resendAt : null) ?? 0;
 
-  const isSignUp = mode === 'sign-up';
-  const valid = email.includes('@') && password.length >= MIN_PASSWORD;
+  const go = (next: Mode, message: string | null = null) => {
+    setMode(next);
+    setError(null);
+    setNotice(message);
+    if (next === 'confirm' || next === 'reset') setCode('');
+  };
 
-  const submit = async () => {
+  const emailOk = email.includes('@');
+  const codeOk = /^\d{6,8}$/.test(code.trim());
+  const valid =
+    mode === 'sign-in' || mode === 'sign-up'
+      ? emailOk && password.length >= MIN_PASSWORD
+      : mode === 'forgot'
+        ? emailOk
+        : mode === 'confirm'
+          ? codeOk
+          : codeOk && password.length >= MIN_PASSWORD;
+
+  const run = async (fn: () => Promise<void>) => {
     if (!valid || busy) return;
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
-      if (!isSignUp) await signIn(email, password);
-      else if (!(await signUp(email, password)))
-        setNotice('Account created. Check your email to confirm it, then sign in. (To skip this, turn off "Confirm email" in Supabase.)');
+      await fn();
     } catch (e) {
-      setError(errorText(e));
+      setError(authError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = () =>
+    run(async () => {
+      if (mode === 'sign-in') await signIn(email, password);
+      else if (mode === 'sign-up') {
+        if (!(await signUp(email, password))) {
+          setResendAt(Date.now() + RESEND_WAIT_S * 1000);
+          go('confirm', `We emailed a 6-digit code to ${email.trim()}. Enter it to finish creating your account.`);
+        }
+      } else if (mode === 'confirm') await confirmSignUp(email, code);
+      else if (mode === 'forgot') {
+        await sendPasswordReset(email);
+        setResendAt(Date.now() + RESEND_WAIT_S * 1000);
+        setPassword('');
+        go('reset', `If an account exists for ${email.trim()}, we've emailed it a 6-digit code.`);
+      } else await resetPassword(email, code, password);
+    });
+
+  const resend = async () => {
+    if (busy || resendIn > 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (mode === 'confirm') await resendSignUpCode(email);
+      else await sendPasswordReset(email);
+      setResendAt(Date.now() + RESEND_WAIT_S * 1000);
+      setNotice(`New code sent to ${email.trim()}.`);
+    } catch (e) {
+      setError(authError(e));
     } finally {
       setBusy(false);
     }
   };
 
   const inputStyle = [styles.input, { color: theme.text, backgroundColor: theme.bg, borderColor: theme.border }];
+  const needsEmail = mode === 'sign-in' || mode === 'sign-up' || mode === 'forgot';
+  const needsPassword = mode === 'sign-in' || mode === 'sign-up' || mode === 'reset';
+  const needsCode = mode === 'confirm' || mode === 'reset';
+  const newPassword = mode === 'sign-up' || mode === 'reset';
+  const label: Record<Mode, string> = {
+    'sign-in': 'Sign in',
+    'sign-up': 'Create account',
+    confirm: 'Confirm email',
+    forgot: 'Send code',
+    reset: 'Set new password',
+  };
 
   return (
     <Card theme={theme}>
-      <Ionicons name="cloud-upload-outline" size={32} color={theme.accent} />
-      <Text style={[styles.h, { color: theme.text }]}>{isSignUp ? 'Create an account' : 'Sync your prompts'}</Text>
+      <Ionicons
+        name={mode === 'forgot' || mode === 'reset' ? 'key-outline' : mode === 'confirm' ? 'mail-unread-outline' : 'cloud-upload-outline'}
+        size={32}
+        color={theme.accent}
+      />
+      <Text style={[styles.h, { color: theme.text }]}>{TITLES[mode]}</Text>
       <Text style={[styles.p, { color: theme.textMuted }]}>
-        Sign in to back up your prompts and keep them in sync across your devices.
+        {mode === 'forgot'
+          ? "Enter your account's email and we'll send you a code to choose a new password."
+          : mode === 'confirm' || mode === 'reset'
+            ? `Enter the code from the email we sent to ${email.trim()}.`
+            : 'Sign in to back up your prompts and keep them in sync across your devices.'}
       </Text>
 
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="you@example.com"
-        placeholderTextColor={theme.textMuted}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoComplete="email"
-        textContentType="emailAddress"
-        autoCorrect={false}
-        style={inputStyle}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder={isSignUp ? `Password (at least ${MIN_PASSWORD} characters)` : 'Password'}
-        placeholderTextColor={theme.textMuted}
-        secureTextEntry
-        autoCapitalize="none"
-        autoComplete={isSignUp ? 'new-password' : 'current-password'}
-        textContentType={isSignUp ? 'newPassword' : 'password'}
-        onSubmitEditing={submit}
-        style={inputStyle}
-      />
-      <Button theme={theme} label={isSignUp ? 'Create account' : 'Sign in'} busy={busy} disabled={!valid} onPress={submit} />
+      {needsEmail && (
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
+          placeholderTextColor={theme.textMuted}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          autoCorrect={false}
+          onSubmitEditing={mode === 'forgot' ? submit : undefined}
+          style={inputStyle}
+        />
+      )}
+      {needsCode && (
+        <TextInput
+          value={code}
+          onChangeText={(t) => setCode(t.replace(/\D/g, '').slice(0, 8))}
+          placeholder="6-digit code"
+          placeholderTextColor={theme.textMuted}
+          keyboardType="number-pad"
+          autoComplete="one-time-code"
+          textContentType="oneTimeCode"
+          accessibilityLabel="Code from the email"
+          onSubmitEditing={mode === 'confirm' ? submit : undefined}
+          style={[inputStyle, code ? styles.code : styles.codeEmpty]}
+        />
+      )}
+      {needsPassword && (
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder={newPassword ? `${mode === 'reset' ? 'New password' : 'Password'} (at least ${MIN_PASSWORD} characters)` : 'Password'}
+          placeholderTextColor={theme.textMuted}
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete={newPassword ? 'new-password' : 'current-password'}
+          textContentType={newPassword ? 'newPassword' : 'password'}
+          onSubmitEditing={submit}
+          style={inputStyle}
+        />
+      )}
+      <Button theme={theme} label={label[mode]} busy={busy} disabled={!valid} onPress={submit} />
 
       {error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
       {notice && <Text style={[styles.p, { color: theme.text }]}>{notice}</Text>}
 
+      {mode === 'sign-in' && (
+        <Pressable onPress={() => go('forgot')} accessibilityRole="button">
+          <Text style={[styles.switch, { color: theme.accent, fontWeight: '700' }]}>Forgot password?</Text>
+        </Pressable>
+      )}
+      {needsCode && (
+        <Pressable onPress={resend} disabled={resendIn > 0 || busy} accessibilityRole="button">
+          <Text style={[styles.switch, { color: resendIn > 0 ? theme.textMuted : theme.accent, fontWeight: '700' }]}>
+            {resendIn > 0 ? `Resend code in ${resendIn} s` : 'Resend code'}
+          </Text>
+        </Pressable>
+      )}
       <Pressable
-        onPress={() => {
-          setMode(isSignUp ? 'sign-in' : 'sign-up');
-          setError(null);
-          setNotice(null);
-        }}
+        onPress={() => go(mode === 'sign-in' ? 'sign-up' : 'sign-in')}
+        accessibilityRole="button"
       >
         <Text style={[styles.switch, { color: theme.textMuted }]}>
-          {isSignUp ? 'Already have an account? ' : 'New here? '}
-          <Text style={{ color: theme.accent, fontWeight: '700' }}>{isSignUp ? 'Sign in' : 'Create an account'}</Text>
+          {mode === 'sign-in' ? 'New here? ' : mode === 'sign-up' ? 'Already have an account? ' : ''}
+          <Text style={{ color: theme.accent, fontWeight: '700' }}>{mode === 'sign-in' ? 'Create an account' : mode === 'sign-up' ? 'Sign in' : 'Back to sign in'}</Text>
         </Text>
       </Pressable>
     </Card>
@@ -232,6 +352,8 @@ function SignedIn({ theme }: { theme: Theme }) {
 
 const styles = StyleSheet.create({
   countdown: { fontWeight: '700' },
+  code: { fontSize: 22, letterSpacing: 6, textAlign: 'center', fontWeight: '700' },
+  codeEmpty: { textAlign: 'center' },
   content: { padding: 16, gap: 12 },
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   h: { fontSize: 18, fontWeight: '800' },
