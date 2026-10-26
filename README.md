@@ -68,7 +68,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
   <tr>
     <td colspan="3" valign="top">
       <h4>📚 Prompt library</h4>
-      51 ready-made prompts for image generation, productivity, business, marketing, writing, coding, learning and careers. Copy one as it is, or save it to your prompts and make it your own.
+      100 ready-made prompts for image generation, productivity, business, marketing, writing, coding, research, learning, careers and better prompting itself. Copy one as it is, or save it to your prompts and make it your own.
     </td>
   </tr>
 </table>
