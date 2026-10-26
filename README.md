@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.4.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
   <img alt="Supabase" src="https://img.shields.io/badge/Sync-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">

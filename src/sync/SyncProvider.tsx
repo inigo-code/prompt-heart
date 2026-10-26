@@ -19,6 +19,8 @@ const PULL_OVERLAP_MS = 10_000;
 
 export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'synced' | 'error';
 
+export type SyncProgress = { label: string; done: number; total: number };
+
 type SyncContext = {
   status: SyncStatus;
   error: string | null;
@@ -27,7 +29,10 @@ type SyncContext = {
   pendingCount: number;
   /** Bumps when images finish downloading, so thumbnails can re-check for their files. */
   imagesVersion: number;
-  syncNow: () => void;
+  /** Resolves when the sync finishes (for pull-to-refresh). */
+  syncNow: () => Promise<void>;
+  /** Image transfer in progress, e.g. { label: "Uploading images", done: 2, total: 5 }. */
+  progress: SyncProgress | null;
   signIn: (email: string, password: string) => Promise<void>;
   /** Resolves to true when signed in straight away, false if Supabase wants the email confirmed first. */
   signUp: (email: string, password: string) => Promise<boolean>;
@@ -74,11 +79,14 @@ async function push(client: SupabaseClient, userId: string, store: SyncStoreApi)
 }
 
 /** Uploads new attachments before the prompt rows that reference them, and removes deleted ones. */
-async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi) {
+type OnProgress = (p: SyncProgress | null) => void;
+
+async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress) {
   if (!imagesSupported) return;
   const { pendingImageUploads, pendingImageDeletes } = store.getSnapshot().sync;
   const uploaded: string[] = [];
-  for (const id of pendingImageUploads) {
+  for (const [i, id] of pendingImageUploads.entries()) {
+    onProgress({ label: 'Uploading images', done: i, total: pendingImageUploads.length });
     // A missing file can't be uploaded from here (another device has it); drop it from the queue.
     await uploadImage(client, userId, id);
     uploaded.push(id);
@@ -88,10 +96,10 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
 }
 
 /** Fetches attachments referenced by prompts that this device doesn't have a file for yet. */
-async function pullImages(client: SupabaseClient, userId: string, store: SyncStoreApi): Promise<number> {
+async function pullImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress): Promise<number> {
   if (!imagesSupported) return 0;
   const ids = [...new Set(store.getSnapshot().prompts.filter((p) => p.deletedAt === null || p.body || p.title).flatMap((p) => p.images))];
-  return downloadMissingImages(client, userId, ids);
+  return downloadMissingImages(client, userId, ids, (done, total) => onProgress({ label: 'Downloading images', done, total }));
 }
 
 async function pullTable<R extends { server_updated_at?: string }>(
@@ -137,6 +145,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   });
 
   const [imagesVersion, setImagesVersion] = useState(0);
+  const [progress, setProgress] = useState<SyncProgress | null>(null);
   const userId = session?.user.id ?? null;
   // Sync only once the store has been switched over to this account.
   const active = ready && userId !== null && meta.userId === userId;
@@ -170,14 +179,17 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     try {
       do {
         again.current = false;
-        await pushImages(supabase, userId, storeRef.current);
+        await pushImages(supabase, userId, storeRef.current, setProgress);
+        setProgress(null);
         await push(supabase, userId, storeRef.current);
         await pull(supabase, userId, storeRef.current);
-        if ((await pullImages(supabase, userId, storeRef.current)) > 0) setImagesVersion((v) => v + 1);
+        if ((await pullImages(supabase, userId, storeRef.current, setProgress)) > 0) setImagesVersion((v) => v + 1);
+        setProgress(null);
       } while (again.current);
       setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
     } catch (e) {
       const message = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
+      setProgress(null);
       setState((s) => ({ ...s, status: 'error', error: message }));
     } finally {
       running.current = false;
@@ -302,12 +314,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       deleteAccount,
       pendingCount: meta.pendingPrompts.length + meta.pendingFolders.length + meta.pendingImageUploads.length,
       imagesVersion,
-      syncNow: () => void runSync(),
+      syncNow: runSync,
+      progress,
       signIn,
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, imagesVersion, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, imagesVersion, progress, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

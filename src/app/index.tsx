@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { BackHandler, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, BackHandler, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
@@ -66,7 +66,8 @@ export default function HomeScreen() {
   const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt, movePrompts, tagPrompts, setPinned, deletePrompts, restorePrompts } =
     usePromptStore();
   const copy = useCopyPrompt();
-  const { status: syncStatus } = useSync();
+  const { status: syncStatus, syncNow, progress } = useSync();
+  const [pulling, setPulling] = useState(false);
   const profile = useProfile();
   const hour = useHour();
   const folders = useVisibleFolders();
@@ -112,6 +113,20 @@ export default function HomeScreen() {
   }, [prompts, query, filter, settings.sort]);
 
   const openPrompt = useCallback((p: Prompt) => router.push({ pathname: '/prompt/[id]', params: { id: p.id } }), []);
+
+  const canSync = syncStatus !== 'unconfigured' && syncStatus !== 'signed-out';
+  const sync = async (fromPull: boolean) => {
+    if (!canSync) {
+      toast('Sign in to sync your prompts across devices', { label: 'Sign in', onPress: () => router.push('/account') });
+      return;
+    }
+    if (fromPull) setPulling(true);
+    try {
+      await syncNow();
+    } finally {
+      if (fromPull) setPulling(false);
+    }
+  };
 
   const toggleSelected = useCallback(
     (p: Prompt) => setSelected((cur) => (cur ? (cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id]) : [p.id])),
@@ -200,6 +215,18 @@ export default function HomeScreen() {
           </View>
           <View style={styles.headerActions}>
             <Pressable
+              onPress={() => sync(false)}
+              hitSlop={6}
+              accessibilityLabel={syncStatus === 'syncing' ? 'Syncing' : 'Sync now'}
+              style={({ pressed }) => [styles.iconBtn, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
+            >
+              {syncStatus === 'syncing' ? (
+                <ActivityIndicator size="small" color={theme.accent} />
+              ) : (
+                <Ionicons name="sync" size={22} color={syncStatus === 'error' ? theme.danger : theme.text} />
+              )}
+            </Pressable>
+            <Pressable
               onPress={() => router.push('/profile')}
               hitSlop={6}
               accessibilityLabel={`Profile and sync (${SYNC_LABEL[syncStatus]})`}
@@ -229,6 +256,20 @@ export default function HomeScreen() {
           )}
         </View>
       </View>
+
+      {progress && progress.total > 0 && (
+        <View style={[styles.progress, { backgroundColor: theme.card, borderColor: theme.border }]} accessibilityLiveRegion="polite">
+          <View style={styles.progressRow}>
+            <ActivityIndicator size="small" color={theme.accent} />
+            <Text style={[styles.progressText, { color: theme.text }]}>
+              {progress.label} · {Math.min(progress.done + 1, progress.total)} of {progress.total}
+            </Text>
+          </View>
+          <View style={[styles.progressTrack, { backgroundColor: theme.chip }]}>
+            <View style={[styles.progressFill, { backgroundColor: theme.accent, width: `${Math.round((progress.done / progress.total) * 100)}%` }]} />
+          </View>
+        </View>
+      )}
 
       {settings.showAiBar && aiApps.length > 0 && (
         <View>
@@ -322,6 +363,15 @@ export default function HomeScreen() {
         columnWrapperStyle={grid ? styles.gridRow : undefined}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 110 }]}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={pulling}
+            onRefresh={() => sync(true)}
+            tintColor={theme.accent}
+            colors={[theme.accent]}
+            progressBackgroundColor={theme.card}
+          />
+        }
         ListHeaderComponent={
           aiApps.length > 0 && !settings.dismissedTips.includes('ai-launch') ? (
             <TipCard
@@ -511,6 +561,11 @@ const styles = StyleSheet.create({
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
   sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },
   hidden: { display: 'none' },
+  progress: { marginHorizontal: 16, marginTop: 10, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
+  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  progressText: { fontSize: 13, fontWeight: '700' },
+  progressTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
+  progressFill: { height: 4, borderRadius: 2 },
   selectHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56 },
   selectClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   selectCount: { flex: 1, fontSize: 20, fontWeight: '800' },

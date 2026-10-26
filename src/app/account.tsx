@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { SignOutSheet } from '@/components/SignOutSheet';
 import { useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { useSync } from '@/sync/SyncProvider';
@@ -154,8 +155,9 @@ const STATUS: Record<SyncStatus, { icon: keyof typeof Ionicons.glyphMap; label: 
 };
 
 function SignedIn({ theme }: { theme: Theme }) {
-  const { status, email, lastSyncedAt, pendingCount, error, syncNow, signOut } = useSync();
+  const { status, email, lastSyncedAt, pendingCount, error, syncNow } = useSync();
   const [busy, setBusy] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const s = STATUS[status];
 
   return (
@@ -175,7 +177,7 @@ function SignedIn({ theme }: { theme: Theme }) {
           {pendingCount > 0 ? ` · ${pendingCount} change${pendingCount === 1 ? '' : 's'} waiting` : ''}
         </Text>
         {status === 'error' && error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
-        <Button theme={theme} kind="secondary" label="Sync now" busy={status === 'syncing'} onPress={syncNow} />
+        <Button theme={theme} kind="secondary" label="Sync now" busy={status === 'syncing'} onPress={() => void syncNow()} />
       </Card>
 
       <Button
@@ -183,14 +185,12 @@ function SignedIn({ theme }: { theme: Theme }) {
         kind="danger"
         label="Sign out"
         busy={busy}
-        onPress={async () => {
-          setBusy(true);
-          await signOut().finally(() => setBusy(false));
-        }}
+        onPress={() => setSignOutOpen(true)}
       />
       <Text style={[styles.hint, { color: theme.textMuted }]}>
-        Signing out keeps your prompts on this device. Changes you make while signed out sync the next time you sign in.
+        When you sign out you can remove your data from this phone or keep your prompts here. Your account keeps everything either way.
       </Text>
+      <SignOutSheet visible={signOutOpen} onClose={() => setSignOutOpen(false)} onBusy={setBusy} />
     </>
   );
 }

@@ -40,7 +40,15 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
       const app = options?.openIn;
       if (app) {
         openAiApp(app, text)
-          .then((how) => toast(how === 'app-prefilled' ? `Copied — opening ${app.label}` : `Copied — paste it in ${app.label}`))
+          .then((how) =>
+            toast(
+              how === 'app'
+                ? `Copied — long-press and paste in ${app.label}`
+                : how === 'web-prefilled'
+                  ? `Copied — opening ${app.label}`
+                  : `Copied — paste it in ${app.label}`,
+            ),
+          )
           .catch(() => toast(`Couldn't open ${app.label}`));
       } else {
         toast('Copied to clipboard');

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { Avatar } from '@/components/Avatar';
+import { SignOutSheet } from '@/components/SignOutSheet';
 import { Row, Section } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
 import { greeting, useHour } from '@/lib/greeting';
@@ -48,6 +49,7 @@ export default function ProfileScreen() {
   const [editing, setEditing] = useState<'email' | 'password' | null>(null);
   const [photoMenu, setPhotoMenu] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
 
   const run = async (key: string, fn: () => Promise<string | void>) => {
@@ -113,7 +115,20 @@ export default function ProfileScreen() {
               returnKeyType="done"
               style={[styles.input, { color: theme.text }]}
             />
-            {busy === 'name' && <ActivityIndicator color={theme.textMuted} />}
+            {busy === 'name' ? (
+              <ActivityIndicator color={theme.textMuted} />
+            ) : (
+              name.trim() !== profile.name && (
+                <Pressable
+                  onPress={saveName}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save name"
+                  style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                >
+                  <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
+                </Pressable>
+              )
+            )}
           </View>
         </Section>
 
@@ -157,7 +172,7 @@ export default function ProfileScreen() {
               label="Sign out"
               busy={busy === 'signout'}
               last
-              onPress={() => run('signout', async () => (await sync.signOut(), 'Signed out. Your prompts stay on this device.'))}
+              onPress={() => setSignOutOpen(true)}
             />
           </Section>
         ) : (
@@ -182,6 +197,8 @@ export default function ProfileScreen() {
           </Section>
         )}
       </ScrollView>
+
+      <SignOutSheet visible={signOutOpen} onClose={() => setSignOutOpen(false)} onBusy={(b) => setBusy(b ? 'signout' : null)} />
 
       <ActionSheet
         visible={photoMenu}
@@ -291,6 +308,8 @@ const styles = StyleSheet.create({
   email: { fontSize: 14 },
   inputRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 8 },
   input: { flex: 1, fontSize: 16, height: 52 },
+  nameSave: { paddingHorizontal: 16, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  nameSaveText: { fontSize: 14, fontWeight: '800' },
   form: { padding: 14, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   formInput: { fontSize: 15, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
   save: { height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },

@@ -9,8 +9,9 @@ import { newId } from '@/store/PromptStore';
 // Attachments are stored on the device as <id>.jpg in the app's documents folder,
 // and in the private "prompt-images" bucket as <user id>/<id>.jpg.
 export const IMAGE_BUCKET = 'prompt-images';
-const MAX_WIDTH = 1600;
-const JPEG_QUALITY = 0.8;
+// Sized for phone screens; about 120–200 KB each, which keeps cloud storage and downloads small.
+const MAX_WIDTH = 1280;
+const JPEG_QUALITY = 0.72;
 
 /** Attachments need the native file system; the web build only shows that images exist. */
 export const imagesSupported = Platform.OS !== 'web';
@@ -93,10 +94,16 @@ export async function deleteRemoteImages(client: SupabaseClient, userId: string,
 }
 
 /** Downloads images this device doesn't have yet. Missing remote files are skipped, not errors. */
-export async function downloadMissingImages(client: SupabaseClient, userId: string, ids: string[]): Promise<number> {
+export async function downloadMissingImages(
+  client: SupabaseClient,
+  userId: string,
+  ids: string[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<number> {
   const missing = ids.filter((id) => !imageFile(id).exists);
   let downloaded = 0;
-  for (const id of missing) {
+  for (const [i, id] of missing.entries()) {
+    onProgress?.(i, missing.length);
     const { data, error } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remotePath(userId, id), 60);
     if (error || !data?.signedUrl) continue;
     try {
@@ -106,5 +113,6 @@ export async function downloadMissingImages(client: SupabaseClient, userId: stri
       // The upload may not have finished on the other device yet; the next sync retries.
     }
   }
+  if (missing.length) onProgress?.(missing.length, missing.length);
   return downloaded;
 }

@@ -1,6 +1,6 @@
-// AI apps the user can launch from Prompt Heart. The prompt is always copied first; apps whose
-// web address accepts a prefilled query also get it in the URL. On Android, these addresses open
-// the installed app when it's set up to handle its own links, and the browser otherwise.
+// AI apps the user can launch from Prompt Heart. The prompt is always copied first. On Android an
+// installed app is opened directly by package (src/lib/launch.ts); otherwise the website opens, with
+// the prompt prefilled when the site accepts a query.
 
 export type AiApp = {
   key: string;
@@ -12,7 +12,7 @@ export type AiApp = {
   home: string;
   /** Opens a new chat; with text when the app supports a prefilled query. */
   url: (text: string) => string;
-  /** Whether the prompt lands in the chat box, or the user pastes it. */
+  /** Whether the website accepts the prompt as a prefilled query (?q=). */
   prefills: boolean;
   /** On by default for new installs. */
   defaultOn: boolean;

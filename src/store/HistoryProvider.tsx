@@ -19,6 +19,8 @@ type HistoryContext = {
   /** Saves the current text as a version, then puts the old version back. */
   restore: (promptId: string, version: Version) => void;
   forget: (promptId: string) => void;
+  /** Removes all history on this device (used when signing out and erasing). */
+  clearAll: () => void;
 };
 
 const Ctx = createContext<HistoryContext | null>(null);
@@ -77,9 +79,11 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const clearAll = useCallback(() => setHistory({}), []);
+
   const value = useMemo<HistoryContext>(
-    () => ({ versionsFor: (id) => history[id] ?? [], snapshot, restore, forget }),
-    [history, snapshot, restore, forget],
+    () => ({ versionsFor: (id) => history[id] ?? [], snapshot, restore, forget, clearAll }),
+    [history, snapshot, restore, forget, clearAll],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
