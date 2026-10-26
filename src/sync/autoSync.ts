@@ -29,7 +29,15 @@ export type AutoSync = {
   cancel: () => void;
 };
 
-export function createAutoSync(run: () => void, cooldownMs = AUTO_SYNC_COOLDOWN_MS, timers: Timers = systemTimers): AutoSync {
+/**
+ * `onPlan` is told the time of the next planned sync, or null when none is planned (for a countdown).
+ */
+export function createAutoSync(
+  run: () => void,
+  cooldownMs = AUTO_SYNC_COOLDOWN_MS,
+  timers: Timers = systemTimers,
+  onPlan: (at: number | null) => void = () => {},
+): AutoSync {
   let lastFinishedAt = -Infinity;
   let running = false;
   let askedWhileRunning = false;
@@ -38,8 +46,10 @@ export function createAutoSync(run: () => void, cooldownMs = AUTO_SYNC_COOLDOWN_
 
   const cancel = () => {
     if (handle !== null) timers.clearTimeout(handle);
+    const hadPlan = handle !== null;
     handle = null;
     dueAt = Infinity;
+    if (hadPlan) onPlan(null);
   };
 
   const request = (delayMs = 0) => {
@@ -55,8 +65,10 @@ export function createAutoSync(run: () => void, cooldownMs = AUTO_SYNC_COOLDOWN_
     handle = timers.setTimeout(() => {
       handle = null;
       dueAt = Infinity;
+      onPlan(null);
       run();
     }, at - timers.now());
+    onPlan(at);
   };
 
   return {

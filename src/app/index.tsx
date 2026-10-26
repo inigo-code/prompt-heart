@@ -49,13 +49,20 @@ const SYNC_LABEL: Record<SyncStatus, string> = {
   'signed-out': 'signed out',
   idle: 'sync on',
   syncing: 'syncing',
+  waiting: 'changes waiting',
   synced: 'up to date',
   error: 'sync problem',
 };
 
-/** Avatar dot: green synced, amber in progress, red problem, none when signed out. */
+/** Avatar dot: green synced, amber in progress, amber ring for changes waiting, red problem, none when signed out. */
 const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
-  status === 'synced' ? '#3FB27F' : status === 'syncing' || status === 'idle' ? theme.accent : status === 'error' ? theme.danger : undefined;
+  status === 'synced'
+    ? '#3FB27F'
+    : status === 'syncing' || status === 'idle' || status === 'waiting'
+      ? theme.accent
+      : status === 'error'
+        ? theme.danger
+        : undefined;
 
 const sameFilter = (a: Filter, b: Filter) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -218,7 +225,7 @@ export default function HomeScreen() {
             <Pressable
               onPress={() => sync(false)}
               hitSlop={6}
-              accessibilityLabel={syncStatus === 'syncing' ? 'Syncing' : 'Sync now'}
+              accessibilityLabel={syncStatus === 'syncing' ? 'Syncing' : syncStatus === 'waiting' ? 'Sync now (changes waiting)' : 'Sync now'}
               style={({ pressed }) => [styles.iconBtn, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
             >
               {syncStatus === 'syncing' ? (
@@ -226,6 +233,7 @@ export default function HomeScreen() {
               ) : (
                 <Ionicons name="sync" size={22} color={syncStatus === 'error' ? theme.danger : theme.text} />
               )}
+              {syncStatus === 'waiting' && <View style={[styles.waitingDot, { backgroundColor: theme.accent, borderColor: theme.bg }]} />}
             </Pressable>
             <Pressable
               onPress={() => router.push('/profile')}
@@ -233,7 +241,7 @@ export default function HomeScreen() {
               accessibilityLabel={`Profile and sync (${SYNC_LABEL[syncStatus]})`}
               style={({ pressed }) => [styles.avatarBtn, { opacity: pressed ? 0.7 : 1 }]}
             >
-              <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={36} dot={syncDot(syncStatus, theme)} />
+              <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={36} dot={syncDot(syncStatus, theme)} dotRing={syncStatus === 'waiting'} />
             </Pressable>
             <IconButton theme={theme} icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
           </View>
@@ -581,6 +589,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 13, marginTop: 2 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  waitingDot: { position: 'absolute', top: 5, right: 5, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
   searchInput: { flex: 1, fontSize: 15, height: '100%' },
   aiBar: { gap: 8, paddingHorizontal: 16, paddingTop: 12 },

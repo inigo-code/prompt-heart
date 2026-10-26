@@ -6,7 +6,7 @@ import { AppState } from 'react-native';
 import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
-import { createAutoSync } from './autoSync';
+import { AUTO_SYNC_COOLDOWN_MS, createAutoSync } from './autoSync';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
 import type { FolderRow, PromptRow } from './rows';
 import { supabase } from './supabase';
@@ -18,7 +18,8 @@ const RETRY_MS = 30_000;
 // older server timestamps. Merging is idempotent, so re-reading a few rows is harmless.
 const PULL_OVERLAP_MS = 10_000;
 
-export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'synced' | 'error';
+/** `waiting`: synced before, but local changes are queued for the next sync (see `nextSyncAt`). */
+export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'waiting' | 'synced' | 'error';
 
 export type SyncProgress = { label: string; done: number; total: number };
 /** Cloud image usage: how many are stored, the limit, and how many are waiting on this phone because of it. */
@@ -30,6 +31,10 @@ type SyncContext = {
   lastSyncedAt: number | null;
   email: string | null;
   pendingCount: number;
+  /** Changes queued for the next sync, not counting images held back by the cloud image limit. */
+  unsentCount: number;
+  /** When the next automatic sync is planned (ms timestamp), or null. */
+  nextSyncAt: number | null;
   /** Bumps when images finish downloading, so thumbnails can re-check for their files. */
   imagesVersion: number;
   /** Resolves when the sync finishes (for pull-to-refresh). */
@@ -209,7 +214,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const again = useRef(false);
   // Automatic syncs go through the cooldown; manual ones (syncNow) call runSync directly.
   const runSyncRef = useRef<() => Promise<void>>(async () => {});
-  const [autoSync] = useState(() => createAutoSync(() => void runSyncRef.current()));
+  const [nextSyncAt, setNextSyncAt] = useState<number | null>(null);
+  const [autoSync] = useState(() => createAutoSync(() => void runSyncRef.current(), AUTO_SYNC_COOLDOWN_MS, undefined, setNextSyncAt));
 
   useEffect(() => {
     if (!supabase) return;
@@ -366,9 +372,22 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setState({ status: 'idle', error: null, lastSyncedAt: null });
   }, []);
 
+  const heldBackImages = imageUsage?.waiting ?? 0;
+  const unsentCount =
+    meta.pendingPrompts.length +
+    meta.pendingFolders.length +
+    meta.pendingImageDeletes.length +
+    Math.max(0, meta.pendingImageUploads.length - heldBackImages);
+
   const value = useMemo<SyncContext>(
     () => ({
-      status: !supabase ? 'unconfigured' : !userId ? 'signed-out' : state.status,
+      status: !supabase
+        ? 'unconfigured'
+        : !userId
+          ? 'signed-out'
+          : (state.status === 'synced' || state.status === 'idle') && unsentCount > 0
+            ? 'waiting'
+            : state.status,
       error: state.error,
       lastSyncedAt: state.lastSyncedAt,
       email: session?.user.email ?? null,
@@ -378,6 +397,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       updatePassword,
       deleteAccount,
       pendingCount: meta.pendingPrompts.length + meta.pendingFolders.length + meta.pendingImageUploads.length,
+      unsentCount,
+      nextSyncAt: userId ? nextSyncAt : null,
       imagesVersion,
       syncNow: runSync,
       progress,
@@ -386,7 +407,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, imagesVersion, progress, imageUsage, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
