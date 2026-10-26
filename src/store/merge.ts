@@ -15,11 +15,40 @@ export function mergeRecords<T extends Versioned>(local: T[], remote: T[]): T[] 
 }
 
 /**
- * Drops ids from the pending list once the server has the version we sent.
- * Ids edited again while the upload was in flight stay pending; ids with no record are dropped.
+ * Prompts merge like mergeRecords for their text, but copy stats only ever go up: copying isn't an
+ * edit, so a copy on one device never replaces newer text from another (the server does the same).
  */
-export function clearPending<T extends Versioned>(pending: string[], records: T[], sent: Record<string, number>): string[] {
-  const current = new Map(records.map((r) => [r.id, r.modifiedAt]));
+export function mergePrompts(local: Prompt[], remote: Prompt[]): Prompt[] {
+  if (remote.length === 0) return local;
+  const byId = new Map(local.map((p) => [p.id, p]));
+  for (const r of remote) {
+    const mine = byId.get(r.id);
+    if (!mine) {
+      byId.set(r.id, r);
+      continue;
+    }
+    const base = r.modifiedAt > mine.modifiedAt ? r : mine;
+    const copyCount = Math.max(mine.copyCount, r.copyCount);
+    const lastCopiedAt = Math.max(mine.lastCopiedAt ?? 0, r.lastCopiedAt ?? 0) || null;
+    byId.set(r.id, base.copyCount === copyCount && base.lastCopiedAt === lastCopiedAt ? base : { ...base, copyCount, lastCopiedAt });
+  }
+  return [...byId.values()];
+}
+
+/** What identifies the uploaded state of a prompt: its text version plus its copy count. */
+export const promptVersion = (p: Prompt) => `${p.modifiedAt}:${p.copyCount}`;
+
+/**
+ * Drops ids from the pending list once the server has the version we sent.
+ * Ids changed again while the upload was in flight stay pending; ids with no record are dropped.
+ */
+export function clearPending<T extends Versioned>(
+  pending: string[],
+  records: T[],
+  sent: Record<string, number | string>,
+  version: (r: T) => number | string = (r) => r.modifiedAt,
+): string[] {
+  const current = new Map(records.map((r) => [r.id, version(r)]));
   return pending.filter((id) => current.has(id) && (!(id in sent) || current.get(id) !== sent[id]));
 }
 
