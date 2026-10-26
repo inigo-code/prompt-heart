@@ -16,6 +16,7 @@ import { useTheme } from '@/lib/theme';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
+import { useSync } from '@/sync/SyncProvider';
 import { useHistory } from '@/store/HistoryProvider';
 import { normalizeTag, usePromptStore } from '@/store/PromptStore';
 import type { PromptDraft } from '@/store/types';
@@ -46,6 +47,8 @@ function PromptEditor() {
   const store = usePromptStore();
   const copy = useCopyPrompt();
   const history = useHistory();
+  const { imageUsage } = useSync();
+  const cloudFull = !!imageUsage && imageUsage.used >= imageUsage.limit;
   // One version is saved per editing session, right before the first change to the text.
   const snapped = useRef(false);
   const aiApps = useEnabledAiApps();
@@ -276,7 +279,10 @@ function PromptEditor() {
           </ScrollView>
         )}
         {images.length > 0 && (
-          <Text style={[styles.hint, { color: theme.textMuted }]}>Images are for reference — copying only copies the text.</Text>
+          <Text style={[styles.hint, { color: theme.textMuted }]}>
+            Images are for reference — copying only copies the text.
+            {cloudFull ? ` Cloud image limit reached (${imageUsage?.limit}); new images stay on this phone.` : ''}
+          </Text>
         )}
 
         <TextInput

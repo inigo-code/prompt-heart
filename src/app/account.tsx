@@ -155,7 +155,7 @@ const STATUS: Record<SyncStatus, { icon: keyof typeof Ionicons.glyphMap; label: 
 };
 
 function SignedIn({ theme }: { theme: Theme }) {
-  const { status, email, lastSyncedAt, pendingCount, error, syncNow } = useSync();
+  const { status, email, lastSyncedAt, pendingCount, error, syncNow, imageUsage } = useSync();
   const [busy, setBusy] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const s = STATUS[status];
@@ -177,6 +177,14 @@ function SignedIn({ theme }: { theme: Theme }) {
           {pendingCount > 0 ? ` · ${pendingCount} change${pendingCount === 1 ? '' : 's'} waiting` : ''}
         </Text>
         {status === 'error' && error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
+        {imageUsage && (
+          <Text style={[styles.p, { color: imageUsage.waiting ? theme.text : theme.textMuted }]}>
+            Images in cloud: {imageUsage.used} of {imageUsage.limit}
+            {imageUsage.waiting
+              ? `. ${imageUsage.waiting} more ${imageUsage.waiting === 1 ? 'is' : 'are'} saved on this phone only; remove some cloud images to sync them.`
+              : ''}
+          </Text>
+        )}
         <Button theme={theme} kind="secondary" label="Sync now" busy={status === 'syncing'} onPress={() => void syncNow()} />
       </Card>
 

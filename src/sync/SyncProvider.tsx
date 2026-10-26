@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState } from 'react-native';
 
-import { IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, uploadImage } from '@/lib/images';
+import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
@@ -20,6 +20,8 @@ const PULL_OVERLAP_MS = 10_000;
 export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'synced' | 'error';
 
 export type SyncProgress = { label: string; done: number; total: number };
+/** Cloud image usage: how many are stored, the limit, and how many are waiting on this phone because of it. */
+export type ImageUsage = { used: number; limit: number; waiting: number };
 
 type SyncContext = {
   status: SyncStatus;
@@ -33,6 +35,8 @@ type SyncContext = {
   syncNow: () => Promise<void>;
   /** Image transfer in progress, e.g. { label: "Uploading images", done: 2, total: 5 }. */
   progress: SyncProgress | null;
+  /** Known after a sync; null before the first one (or when signed out). */
+  imageUsage: ImageUsage | null;
   signIn: (email: string, password: string) => Promise<void>;
   /** Resolves to true when signed in straight away, false if Supabase wants the email confirmed first. */
   signUp: (email: string, password: string) => Promise<boolean>;
@@ -81,18 +85,48 @@ async function push(client: SupabaseClient, userId: string, store: SyncStoreApi)
 /** Uploads new attachments before the prompt rows that reference them, and removes deleted ones. */
 type OnProgress = (p: SyncProgress | null) => void;
 
-async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress) {
-  if (!imagesSupported) return;
+/**
+ * Removes deleted attachments, then uploads new ones while there's room under CLOUD_IMAGE_LIMIT.
+ * Images over the limit stay queued on this phone and upload automatically once a slot frees up.
+ */
+async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress): Promise<ImageUsage | null> {
+  if (!imagesSupported) return null;
   const { pendingImageUploads, pendingImageDeletes } = store.getSnapshot().sync;
-  const uploaded: string[] = [];
-  for (const [i, id] of pendingImageUploads.entries()) {
-    onProgress({ label: 'Uploading images', done: i, total: pendingImageUploads.length });
-    // A missing file can't be uploaded from here (another device has it); drop it from the queue.
-    await uploadImage(client, userId, id);
-    uploaded.push(id);
-  }
   await deleteRemoteImages(client, userId, pendingImageDeletes);
-  store.markImagesSynced({ uploaded, deleted: pendingImageDeletes });
+  store.markImagesSynced({ uploaded: [], deleted: pendingImageDeletes });
+
+  const remote = await listRemoteImages(client, userId);
+  const uploaded: string[] = [];
+  const waiting: string[] = [];
+  const toUpload = pendingImageUploads.filter((id) => {
+    if (remote.has(id)) {
+      uploaded.push(id); // already in the cloud (e.g. re-queued after signing in again)
+      return false;
+    }
+    return true;
+  });
+  for (const [i, id] of toUpload.entries()) {
+    if (remote.size >= CLOUD_IMAGE_LIMIT) {
+      waiting.push(id);
+      continue;
+    }
+    onProgress({ label: 'Uploading images', done: i, total: toUpload.length });
+    try {
+      // A missing file can't be uploaded from here (another device has it); drop it from the queue.
+      if ((await uploadImage(client, userId, id)) === 'done') remote.add(id);
+      uploaded.push(id);
+    } catch (e) {
+      // The server refuses uploads over the limit (row-level security); keep the rest waiting.
+      if (/row-level security|policy/i.test(e instanceof Error ? e.message : String((e as { message?: string })?.message))) {
+        waiting.push(id);
+        remote.add(id); // treat as full for the rest of this pass
+        continue;
+      }
+      throw e;
+    }
+  }
+  store.markImagesSynced({ uploaded, deleted: [] });
+  return { used: Math.min(remote.size, CLOUD_IMAGE_LIMIT), limit: CLOUD_IMAGE_LIMIT, waiting: waiting.length };
 }
 
 /** Fetches attachments referenced by prompts that this device doesn't have a file for yet. */
@@ -146,6 +180,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   const [imagesVersion, setImagesVersion] = useState(0);
   const [progress, setProgress] = useState<SyncProgress | null>(null);
+  const [imageUsage, setImageUsage] = useState<ImageUsage | null>(null);
   const userId = session?.user.id ?? null;
   // Sync only once the store has been switched over to this account.
   const active = ready && userId !== null && meta.userId === userId;
@@ -179,7 +214,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     try {
       do {
         again.current = false;
-        await pushImages(supabase, userId, storeRef.current, setProgress);
+        const usage = await pushImages(supabase, userId, storeRef.current, setProgress);
+        if (usage) setImageUsage(usage);
         setProgress(null);
         await push(supabase, userId, storeRef.current);
         await pull(supabase, userId, storeRef.current);
@@ -316,11 +352,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       imagesVersion,
       syncNow: runSync,
       progress,
+      imageUsage: userId ? imageUsage : null,
       signIn,
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, imagesVersion, progress, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, imagesVersion, progress, imageUsage, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
