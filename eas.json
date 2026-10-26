@@ -4,25 +4,24 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "base": {
-      "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "https://qhwavloktmgbywcjcxpr.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_MeaibTADsGPbC7dvO2ugjA_Hjf_EhCa"
-      }
-    },
     "development": {
-      "extends": "base",
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development",
+      "environment": "development"
     },
     "preview": {
-      "extends": "base",
       "distribution": "internal",
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      },
+      "channel": "preview",
+      "environment": "preview"
     },
     "production": {
-      "extends": "base",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production",
+      "environment": "production"
     }
   },
   "submit": {
