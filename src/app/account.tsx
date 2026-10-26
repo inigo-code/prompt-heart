@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { AboutCard } from '@/components/AboutCard';
 import { useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { useSync } from '@/sync/SyncProvider';
@@ -29,6 +30,7 @@ export default function AccountScreen() {
         ) : (
           <SignedIn theme={theme} />
         )}
+        <AboutCard theme={theme} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
