@@ -1,12 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as WebBrowser from 'expo-web-browser';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AboutCard } from '@/components/AboutCard';
 import { BrandTitle } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
-import { APP_NAME, APP_TAGLINE, DEVELOPER } from '@/lib/app';
+import { APP_NAME, APP_TAGLINE, DEVELOPER, LINKS, SUPPORT_EMAIL } from '@/lib/app';
 import { useTheme } from '@/lib/theme';
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
@@ -52,6 +52,19 @@ export default function AboutScreen() {
           label="GitHub"
           value={DEVELOPER.github.replace('https://', '')}
           onPress={() => WebBrowser.openBrowserAsync(DEVELOPER.github)}
+          last
+        />
+      </Section>
+
+      <Section theme={theme} title="Privacy & support">
+        <Row theme={theme} icon="shield-checkmark-outline" label="Privacy policy" onPress={() => WebBrowser.openBrowserAsync(LINKS.privacy)} />
+        <Row theme={theme} icon="person-remove-outline" label="Delete your account" onPress={() => WebBrowser.openBrowserAsync(LINKS.deleteAccount)} />
+        <Row
+          theme={theme}
+          icon="mail-outline"
+          label="Contact"
+          value={SUPPORT_EMAIL}
+          onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(APP_NAME)}`)}
           last
         />
       </Section>

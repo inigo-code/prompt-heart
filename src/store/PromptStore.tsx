@@ -2,6 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { newId } from '@/lib/id';
+import { deleteLocalImage } from '@/lib/images';
+
 import { clearPending, emptySyncMeta, mergeBackup, mergeRecords, migrate } from './merge';
 import type { ImportResult } from './merge';
 import { seedData } from './seed';
@@ -15,7 +18,7 @@ export const TRASH_DAYS = 30;
 
 export const FOLDER_COLORS = ['#F2B84B', '#5B8DEF', '#4CB782', '#E5688A', '#9B7BE0', '#EE8B4A', '#3FB6C4', '#8A8F98'];
 
-export const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+export { newId };
 
 export const normalizeTag = (tag: string) => tag.trim().replace(/^#+/, '').toLowerCase().replace(/\s+/g, '-');
 
@@ -241,6 +244,14 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const purgePrompt = useCallback((id: string) => purge([id]), [purge]);
+
+  // Trash keeps prompts for TRASH_DAYS; after that they're erased like Empty Trash (here and in the cloud).
+  useEffect(() => {
+    if (!ready) return;
+    const cutoff = openedAt - TRASH_DAYS * 24 * 60 * 60 * 1000;
+    const expired = snapshot.current.prompts.filter((p) => p.deletedAt !== null && p.deletedAt <= cutoff && !isPurged(p));
+    if (expired.length > 0) purge(expired.map((p) => p.id)).forEach(deleteLocalImage);
+  }, [ready, openedAt, purge]);
 
   const togglePin = useCallback((id: string) => mutatePrompt(id, (p) => ({ pinned: !p.pinned })), [mutatePrompt]);
 

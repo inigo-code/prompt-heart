@@ -9,10 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.inigocode.promptnotes"
+      "bundleIdentifier": "com.inigocode.promptheart"
     },
     "android": {
-      "package": "com.inigocode.promptnotes",
+      "package": "com.inigocode.promptheart",
       "adaptiveIcon": {
         "backgroundColor": "#121110",
         "foregroundImage": "./assets/android-icon-foreground.png",

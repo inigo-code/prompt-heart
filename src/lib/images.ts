@@ -4,7 +4,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
 
-import { newId } from '@/store/PromptStore';
+import { newId } from '@/lib/id';
 
 // Attachments are stored on the device as <id>.jpg in the app's documents folder,
 // and in the private "prompt-images" bucket as <user id>/<id>.jpg.

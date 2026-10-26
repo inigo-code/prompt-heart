@@ -8,3 +8,10 @@ export const DEVELOPER = {
   name: 'Inigo',
   github: 'https://github.com/inigo-code',
 };
+
+/** Public pages (GitHub Pages, repo inigo-code/prompt-heart-site). The Play Store listing links to them too. */
+export const LINKS = {
+  privacy: 'https://inigo-code.github.io/prompt-heart-site/privacy.html',
+  deleteAccount: 'https://inigo-code.github.io/prompt-heart-site/delete-account.html',
+};
+export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';

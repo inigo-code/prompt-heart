@@ -34,7 +34,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
     </td>
     <td width="33%" valign="top">
       <h4>🚀 Launch in your AI app</h4>
-      Every AI app gets its own folder. Tap <b>Open in Claude</b> and it opens with your prompt already typed in.
+      Every AI app gets its own folder. Tap <b>Open in Claude</b>: your prompt is copied and the Claude app opens, ready to paste.
     </td>
   </tr>
   <tr>
@@ -86,7 +86,10 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 - **Offline first.** Prompts, images and history live on your phone and work without a connection.
 - **Private sync.** With an account, your prompts, images, name and photo sync through Supabase. Row Level Security means every account can only read its own rows, and images sit in a private bucket under your own folder.
 - **Version history stays on your device**, so sync stays fast and light.
+- **Light on the cloud.** Up to 20 images per account sync; any extras stay on your phone. Images are resized to about 100 KB.
 - **You're in control.** Change your email or password, export everything, or delete your account and all of its cloud data from **Profile**.
+
+Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/privacy.html), or see [how to delete your account](https://inigo-code.github.io/prompt-heart-site/delete-account.html).
 
 ## 🗺️ Roadmap
 
