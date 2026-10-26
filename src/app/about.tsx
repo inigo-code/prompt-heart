@@ -4,6 +4,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AboutCard } from '@/components/AboutCard';
+import { BrandTitle } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
 import { APP_NAME, APP_TAGLINE, DEVELOPER } from '@/lib/app';
 import { useTheme } from '@/lib/theme';
@@ -25,7 +26,7 @@ export default function AboutScreen() {
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
       <View style={styles.hero}>
         <Image source={require('../../assets/icon.png')} style={styles.icon} />
-        <Text style={[styles.name, { color: theme.text }]}>{APP_NAME}</Text>
+        <BrandTitle theme={theme} size={28} />
         <Text style={[styles.tagline, { color: theme.textMuted }]}>{APP_TAGLINE}</Text>
       </View>
 
@@ -68,7 +69,6 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 24 },
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
   icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
-  name: { fontSize: 28, fontWeight: '800', letterSpacing: -0.6 },
   tagline: { fontSize: 15 },
   feature: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 13 },
   featureText: { flex: 1, fontSize: 14, lineHeight: 19 },

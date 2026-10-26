@@ -1,6 +1,9 @@
+import { Fraunces_700Bold_Italic } from '@expo-google-fonts/fraunces/700Bold_Italic';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import { ShareIntentProvider, useShareIntentContext } from 'expo-share-intent';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
@@ -13,10 +16,18 @@ import { SettingsProvider } from '@/settings/SettingsProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 
+// Keep the splash up until the title font is ready, so the home title never flashes in the fallback font.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 // Receiving shares needs the native module, which web and Expo Go don't have.
 const shareDisabled = Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({ Fraunces_700Bold_Italic });
+  useEffect(() => {
+    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded, fontError]);
+
   return (
     <ShareIntentProvider options={{ disabled: shareDisabled, resetOnBackground: true }}>
       <SettingsProvider>

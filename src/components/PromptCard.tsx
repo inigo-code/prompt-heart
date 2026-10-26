@@ -76,17 +76,6 @@ export const PromptCard = memo(function PromptCard({
             {prompt.title || 'Untitled'}
           </Text>
         </View>
-        {launchApp && onLaunch && (
-          <Pressable
-            onPress={() => onLaunch(prompt, launchApp)}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={`Copy and open in ${launchApp.label}`}
-            style={({ pressed }) => [styles.launchBtn, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <AppBadge app={launchApp} size={36} />
-          </Pressable>
-        )}
         <Pressable
           onPress={() => onCopy(prompt)}
           hitSlop={10}
@@ -107,7 +96,7 @@ export const PromptCard = memo(function PromptCard({
       <View style={styles.meta}>
         {folder && (
           <View style={[styles.pill, { backgroundColor: folder.color + '2E' }]}>
-            <View style={[styles.dot, { backgroundColor: folder.color }]} />
+            {launchApp ? <AppBadge app={launchApp} size={14} /> : <View style={[styles.dot, { backgroundColor: folder.color }]} />}
             <Text style={[styles.metaText, { color: theme.text }]} numberOfLines={1}>
               {folder.name}
             </Text>
@@ -128,6 +117,24 @@ export const PromptCard = memo(function PromptCard({
           <Text style={[styles.metaText, styles.tokens, { color: theme.textMuted }]}>~{estimateTokens(prompt.body)} tok</Text>
         )}
       </View>
+
+      {launchApp && onLaunch && (
+        <Pressable
+          onPress={() => onLaunch(prompt, launchApp)}
+          accessibilityRole="button"
+          accessibilityLabel={`Copy and open in ${launchApp.label}`}
+          style={({ pressed }) => [
+            styles.launchBtn,
+            { backgroundColor: launchApp.color + (theme.dark ? '33' : '1F'), borderColor: launchApp.color + '66', opacity: pressed ? 0.75 : 1 },
+          ]}
+        >
+          <AppBadge app={launchApp} size={22} />
+          <Text style={[styles.launchText, { color: theme.text }]} numberOfLines={1}>
+            {grid ? 'Open' : `Open in ${launchApp.label}`}
+          </Text>
+          <Ionicons name="arrow-forward" size={14} color={theme.text} />
+        </Pressable>
+      )}
     </Pressable>
   );
 });
@@ -152,7 +159,19 @@ const styles = StyleSheet.create({
   titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', minHeight: 34 },
   pin: { marginRight: 5 },
   title: { flex: 1, fontSize: 16, fontWeight: '700', letterSpacing: -0.2 },
-  launchBtn: { borderRadius: 18 },
+  launchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 7,
+    paddingLeft: 5,
+    paddingRight: 12,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginTop: 2,
+  },
+  launchText: { fontSize: 13, fontWeight: '700', flexShrink: 1 },
   copyBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   body: { fontSize: 14, lineHeight: 20 },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },

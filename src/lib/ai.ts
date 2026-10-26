@@ -1,4 +1,4 @@
-// AI apps the user can launch from Promptheart. The prompt is always copied first; apps whose
+// AI apps the user can launch from Prompt Heart. The prompt is always copied first; apps whose
 // web address accepts a prefilled query also get it in the URL. On Android, these addresses open
 // the installed app when it's set up to handle its own links, and the browser otherwise.
 

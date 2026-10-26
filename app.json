@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Promptheart",
+    "name": "Prompt Heart",
     "slug": "prompt-notes",
     "owner": "inigojo",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -52,7 +52,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Promptheart uses your photos so you can attach reference images to prompts.",
+          "photosPermission": "Prompt Heart uses your photos so you can attach reference images to prompts.",
           "cameraPermission": false,
           "microphonePermission": false
         }

@@ -129,11 +129,6 @@ export default function PromptEditor() {
         options={{
           headerRight: () => (
             <View style={styles.headerActions}>
-              {launchApp && prompt && (
-                <Pressable hitSlop={8} accessibilityLabel={`Copy and open in ${launchApp.label}`} onPress={() => copy(prompt, { openIn: launchApp })}>
-                  <AppBadge app={launchApp} size={26} />
-                </Pressable>
-              )}
               <Pressable hitSlop={8} accessibilityLabel="Copy prompt" disabled={!prompt} onPress={() => prompt && copy(prompt)}>
                 <Ionicons name="copy-outline" size={22} color={prompt ? theme.text : theme.textMuted} />
               </Pressable>
@@ -170,8 +165,30 @@ export default function PromptEditor() {
               onPress={() => change({ folderId: f.id })}
             />
           ))}
-          <Chip label="+ New" theme={theme} onPress={() => router.push('/categories')} />
+          <Chip label="+ New category" variant="action" theme={theme} onPress={() => router.push({ pathname: '/categories', params: { new: '1' } })} />
         </ScrollView>
+
+        {launchApp && (
+          <Pressable
+            onPress={() => prompt && copy(prompt, { openIn: launchApp })}
+            disabled={!prompt}
+            accessibilityRole="button"
+            accessibilityLabel={`Copy and open in ${launchApp.label}`}
+            style={({ pressed }) => [
+              styles.launch,
+              { backgroundColor: launchApp.color + (theme.dark ? '33' : '1F'), borderColor: launchApp.color + '66', opacity: !prompt ? 0.5 : pressed ? 0.75 : 1 },
+            ]}
+          >
+            <AppBadge app={launchApp} size={28} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.launchTitle, { color: theme.text }]}>Copy & open in {launchApp.label}</Text>
+              <Text style={[styles.launchSub, { color: theme.textMuted }]}>
+                {launchApp.prefills ? 'Opens with this prompt already typed in.' : 'Opens the app; just paste.'}
+              </Text>
+            </View>
+            <Ionicons name="arrow-forward" size={18} color={theme.text} />
+          </Pressable>
+        )}
 
         <View style={[styles.row, styles.wrap]}>
           {draft.tags.map((t) => (
@@ -299,6 +316,9 @@ const styles = StyleSheet.create({
   wrap: { flexWrap: 'wrap' },
   tag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 14 },
   tagInput: { minWidth: 80, fontSize: 14, height: 28, paddingVertical: 0 },
+  launch: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
+  launchTitle: { fontSize: 15, fontWeight: '700' },
+  launchSub: { fontSize: 12, marginTop: 1 },
   addImage: {
     width: 76,
     height: 76,

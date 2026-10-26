@@ -3,7 +3,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 
-import { APP_NAME } from '@/lib/app';
+import { APP_NAME, APP_SLUG } from '@/lib/app';
 import { imageBase64, imagesSupported, writeImageBase64 } from '@/lib/images';
 import type { Folder, Prompt } from '@/store/types';
 
@@ -49,7 +49,7 @@ export async function exportBackup(prompts: Prompt[], folders: Folder[]): Promis
     }
   }
   const backup: Backup = { format: FORMAT, version: FORMAT_VERSION, exportedAt: new Date().toISOString(), folders, prompts, images };
-  await share(`${APP_NAME.toLowerCase()}-backup-${stamp()}.json`, JSON.stringify(backup), 'application/json');
+  await share(`${APP_SLUG}-backup-${stamp()}.json`, JSON.stringify(backup), 'application/json');
   return { prompts: prompts.length, images: Object.keys(images).length };
 }
 
@@ -67,7 +67,7 @@ export async function exportMarkdown(prompts: Prompt[], folders: Folder[]) {
       out.push('', '```', p.body, '```', '');
     }
   }
-  await share(`${APP_NAME.toLowerCase()}-prompts-${stamp()}.md`, out.join('\n'), 'text/markdown');
+  await share(`${APP_SLUG}-prompts-${stamp()}.md`, out.join('\n'), 'text/markdown');
 }
 
 /** Lets the user pick a backup file; returns null if cancelled. Throws on files that aren't backups. */

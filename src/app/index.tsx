@@ -1,13 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
+import { BrandTitle, HeartMark } from '@/components/BrandTitle';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
+import { TipCard } from '@/components/TipCard';
 import { useToast } from '@/components/Toast';
 import { aiAppForFolder } from '@/lib/ai';
 import type { AiApp } from '@/lib/ai';
@@ -98,8 +101,18 @@ export default function HomeScreen() {
     toast('Moved to Trash', { label: 'Undo', onPress: () => restorePrompt(p.id) });
   };
 
-  const chip = (label: string, f: Filter, color?: string) => (
-    <Chip key={label} label={label} color={color} theme={theme} active={sameFilter(filter, f)} onPress={() => setFilter(f)} />
+  const chip = (label: string, f: Filter, color?: string, leading?: ReactNode) => (
+    <Chip
+      key={label}
+      label={label}
+      color={color}
+      leading={leading}
+      theme={theme}
+      active={sameFilter(filter, f)}
+      onPress={() => setFilter(f)}
+      // Long-press a category to manage categories.
+      onLongPress={f.kind === 'folder' ? () => router.push('/categories') : undefined}
+    />
   );
 
   return (
@@ -109,7 +122,7 @@ export default function HomeScreen() {
       <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
         <View style={styles.titleRow}>
           <View>
-            <Text style={[styles.appName, { color: theme.text }]}>{APP_NAME}</Text>
+            <BrandTitle theme={theme} />
             <Text style={[styles.subtitle, { color: theme.textMuted }]}>
               {prompts.length} prompt{prompts.length === 1 ? '' : 's'}
               {folders.length ? ` · ${folders.length} categor${folders.length === 1 ? 'y' : 'ies'}` : ''}
@@ -143,6 +156,10 @@ export default function HomeScreen() {
       {settings.showAiBar && aiApps.length > 0 && (
         <View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiBar}>
+          <View style={styles.aiBarLabel}>
+            <Ionicons name="open-outline" size={14} color={theme.textMuted} />
+            <Text style={[styles.aiBarLabelText, { color: theme.textMuted }]}>Open</Text>
+          </View>
           {aiApps.map((app) => (
             <Pressable
               key={app.key}
@@ -163,9 +180,18 @@ export default function HomeScreen() {
           {chip('All', { kind: 'all' })}
           {chip('Pinned', { kind: 'pinned' })}
           {chip('Recently copied', { kind: 'copied' })}
-          {folders.map((f) => chip(f.name, { kind: 'folder', id: f.id }, f.color))}
+          {folders.map((f) => {
+            const app = aiAppForFolder(f.id);
+            return chip(f.name, { kind: 'folder', id: f.id }, f.color, app ? <AppBadge app={app} size={24} /> : undefined);
+          })}
           {allTags.map((t) => chip(`#${t}`, { kind: 'tag', tag: t }))}
-          <Chip label="Edit categories" theme={theme} onPress={() => router.push('/categories')} />
+          <Chip
+            label="+ New category"
+            variant="action"
+            theme={theme}
+            accessibilityLabel="Create a new category"
+            onPress={() => router.push({ pathname: '/categories', params: { new: '1' } })}
+          />
         </ScrollView>
       </View>
 
@@ -181,13 +207,24 @@ export default function HomeScreen() {
             {filter.kind === 'copied' ? 'Last copied' : SORTS[settings.sort].label}
           </Text>
         </Pressable>
-        <Pressable
-          onPress={() => update({ layout: grid ? 'list' : 'grid' })}
-          hitSlop={8}
-          accessibilityLabel={grid ? 'Show as list' : 'Show as grid'}
-        >
-          <Ionicons name={grid ? 'list-outline' : 'grid-outline'} size={18} color={theme.textMuted} />
-        </Pressable>
+        <View style={styles.toolbarRight}>
+          <Pressable
+            onPress={() => router.push('/categories')}
+            accessibilityRole="button"
+            accessibilityLabel="Manage categories"
+            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.accentSoft, opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="folder-open-outline" size={15} color={theme.text} />
+            <Text style={[styles.manageText, { color: theme.text }]}>Categories</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => update({ layout: grid ? 'list' : 'grid' })}
+            hitSlop={8}
+            accessibilityLabel={grid ? 'Show as list' : 'Show as grid'}
+          >
+            <Ionicons name={grid ? 'list-outline' : 'grid-outline'} size={18} color={theme.textMuted} />
+          </Pressable>
+        </View>
       </View>
 
       <FlatList
@@ -198,6 +235,21 @@ export default function HomeScreen() {
         columnWrapperStyle={grid ? styles.gridRow : undefined}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 110 }]}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          aiApps.length > 0 && !settings.dismissedTips.includes('ai-launch') ? (
+            <TipCard
+              theme={theme}
+              icon={<HeartMark theme={theme} size={22} />}
+              title="Launch prompts in your AI apps"
+              onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'ai-launch'] })}
+              action={{ label: 'Choose apps', onPress: () => router.push('/settings') }}
+            >
+              Each AI app has its own category. Put a prompt in one (for example Claude) and it gets an{' '}
+              <Text style={{ fontWeight: '800' }}>Open in Claude</Text> button that copies it and opens the app. Tap an app in the{' '}
+              <Text style={{ fontWeight: '800' }}>Open</Text> bar above to jump straight to it.
+            </TipCard>
+          ) : undefined
+        }
         renderItem={({ item }) => (
           <PromptCard
             prompt={item}
@@ -289,8 +341,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   top: { paddingHorizontal: 16, gap: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  appName: { fontSize: 30, fontWeight: '800', letterSpacing: -0.8 },
-  subtitle: { fontSize: 13, marginTop: 1 },
+  subtitle: { fontSize: 13, marginTop: 2 },
   headerActions: { flexDirection: 'row', gap: 4 },
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
@@ -301,6 +352,11 @@ const styles = StyleSheet.create({
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
   sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },
+  toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 30, borderRadius: 10 },
+  manageText: { fontSize: 13, fontWeight: '700' },
+  aiBarLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 2 },
+  aiBarLabelText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   toolbarText: { fontSize: 13, fontWeight: '600' },
   list: { paddingHorizontal: 16, gap: 12, paddingTop: 4 },
   gridRow: { gap: 12 },

@@ -1,4 +1,4 @@
--- Promptheart (formerly Prompt Notes): cloud sync schema.
+-- Prompt Heart (formerly Prompt Notes): cloud sync schema.
 -- Paste into Supabase Dashboard -> SQL Editor -> New query, then Run. Safe to run more than once.
 --
 -- Sync model:

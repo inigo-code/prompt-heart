@@ -22,6 +22,8 @@ export type Settings = {
   aiApps: Record<string, boolean>;
   /** Row of AI app shortcuts on the home screen. */
   showAiBar: boolean;
+  /** One-time tips the user has closed. */
+  dismissedTips: string[];
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -34,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showTokens: true,
   aiApps: defaultAiApps(),
   showAiBar: true,
+  dismissedTips: [],
 };
 
 type SettingsContext = {

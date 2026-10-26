@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +13,8 @@ import type { Folder } from '@/store/types';
 export default function CategoriesScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // Opened from "+ New category": put the cursor straight in the name box.
+  const { new: startNew } = useLocalSearchParams<{ new?: string }>();
   const { prompts, createFolder, updateFolder, deleteFolder } = usePromptStore();
   const folders = useVisibleFolders();
 
@@ -53,6 +56,7 @@ export default function CategoriesScreen() {
           onChangeText={setName}
           onSubmitEditing={add}
           placeholder="New category name"
+          autoFocus={startNew === '1'}
           placeholderTextColor={theme.textMuted}
           style={[styles.input, { color: theme.text }]}
         />
