@@ -5,13 +5,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { useTheme } from '@/lib/theme';
+import { useVisibleFolders } from '@/lib/useAiApps';
 import { FOLDER_COLORS, usePromptStore } from '@/store/PromptStore';
 import type { Folder } from '@/store/types';
 
 export default function CategoriesScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { folders, prompts, createFolder, updateFolder, deleteFolder } = usePromptStore();
+  const { prompts, createFolder, updateFolder, deleteFolder } = usePromptStore();
+  const folders = useVisibleFolders();
 
   const [name, setName] = useState('');
   // null = use the next colour in the palette, so each new category gets a different one.

@@ -6,13 +6,13 @@ import { Linking, Platform } from 'react-native';
 
 import { FillTemplateSheet } from '@/components/FillTemplateSheet';
 import { useToast } from '@/components/Toast';
-import type { AiTarget } from '@/lib/ai';
+import type { AiApp } from '@/lib/ai';
 import { extractDefaults, extractVariables } from '@/lib/templates';
 import { useSettings } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
 
-type CopyOptions = { openIn?: AiTarget };
+type CopyOptions = { openIn?: AiApp };
 type CopyFn = (prompt: Prompt, options?: CopyOptions) => void;
 
 const CopyCtx = createContext<CopyFn | null>(null);
@@ -36,9 +36,10 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       }
       recordCopy(prompt.id);
-      if (options?.openIn) {
-        toast(`Copied — opening ${options.openIn.label}`);
-        Linking.openURL(options.openIn.url(text)).catch(() => toast(`Couldn't open ${options.openIn?.label}`));
+      const app = options?.openIn;
+      if (app) {
+        toast(app.prefills ? `Copied — opening ${app.label}` : `Copied — paste it in ${app.label}`);
+        Linking.openURL(app.url(text)).catch(() => toast(`Couldn't open ${app.label}`));
       } else {
         toast('Copied to clipboard');
       }
@@ -67,7 +68,7 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
           prompt={pending.prompt}
           variables={pending.variables}
           initialValues={pending.initialValues}
-          actionLabel={pending.options?.openIn ? `Copy & open ${pending.options.openIn.label}` : 'Copy'}
+          actionLabel={pending.options?.openIn ? `Copy & open in ${pending.options.openIn.label}` : 'Copy'}
           onClose={() => setPending(null)}
           onCopy={(text, values) => {
             lastValues.current[pending.prompt.id] = values;

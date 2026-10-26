@@ -18,7 +18,9 @@ export function Section({ theme, title, children, footer }: { theme: Theme; titl
 
 type RowProps = {
   theme: Theme;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
+  /** Replaces the icon, e.g. an app badge. */
+  leading?: ReactNode;
   label: string;
   value?: string;
   onPress?: () => void;
@@ -28,7 +30,7 @@ type RowProps = {
   right?: ReactNode;
 };
 
-export function Row({ theme, icon, label, value, onPress, busy, destructive, last, right }: RowProps) {
+export function Row({ theme, icon, leading, label, value, onPress, busy, destructive, last, right }: RowProps) {
   const color = destructive ? theme.danger : theme.text;
   return (
     <Pressable
@@ -40,9 +42,11 @@ export function Row({ theme, icon, label, value, onPress, busy, destructive, las
         pressed && onPress ? { backgroundColor: theme.chip } : null,
       ]}
     >
-      <View style={[styles.iconWrap, { backgroundColor: destructive ? theme.danger + '22' : theme.accentSoft }]}>
-        <Ionicons name={icon} size={17} color={destructive ? theme.danger : theme.text} />
-      </View>
+      {leading ?? (
+        <View style={[styles.iconWrap, { backgroundColor: destructive ? theme.danger + '22' : theme.accentSoft }]}>
+          <Ionicons name={icon ?? 'ellipse-outline'} size={17} color={destructive ? theme.danger : theme.text} />
+        </View>
+      )}
       <Text style={[styles.label, { color }]} numberOfLines={1}>
         {label}
       </Text>
@@ -57,9 +61,10 @@ export function Row({ theme, icon, label, value, onPress, busy, destructive, las
   );
 }
 
-export function ToggleRow({ theme, icon, label, value, onChange, last }: {
+export function ToggleRow({ theme, icon, leading, label, value, onChange, last }: {
   theme: Theme;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
+  leading?: ReactNode;
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
@@ -69,6 +74,7 @@ export function ToggleRow({ theme, icon, label, value, onChange, last }: {
     <Row
       theme={theme}
       icon={icon}
+      leading={leading}
       label={label}
       last={last}
       right={

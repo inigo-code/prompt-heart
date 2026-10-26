@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useShareIntentContext } from 'expo-share-intent';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast';
 import { APP_NAME } from '@/lib/app';
 import { saveImage } from '@/lib/images';
 import { useTheme } from '@/lib/theme';
+import { useVisibleFolders } from '@/lib/useAiApps';
 import { usePromptStore } from '@/store/PromptStore';
 
 /** A short title from shared text: page title, else the first line. */
@@ -24,7 +25,8 @@ export default function ShareScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { folders, createPrompt } = usePromptStore();
+  const { createPrompt } = usePromptStore();
+  const folders = useVisibleFolders();
   const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntentContext();
 
   const sharedText = [shareIntent.text, shareIntent.webUrl && !shareIntent.text?.includes(shareIntent.webUrl) ? shareIntent.webUrl : null]
@@ -44,6 +46,13 @@ export default function ShareScreen() {
     setBody(sharedText);
     setTitle(suggestTitle(sharedText, shareIntent.meta?.title));
   }
+
+  // Leaving with the back button also counts as handled; otherwise the layout would reopen this screen.
+  const resetRef = useRef(resetShareIntent);
+  useEffect(() => {
+    resetRef.current = resetShareIntent;
+  });
+  useEffect(() => () => resetRef.current(), []);
 
   const done = () => {
     resetShareIntent();

@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { defaultAiApps } from '@/lib/ai';
+
 const STORAGE_KEY = 'promptheart/settings';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -16,6 +18,10 @@ export type Settings = {
   previewLines: 2 | 4 | 6;
   haptics: boolean;
   showTokens: boolean;
+  /** Which AI apps are on (app key -> enabled). Off apps are hidden everywhere, folders included. */
+  aiApps: Record<string, boolean>;
+  /** Row of AI app shortcuts on the home screen. */
+  showAiBar: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +32,8 @@ export const DEFAULT_SETTINGS: Settings = {
   previewLines: 4,
   haptics: true,
   showTokens: true,
+  aiApps: defaultAiApps(),
+  showAiBar: true,
 };
 
 type SettingsContext = {
@@ -42,7 +50,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => raw && setSettings({ ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }))
+      .then((raw) => {
+        if (!raw) return;
+        const saved = JSON.parse(raw) as Partial<Settings>;
+        // Merge per app so apps added in later versions get their default.
+        setSettings({ ...DEFAULT_SETTINGS, ...saved, aiApps: { ...DEFAULT_SETTINGS.aiApps, ...saved.aiApps } });
+      })
       .catch(() => {})
       .finally(() => {
         loaded.current = true;

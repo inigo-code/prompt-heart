@@ -5,14 +5,15 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollVie
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
+import { AppBadge } from '@/components/AppBadge';
 import { Chip } from '@/components/Chip';
 import { ImageThumb } from '@/components/ImageThumb';
 import { ImageViewer } from '@/components/ImageViewer';
 import { useToast } from '@/components/Toast';
-import { AI_TARGETS } from '@/lib/ai';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
 import { useTheme } from '@/lib/theme';
+import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
 import { normalizeTag, usePromptStore } from '@/store/PromptStore';
@@ -28,6 +29,8 @@ export default function PromptEditor() {
   const { settings } = useSettings();
   const store = usePromptStore();
   const copy = useCopyPrompt();
+  const aiApps = useEnabledAiApps();
+  const folders = useVisibleFolders();
 
   // A new prompt only gets an id once there's content, so backing out leaves nothing behind.
   const [id, setId] = useState<string | null>(params.id === 'new' ? null : params.id);
@@ -48,6 +51,7 @@ export default function PromptEditor() {
   // Images are edited straight in the store (they aren't typed), so read them from there.
   const prompt = id ? store.getPrompt(id) : undefined;
   const images = prompt?.images ?? [];
+  const launchApp = useLaunchApp(draft.folderId);
 
   const change = (patch: Partial<TextDraft>) => {
     const next = { ...draft, ...patch };
@@ -125,6 +129,11 @@ export default function PromptEditor() {
         options={{
           headerRight: () => (
             <View style={styles.headerActions}>
+              {launchApp && prompt && (
+                <Pressable hitSlop={8} accessibilityLabel={`Copy and open in ${launchApp.label}`} onPress={() => copy(prompt, { openIn: launchApp })}>
+                  <AppBadge app={launchApp} size={26} />
+                </Pressable>
+              )}
               <Pressable hitSlop={8} accessibilityLabel="Copy prompt" disabled={!prompt} onPress={() => prompt && copy(prompt)}>
                 <Ionicons name="copy-outline" size={22} color={prompt ? theme.text : theme.textMuted} />
               </Pressable>
@@ -151,7 +160,7 @@ export default function PromptEditor() {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
           <Chip label="No category" theme={theme} active={draft.folderId === null} onPress={() => change({ folderId: null })} />
-          {store.folders.map((f) => (
+          {folders.map((f) => (
             <Chip
               key={f.id}
               label={f.name}
@@ -256,7 +265,7 @@ export default function PromptEditor() {
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
         actions={[
-          ...(prompt ? AI_TARGETS.map((t) => ({ label: `Copy & open ${t.label}`, onPress: () => copy(prompt, { openIn: t }) })) : []),
+          ...(prompt ? aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(prompt, { openIn: a }) })) : []),
           {
             label: 'Duplicate',
             onPress: () => {
@@ -283,7 +292,7 @@ export default function PromptEditor() {
 
 const styles = StyleSheet.create({
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  headerActions: { flexDirection: 'row', gap: 18, paddingHorizontal: 4 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 4 },
   content: { paddingHorizontal: 20, paddingTop: 4, gap: 12 },
   title: { fontSize: 26, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },

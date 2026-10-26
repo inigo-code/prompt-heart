@@ -1,11 +1,13 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import { Stack } from 'expo-router';
-import { ShareIntentProvider } from 'expo-share-intent';
+import { Stack, router, usePathname } from 'expo-router';
+import { ShareIntentProvider, useShareIntentContext } from 'expo-share-intent';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { ToastProvider } from '@/components/Toast';
 import { useTheme } from '@/lib/theme';
+import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
 import { SettingsProvider } from '@/settings/SettingsProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
@@ -34,6 +36,16 @@ export default function RootLayout() {
 
 function Navigator() {
   const theme = useTheme();
+  const pathname = usePathname();
+  const { hasShareIntent } = useShareIntentContext();
+  useEnsureAiFolders();
+
+  // On Android, shared content arrives through the native module rather than a deep link,
+  // so open the Share screen whenever something has been shared and not yet handled.
+  useEffect(() => {
+    if (hasShareIntent && pathname !== '/share') router.push('/share');
+  }, [hasShareIntent, pathname]);
+
   return (
     <>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />

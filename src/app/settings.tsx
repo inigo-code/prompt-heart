@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppBadge } from '@/components/AppBadge';
 import { ControlRow, Row, Section, Segmented, ToggleRow } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
+import { AI_APPS } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { exportBackup, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
@@ -124,6 +126,31 @@ export default function SettingsScreen() {
           onChange={(showTokens) => update({ showTokens })}
           last
         />
+      </Section>
+
+      <Section
+        theme={theme}
+        title="AI apps"
+        footer={`Each app you turn on gets its own category. Prompts saved there get a button that copies the prompt and opens the app (ChatGPT, Claude, Grok and Perplexity open with it pre-typed; for the others, just paste). Turning an app off hides it everywhere, including its category; its prompts stay under All.`}
+      >
+        <ToggleRow
+          theme={theme}
+          icon="apps-outline"
+          label="Show AI app bar on home"
+          value={settings.showAiBar}
+          onChange={(showAiBar) => update({ showAiBar })}
+        />
+        {AI_APPS.map((app, i) => (
+          <ToggleRow
+            key={app.key}
+            theme={theme}
+            leading={<AppBadge app={app} size={30} />}
+            label={app.label}
+            value={!!settings.aiApps[app.key]}
+            onChange={(on) => update({ aiApps: { ...settings.aiApps, [app.key]: on } })}
+            last={i === AI_APPS.length - 1}
+          />
+        ))}
       </Section>
 
       <Section

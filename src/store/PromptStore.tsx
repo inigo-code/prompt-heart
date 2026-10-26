@@ -77,6 +77,8 @@ type PromptStore = {
   createFolder: (name: string, color?: string) => Folder;
   updateFolder: (id: string, patch: Partial<Pick<Folder, 'name' | 'color'>>) => void;
   deleteFolder: (id: string) => void;
+  /** Creates folders with fixed ids if this device has never had them (deleted ones stay deleted). */
+  ensureFolders: (folders: Pick<Folder, 'id' | 'name' | 'color'>[]) => void;
   /** Merges a backup; image ids in it must already be saved locally. */
   importBackup: (backup: { prompts: Prompt[]; folders: Folder[] }) => ImportResult;
   sync: SyncStoreApi;
@@ -283,6 +285,25 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     [commitLocal],
   );
 
+  const ensureFolders = useCallback(
+    (wanted: Pick<Folder, 'id' | 'name' | 'color'>[]) => {
+      const missing = wanted.filter((w) => !snapshot.current.folders.some((f) => f.id === w.id));
+      if (missing.length === 0) return;
+      // modifiedAt 0, like the seed data: a rename or delete on any device always wins over this copy.
+      const now = Date.now();
+      const created: Folder[] = missing.map((m) => ({ ...m, createdAt: now, modifiedAt: 0, deletedAt: null }));
+      commitLocal((d) =>
+        local(
+          d,
+          { prompts: d.prompts, folders: [...d.folders, ...created.filter((c) => !d.folders.some((f) => f.id === c.id))] },
+          [],
+          created.map((c) => c.id),
+        ),
+      );
+    },
+    [commitLocal],
+  );
+
   const importBackup = useCallback(
     (backup: { prompts: Prompt[]; folders: Folder[] }) => {
       const merged = mergeBackup(snapshot.current, backup, Date.now());
@@ -389,6 +410,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       createFolder,
       updateFolder,
       deleteFolder,
+      ensureFolders,
       importBackup,
       sync,
     };
@@ -409,6 +431,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     createFolder,
     updateFolder,
     deleteFolder,
+    ensureFolders,
     importBackup,
     sync,
   ]);

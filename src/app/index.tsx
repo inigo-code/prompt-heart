@@ -1,16 +1,19 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
+import { AppBadge } from '@/components/AppBadge';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
 import { useToast } from '@/components/Toast';
-import { AI_TARGETS } from '@/lib/ai';
+import { aiAppForFolder } from '@/lib/ai';
+import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { useTheme } from '@/lib/theme';
+import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { SortKey } from '@/settings/SettingsProvider';
@@ -48,9 +51,21 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { settings, update } = useSettings();
-  const { ready, prompts, folders, allTags, getFolder, togglePin, duplicatePrompt, deletePrompt, restorePrompt } = usePromptStore();
+  const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt } = usePromptStore();
   const copy = useCopyPrompt();
   const { status: syncStatus } = useSync();
+  const folders = useVisibleFolders();
+  const aiApps = useEnabledAiApps();
+  const launchAppFor = useCallback(
+    (folderId: string | null) => {
+      const app = aiAppForFolder(folderId);
+      return app && settings.aiApps[app.key] ? app : undefined;
+    },
+    [settings.aiApps],
+  );
+  const launch = useCallback((p: Prompt, app: AiApp) => copy(p, { openIn: app }), [copy]);
+  // Cards only label categories that are visible (an AI app that's switched off hides its label too).
+  const visibleFolder = useCallback((id: string | null) => folders.find((f) => f.id === id), [folders]);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>({ kind: 'all' });
@@ -125,6 +140,24 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {settings.showAiBar && aiApps.length > 0 && (
+        <View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiBar}>
+          {aiApps.map((app) => (
+            <Pressable
+              key={app.key}
+              onPress={() => Linking.openURL(app.home).catch(() => toast(`Couldn't open ${app.label}`))}
+              accessibilityLabel={`Open ${app.label}`}
+              style={({ pressed }) => [styles.aiPill, { backgroundColor: theme.card, borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <AppBadge app={app} size={22} />
+              <Text style={[styles.aiPillText, { color: theme.text }]}>{app.label}</Text>
+            </Pressable>
+          ))}
+          </ScrollView>
+        </View>
+      )}
+
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
           {chip('All', { kind: 'all' })}
@@ -168,11 +201,13 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <PromptCard
             prompt={item}
-            folder={getFolder(item.folderId)}
+            folder={visibleFolder(item.folderId)}
             theme={theme}
             variant={settings.layout}
             previewLines={grid ? Math.min(settings.previewLines, 4) : settings.previewLines}
             showTokens={settings.showTokens && !grid}
+            launchApp={launchAppFor(item.folderId)}
+            onLaunch={launch}
             onOpen={openPrompt}
             onCopy={copy}
             onLongPress={setMenuFor}
@@ -219,7 +254,7 @@ export default function HomeScreen() {
           menuFor
             ? [
                 { label: 'Copy', onPress: () => copy(menuFor) },
-                ...AI_TARGETS.map((t) => ({ label: `Copy & open ${t.label}`, onPress: () => copy(menuFor, { openIn: t }) })),
+                ...aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(menuFor, { openIn: a }) })),
                 { label: menuFor.pinned ? 'Unpin' : 'Pin to top', onPress: () => togglePin(menuFor.id) },
                 { label: 'Duplicate', onPress: () => duplicatePrompt(menuFor.id) },
                 { label: 'Move to Trash', destructive: true, onPress: () => remove(menuFor) },
@@ -260,6 +295,9 @@ const styles = StyleSheet.create({
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
   searchInput: { flex: 1, fontSize: 15, height: '100%' },
+  aiBar: { gap: 8, paddingHorizontal: 16, paddingTop: 12 },
+  aiPill: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingLeft: 5, paddingRight: 12, height: 34, borderRadius: 17, borderWidth: StyleSheet.hairlineWidth },
+  aiPillText: { fontSize: 13, fontWeight: '700' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
   sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },

@@ -2,7 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
+import type { AiApp } from '@/lib/ai';
 import { estimateTokens, extractVariables } from '@/lib/templates';
 import type { Theme } from '@/lib/theme';
 import type { Folder, Prompt } from '@/store/types';
@@ -14,6 +16,9 @@ type Props = {
   variant: 'list' | 'grid';
   previewLines: number;
   showTokens: boolean;
+  /** Set for prompts in an AI app's category: shows a button that copies and opens that app. */
+  launchApp?: AiApp;
+  onLaunch?: (prompt: Prompt, app: AiApp) => void;
   onOpen: (prompt: Prompt) => void;
   onCopy: (prompt: Prompt) => void;
   onLongPress: (prompt: Prompt) => void;
@@ -26,6 +31,8 @@ export const PromptCard = memo(function PromptCard({
   variant,
   previewLines,
   showTokens,
+  launchApp,
+  onLaunch,
   onOpen,
   onCopy,
   onLongPress,
@@ -69,6 +76,17 @@ export const PromptCard = memo(function PromptCard({
             {prompt.title || 'Untitled'}
           </Text>
         </View>
+        {launchApp && onLaunch && (
+          <Pressable
+            onPress={() => onLaunch(prompt, launchApp)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Copy and open in ${launchApp.label}`}
+            style={({ pressed }) => [styles.launchBtn, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <AppBadge app={launchApp} size={36} />
+          </Pressable>
+        )}
         <Pressable
           onPress={() => onCopy(prompt)}
           hitSlop={10}
@@ -134,6 +152,7 @@ const styles = StyleSheet.create({
   titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', minHeight: 34 },
   pin: { marginRight: 5 },
   title: { flex: 1, fontSize: 16, fontWeight: '700', letterSpacing: -0.2 },
+  launchBtn: { borderRadius: 18 },
   copyBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   body: { fontSize: 14, lineHeight: 20 },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
