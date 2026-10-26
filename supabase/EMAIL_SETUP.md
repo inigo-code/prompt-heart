@@ -8,9 +8,61 @@ hourly limit, so for real users you need your own email service. Resend's free p
 ## 1. Create a sending domain (Resend)
 
 1. Sign up at [resend.com](https://resend.com).
-2. **Domains → Add domain**, for example `tosstheworld.org` (or a subdomain like `mail.tosstheworld.org`).
-3. Add the DNS records Resend shows (SPF, DKIM) at your domain's DNS provider, then wait for **Verified**.
+2. **Domains → Add domain** and enter `mail.tosstheworld.org`. Resend recommends a subdomain: it keeps
+   the app's emails separate from your own mail, and all its records go on that subdomain.
+3. Resend now shows three DNS records. Leave that page open and add them where your DNS is managed
+   (see **Adding the records with Google-managed DNS** below), then click **Verify DNS Records**.
+   Verification usually takes minutes, occasionally a few hours.
 4. **API Keys → Create API key** with "Sending access". Copy it; you'll paste it into Supabase once.
+
+### Adding the records with Google-managed DNS
+
+The records Resend shows look like this. Copy the exact values from Resend; the MX host and the DKIM
+key are specific to your account.
+
+| Type | Name / host | Value | Priority |
+|---|---|---|---|
+| MX | `send.mail` | `feedback-smtp.<region>.amazonses.com` (from Resend) | 10 |
+| TXT | `send.mail` | `v=spf1 include:amazonses.com ~all` | |
+| TXT | `resend._domainkey.mail` | the long `p=…` key from Resend | |
+
+> **Leave your existing records alone.** If inigo@tosstheworld.org uses Google Workspace (Gmail), the
+> domain already has MX records and an SPF record (`v=spf1 include:_spf.google.com ~all`) on
+> `tosstheworld.org` itself. Don't edit or delete them, or your own email stops working. The Resend
+> records above are all on the `mail` subdomain, so they don't touch them.
+
+**If you bought the domain through Google Domains or Google Workspace** (most likely): since Google
+Domains moved to Squarespace in 2023, the DNS is managed at Squarespace Domains.
+
+1. Go to [domains.squarespace.com](https://domains.squarespace.com) and sign in with **Continue with
+   Google**, using the Google account that owns the domain. (In the Google Workspace Admin console,
+   **Account → Domains → Manage domains** links there too.)
+2. Open **tosstheworld.org → DNS → DNS Settings**, and scroll to **Custom records**.
+3. **Add record** three times, once for each row above. In **Host** enter just the part shown
+   (`send.mail`, `resend._domainkey.mail`), not the full domain: Squarespace adds
+   `.tosstheworld.org` itself. Set the MX **Priority** to 10 (use 20 if 10 is taken).
+4. Save, then go back to Resend and click **Verify DNS Records**.
+
+**If the domain's DNS is in Google Cloud DNS** (console.cloud.google.com → **Network services →
+Cloud DNS**):
+
+1. Open the zone for `tosstheworld.org` and **Add standard** record set three times.
+2. In **DNS name** enter the part before the domain (`send.mail`, `resend._domainkey.mail`); the
+   console fills in `.tosstheworld.org.`.
+3. For the MX record, the data is `10 feedback-smtp.<region>.amazonses.com.` (priority, space, host,
+   trailing dot). For the TXT records, paste the value in double quotes. If the DKIM key is longer than
+   255 characters, split it into several quoted strings on one line.
+
+**Which one is tosstheworld.org?** Squarespace. Its name servers are `dns1.p05.nsone.net` to
+`dns4.p05.nsone.net`, which belong to Squarespace Domains (checked 27 Oct 2026). Its mail runs on
+Google Workspace (the `aspmx.l.google.com` MX records). To check another domain, look up its name
+servers at [dns.google](https://dns.google/query?name=tosstheworld.org&rr_type=NS):
+`*.nsone.net` means Squarespace; `ns-cloud-*.googledomains.com` means Google Cloud DNS.
+
+**Worth adding while you're there (optional, for your own Gmail):** the domain has no SPF record on
+`tosstheworld.org` itself, so mail from inigo@tosstheworld.org is more likely to land in spam. Add a
+TXT record with Host `@` and value `v=spf1 include:_spf.google.com ~all`. A domain can only have one
+`v=spf1` record on `@`, so skip this if one appears later. Prompt Heart doesn't need it.
 
 ## 2. Point Supabase at it
 
@@ -19,7 +71,7 @@ Supabase Dashboard → your project → **Authentication → Emails → SMTP Set
 
 | Field | Value |
 |---|---|
-| Sender email | `no-reply@tosstheworld.org` (any address on the verified domain) |
+| Sender email | `no-reply@mail.tosstheworld.org` (any address on the verified domain) |
 | Sender name | `Prompt Heart` |
 | Host | `smtp.resend.com` |
 | Port | `465` |
