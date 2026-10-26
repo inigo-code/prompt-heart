@@ -77,7 +77,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 
 <table>
   <tr>
-    <td width="38%"><img src="docs/screens/home-dark.png" alt="Home screen" /></td>
+    <td width="300" align="center"><img src="docs/screens/home-dark.png" alt="Home screen" width="280" /></td>
     <td valign="middle">
       <h3>Your prompts, front and centre</h3>
       <p>A warm welcome ("Good evening, Inigo!"), quick shortcuts to every AI app you use, and filter chips for categories and tags. Pinned prompts stay at the top, and each card shows its category, tags and a token estimate at a glance.</p>
@@ -89,10 +89,10 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
       <h3>Templates that fill themselves in</h3>
       <p>Turn any prompt into a reusable template with <code>{{placeholders}}</code>. When you copy it, Prompt Heart asks for each value, remembers your last answers, and shows the finished prompt before you send it anywhere.</p>
     </td>
-    <td width="38%"><img src="docs/screens/template-dark.png" alt="Template fill-in sheet" /></td>
+    <td width="300" align="center"><img src="docs/screens/template-dark.png" alt="Template fill-in sheet" width="280" /></td>
   </tr>
   <tr>
-    <td width="38%"><img src="docs/screens/editor-light.png" alt="Editor with Copy and open in Claude" /></td>
+    <td width="300" align="center"><img src="docs/screens/editor-light.png" alt="Editor with Copy and open in Claude" width="280" /></td>
     <td valign="middle">
       <h3>Write like a note, launch like an app</h3>
       <p>The editor autosaves as you type. Choose a category, add tags, attach reference images, and see the word count and token estimate.</p>
@@ -104,10 +104,10 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
       <h3>Tidy up in seconds</h3>
       <p>Tap <b>Select</b>, tick as many prompts as you like (or <b>Select all</b>), then move, tag, pin or delete them in one go. Deleted prompts wait in Trash for 30 days, and Undo is always one tap away.</p>
     </td>
-    <td width="38%"><img src="docs/screens/select-dark.png" alt="Bulk select" /></td>
+    <td width="300" align="center"><img src="docs/screens/select-dark.png" alt="Bulk select" width="280" /></td>
   </tr>
   <tr>
-    <td width="38%"><img src="docs/screens/history-light.png" alt="Version history" /></td>
+    <td width="300" align="center"><img src="docs/screens/history-light.png" alt="Version history" width="280" /></td>
     <td valign="middle">
       <h3>Never lose a good version</h3>
       <p>Prompt Heart keeps a version from each editing session. Open <b>Version history</b> to compare, copy, or bring back any earlier wording. Your current text is saved first, so restoring is always safe.</p>
@@ -118,7 +118,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
       <h3>Your apps, your way</h3>
       <p>Switch AI apps on or off: ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot, DeepSeek and Le Chat. Each one you switch on gets a category and a shortcut. Switch one off and it disappears everywhere, while its prompts stay safe under All.</p>
     </td>
-    <td width="38%"><img src="docs/screens/settings-ai-dark.png" alt="AI apps settings" /></td>
+    <td width="300" align="center"><img src="docs/screens/settings-ai-dark.png" alt="AI apps settings" width="280" /></td>
   </tr>
 </table>
 
