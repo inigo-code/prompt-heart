@@ -39,6 +39,8 @@ type SyncContext = {
   imagesVersion: number;
   /** Resolves when the sync finishes (for pull-to-refresh). */
   syncNow: () => Promise<void>;
+  /** When the one-minute cooldown after the last sync ends (ms timestamp; in the past if none). */
+  cooldownEndsAt: () => number;
   /** Image transfer in progress, e.g. { label: "Uploading images", done: 2, total: 5 }. */
   progress: SyncProgress | null;
   /** Known after a sync; null before the first one (or when signed out). */
@@ -401,13 +403,14 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       nextSyncAt: userId ? nextSyncAt : null,
       imagesVersion,
       syncNow: runSync,
+      cooldownEndsAt: autoSync.cooldownEndsAt,
       progress,
       imageUsage: userId ? imageUsage : null,
       signIn,
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, autoSync, signIn, signUp, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

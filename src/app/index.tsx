@@ -28,6 +28,7 @@ import { useSettings } from '@/settings/SettingsProvider';
 import type { SortKey } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
+import { SYNC_AMBER, SYNC_BLUE, SYNC_GREEN } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
 import type { SyncStatus } from '@/sync/SyncProvider';
 
@@ -54,15 +55,17 @@ const SYNC_LABEL: Record<SyncStatus, string> = {
   error: 'sync problem',
 };
 
-/** Avatar dot: green synced, amber in progress, amber ring for changes waiting, red problem, none when signed out. */
+/** Avatar dot: green synced, blue syncing, amber ring for changes waiting, red problem, none when signed out. */
 const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
   status === 'synced'
-    ? '#3FB27F'
-    : status === 'syncing' || status === 'idle' || status === 'waiting'
-      ? theme.accent
-      : status === 'error'
-        ? theme.danger
-        : undefined;
+    ? SYNC_GREEN
+    : status === 'waiting'
+      ? SYNC_AMBER
+      : status === 'syncing' || status === 'idle'
+        ? SYNC_BLUE
+        : status === 'error'
+          ? theme.danger
+          : undefined;
 
 const sameFilter = (a: Filter, b: Filter) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -74,7 +77,7 @@ export default function HomeScreen() {
   const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt, movePrompts, tagPrompts, setPinned, deletePrompts, restorePrompts } =
     usePromptStore();
   const copy = useCopyPrompt();
-  const { status: syncStatus, syncNow, progress } = useSync();
+  const { status: syncStatus, syncNow, progress, cooldownEndsAt } = useSync();
   const [pulling, setPulling] = useState(false);
   const profile = useProfile();
   const hour = useHour();
@@ -126,6 +129,18 @@ export default function HomeScreen() {
   const sync = async (fromPull: boolean) => {
     if (!canSync) {
       toast('Sign in to sync your prompts across devices', { label: 'Sign in', onPress: () => router.push('/account') });
+      return;
+    }
+    // Within a minute of the last sync, say how long to wait instead of syncing again. A sync
+    // problem can still be retried straight away.
+    const wait = Math.ceil((cooldownEndsAt() - Date.now()) / 1000);
+    if (wait > 0 && syncStatus !== 'error') {
+      toast(syncStatus === 'waiting' ? `Wait ${wait} s. Your changes sync then.` : `Synced just now. Wait ${wait} s to sync again.`);
+      if (fromPull) {
+        // Let the pull-to-refresh spinner finish cleanly.
+        setPulling(true);
+        setTimeout(() => setPulling(false), 300);
+      }
       return;
     }
     if (fromPull) setPulling(true);
@@ -233,7 +248,7 @@ export default function HomeScreen() {
               ) : (
                 <Ionicons name="sync" size={22} color={syncStatus === 'error' ? theme.danger : theme.text} />
               )}
-              {syncStatus === 'waiting' && <View style={[styles.waitingDot, { backgroundColor: theme.accent, borderColor: theme.bg }]} />}
+              {syncStatus === 'waiting' && <View style={[styles.waitingDot, { backgroundColor: SYNC_AMBER, borderColor: theme.bg }]} />}
             </Pressable>
             <Pressable
               onPress={() => router.push('/profile')}

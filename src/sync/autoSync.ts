@@ -27,6 +27,8 @@ export type AutoSync = {
   finished: () => void;
   /** Drop any planned sync (signed out, unmounted). */
   cancel: () => void;
+  /** When the current cooldown ends (ms timestamp); in the past when there is none. */
+  cooldownEndsAt: () => number;
 };
 
 /**
@@ -90,5 +92,6 @@ export function createAutoSync(
       cancel();
       askedWhileRunning = false;
     },
+    cooldownEndsAt: () => lastFinishedAt + cooldownMs,
   };
 }
