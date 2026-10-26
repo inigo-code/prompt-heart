@@ -68,6 +68,12 @@ type PromptStore = {
   removeImage: (id: string, imageId: string) => boolean;
   deletePrompt: (id: string) => void;
   restorePrompt: (id: string) => void;
+  /** Bulk actions for multi-select. */
+  movePrompts: (ids: string[], folderId: string | null) => void;
+  tagPrompts: (ids: string[], tag: string) => void;
+  setPinned: (ids: string[], pinned: boolean) => void;
+  deletePrompts: (ids: string[]) => void;
+  restorePrompts: (ids: string[]) => void;
   /** Deletes for good: clears the content but keeps a tombstone so the delete syncs. Returns image ids to delete. */
   purgePrompt: (id: string) => string[];
   emptyTrash: () => string[];
@@ -237,6 +243,34 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const purgePrompt = useCallback((id: string) => purge([id]), [purge]);
 
   const togglePin = useCallback((id: string) => mutatePrompt(id, (p) => ({ pinned: !p.pinned })), [mutatePrompt]);
+
+  /** Applies one change to many prompts in a single commit (and a single sync). */
+  const mutateMany = useCallback(
+    (ids: string[], fn: (p: Prompt) => Partial<Prompt>) => {
+      if (ids.length === 0) return;
+      const set = new Set(ids);
+      const now = Date.now();
+      commitLocal((d) =>
+        local(d, { folders: d.folders, prompts: d.prompts.map((p) => (set.has(p.id) ? { ...p, ...fn(p), modifiedAt: now } : p)) }, ids),
+      );
+    },
+    [commitLocal],
+  );
+
+  const movePrompts = useCallback(
+    (ids: string[], folderId: string | null) => mutateMany(ids, () => ({ folderId, updatedAt: Date.now() })),
+    [mutateMany],
+  );
+  const tagPrompts = useCallback(
+    (ids: string[], tag: string) => {
+      const t = normalizeTag(tag);
+      if (t) mutateMany(ids, (p) => (p.tags.includes(t) ? {} : { tags: [...p.tags, t], updatedAt: Date.now() }));
+    },
+    [mutateMany],
+  );
+  const setPinned = useCallback((ids: string[], pinned: boolean) => mutateMany(ids, () => ({ pinned })), [mutateMany]);
+  const deletePrompts = useCallback((ids: string[]) => mutateMany(ids, () => ({ deletedAt: Date.now() })), [mutateMany]);
+  const restorePrompts = useCallback((ids: string[]) => mutateMany(ids, () => ({ deletedAt: null })), [mutateMany]);
 
   const recordCopy = useCallback(
     (id: string) => mutatePrompt(id, (p) => ({ copyCount: p.copyCount + 1, lastCopiedAt: Date.now() })),
@@ -409,6 +443,11 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       removeImage,
       deletePrompt,
       restorePrompt,
+      movePrompts,
+      tagPrompts,
+      setPinned,
+      deletePrompts,
+      restorePrompts,
       purgePrompt,
       emptyTrash: () => purge(trash.map((p) => p.id)),
       duplicatePrompt: (id) => {
@@ -437,6 +476,11 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     removeImage,
     deletePrompt,
     restorePrompt,
+    movePrompts,
+    tagPrompts,
+    setPinned,
+    deletePrompts,
+    restorePrompts,
     purgePrompt,
     purge,
     togglePin,

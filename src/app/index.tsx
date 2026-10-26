@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { BackHandler, FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
@@ -11,6 +11,7 @@ import { Avatar } from '@/components/Avatar';
 import { BrandTitle, HeartMark } from '@/components/BrandTitle';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
+import { TagSheet } from '@/components/TagSheet';
 import { TipCard } from '@/components/TipCard';
 import { useToast } from '@/components/Toast';
 import { aiAppForFolder } from '@/lib/ai';
@@ -61,7 +62,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { settings, update } = useSettings();
-  const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt } = usePromptStore();
+  const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt, movePrompts, tagPrompts, setPinned, deletePrompts, restorePrompts } =
+    usePromptStore();
   const copy = useCopyPrompt();
   const { status: syncStatus } = useSync();
   const profile = useProfile();
@@ -82,6 +84,11 @@ export default function HomeScreen() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>({ kind: 'all' });
   const [menuFor, setMenuFor] = useState<Prompt | null>(null);
+  // Multi-select: null when off, otherwise the selected prompt ids.
+  const [selected, setSelected] = useState<string[] | null>(null);
+  const [bulkSheet, setBulkSheet] = useState<'move' | 'tag' | null>(null);
+  const selecting = selected !== null;
+  const count = selected?.length ?? 0;
   const grid = settings.layout === 'grid';
 
   const visible = useMemo(() => {
@@ -104,6 +111,41 @@ export default function HomeScreen() {
   }, [prompts, query, filter, settings.sort]);
 
   const openPrompt = useCallback((p: Prompt) => router.push({ pathname: '/prompt/[id]', params: { id: p.id } }), []);
+
+  const toggleSelected = useCallback(
+    (p: Prompt) => setSelected((cur) => (cur ? (cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id]) : [p.id])),
+    [],
+  );
+  const exitSelect = useCallback(() => {
+    setSelected(null);
+    setBulkSheet(null);
+  }, []);
+  const allVisibleSelected = count > 0 && visible.every((p) => selected?.includes(p.id));
+
+  // Android back button leaves select mode instead of the app.
+  useEffect(() => {
+    if (!selecting) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      exitSelect();
+      return true;
+    });
+    return () => sub.remove();
+  }, [selecting, exitSelect]);
+
+  const plural = (n: number) => `${n} prompt${n === 1 ? '' : 's'}`;
+  const bulkDelete = () => {
+    const ids = selected ?? [];
+    deletePrompts(ids);
+    exitSelect();
+    toast(`Moved ${plural(ids.length)} to Trash`, { label: 'Undo', onPress: () => restorePrompts(ids) });
+  };
+  const selectedPrompts = prompts.filter((p) => selected?.includes(p.id));
+  const allPinned = selectedPrompts.length > 0 && selectedPrompts.every((p) => p.pinned);
+  const moveTo = (folderId: string | null, name: string) => {
+    movePrompts(selected ?? [], folderId);
+    toast(`Moved ${plural(count)} to ${name}`);
+    exitSelect();
+  };
 
   const remove = (p: Prompt) => {
     deletePrompt(p.id);
@@ -129,7 +171,22 @@ export default function HomeScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
-        <View style={styles.titleRow}>
+        {selecting && (
+          <View style={styles.selectHeader}>
+            <Pressable onPress={exitSelect} hitSlop={8} accessibilityLabel="Done selecting" style={styles.selectClose}>
+              <Ionicons name="close" size={24} color={theme.text} />
+            </Pressable>
+            <Text style={[styles.selectCount, { color: theme.text }]}>{count === 0 ? 'Select prompts' : `${count} selected`}</Text>
+            <Pressable
+              onPress={() => setSelected(allVisibleSelected ? [] : visible.map((p) => p.id))}
+              hitSlop={8}
+              accessibilityLabel={allVisibleSelected ? 'Select none' : 'Select all'}
+            >
+              <Text style={[styles.selectAll, { color: theme.accent }]}>{allVisibleSelected ? 'None' : 'Select all'}</Text>
+            </Pressable>
+          </View>
+        )}
+        <View style={[styles.titleRow, selecting && styles.hidden]}>
           <View style={styles.titleBlock}>
             <BrandTitle theme={theme} />
             <Text style={[styles.hello, { color: theme.text }]} numberOfLines={1}>
@@ -228,6 +285,16 @@ export default function HomeScreen() {
         </Pressable>
         <View style={styles.toolbarRight}>
           <Pressable
+            onPress={() => (selecting ? exitSelect() : setSelected([]))}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityLabel={selecting ? 'Done selecting' : 'Select prompts'}
+            style={styles.selectBtn}
+          >
+            <Ionicons name={selecting ? 'checkmark-done' : 'checkbox-outline'} size={16} color={selecting ? theme.accent : theme.textMuted} />
+            <Text style={[styles.toolbarText, { color: selecting ? theme.accent : theme.textMuted }]}>{selecting ? 'Done' : 'Select'}</Text>
+          </Pressable>
+          <Pressable
             onPress={() => router.push('/categories')}
             accessibilityRole="button"
             accessibilityLabel="Manage categories"
@@ -279,9 +346,11 @@ export default function HomeScreen() {
             showTokens={settings.showTokens && !grid}
             launchApp={launchAppFor(item.folderId)}
             onLaunch={launch}
-            onOpen={openPrompt}
+            selecting={selecting}
+            selected={!!selected?.includes(item.id)}
+            onOpen={selecting ? toggleSelected : openPrompt}
             onCopy={copy}
-            onLongPress={setMenuFor}
+            onLongPress={selecting ? toggleSelected : setMenuFor}
           />
         )}
         ListEmptyComponent={
@@ -303,6 +372,7 @@ export default function HomeScreen() {
         }
       />
 
+      {!selecting && (
       <Pressable
         accessibilityLabel="New prompt"
         onPress={() => {
@@ -316,6 +386,47 @@ export default function HomeScreen() {
       >
         <Ionicons name="add" size={30} color={theme.accentText} />
       </Pressable>
+      )}
+
+      {selecting && (
+        <View style={[styles.bulkBar, { backgroundColor: theme.elevated, borderColor: theme.border, bottom: insets.bottom + 16 }]}>
+          <BulkButton theme={theme} icon="folder-outline" label="Move" disabled={count === 0} onPress={() => setBulkSheet('move')} />
+          <BulkButton theme={theme} icon="pricetag-outline" label="Tag" disabled={count === 0} onPress={() => setBulkSheet('tag')} />
+          <BulkButton
+            theme={theme}
+            icon={allPinned ? 'pin' : 'pin-outline'}
+            label={allPinned ? 'Unpin' : 'Pin'}
+            disabled={count === 0}
+            onPress={() => {
+              setPinned(selected ?? [], !allPinned);
+              toast(`${allPinned ? 'Unpinned' : 'Pinned'} ${plural(count)}`);
+            }}
+          />
+          <BulkButton theme={theme} icon="trash-outline" label="Delete" danger disabled={count === 0} onPress={bulkDelete} />
+        </View>
+      )}
+
+      <ActionSheet
+        visible={bulkSheet === 'move'}
+        title={`Move ${plural(count)} to…`}
+        onClose={() => setBulkSheet(null)}
+        actions={[
+          { label: 'No category', onPress: () => moveTo(null, 'No category') },
+          ...folders.map((f) => ({ label: f.name, onPress: () => moveTo(f.id, f.name) })),
+        ]}
+      />
+
+      <TagSheet
+        visible={bulkSheet === 'tag'}
+        title={`Tag ${plural(count)}`}
+        existingTags={allTags}
+        onClose={() => setBulkSheet(null)}
+        onAdd={(t) => {
+          tagPrompts(selected ?? [], t);
+          toast(`Tagged ${plural(count)} with #${t}`);
+          exitSelect();
+        }}
+      />
 
       <ActionSheet
         visible={menuFor !== null}
@@ -327,6 +438,7 @@ export default function HomeScreen() {
                 { label: 'Copy', onPress: () => copy(menuFor) },
                 ...aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(menuFor, { openIn: a }) })),
                 { label: menuFor.pinned ? 'Unpin' : 'Pin to top', onPress: () => togglePin(menuFor.id) },
+                { label: 'Select multiple…', onPress: () => setSelected([menuFor.id]) },
                 { label: 'Duplicate', onPress: () => duplicatePrompt(menuFor.id) },
                 { label: 'Move to Trash', destructive: true, onPress: () => remove(menuFor) },
               ]
@@ -334,6 +446,29 @@ export default function HomeScreen() {
         }
       />
     </View>
+  );
+}
+
+function BulkButton({ theme, icon, label, onPress, disabled, danger }: {
+  theme: ReturnType<typeof useTheme>;
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  const color = danger ? theme.danger : theme.text;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={`${label} selected prompts`}
+      style={({ pressed }) => [styles.bulkBtn, { opacity: disabled ? 0.4 : pressed ? 0.6 : 1 }]}
+    >
+      <Ionicons name={icon} size={22} color={color} />
+      <Text style={[styles.bulkText, { color }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -374,6 +509,29 @@ const styles = StyleSheet.create({
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
   sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },
+  hidden: { display: 'none' },
+  selectHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56 },
+  selectClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  selectCount: { flex: 1, fontSize: 20, fontWeight: '800' },
+  selectAll: { fontSize: 15, fontWeight: '700' },
+  selectBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  bulkBar: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  bulkBtn: { alignItems: 'center', gap: 2, paddingHorizontal: 12, paddingVertical: 4 },
+  bulkText: { fontSize: 12, fontWeight: '700' },
   toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 30, borderRadius: 10 },
   manageText: { fontSize: 13, fontWeight: '700' },

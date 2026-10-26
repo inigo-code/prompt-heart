@@ -9,11 +9,13 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { ToastProvider } from '@/components/Toast';
+import { UpdatePrompt } from '@/components/UpdatePrompt';
 import { useTheme } from '@/lib/theme';
 import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
 import { ProfileProvider } from '@/profile/ProfileProvider';
 import { SettingsProvider } from '@/settings/SettingsProvider';
+import { HistoryProvider } from '@/store/HistoryProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 
@@ -35,11 +37,13 @@ export default function RootLayout() {
         <PromptStoreProvider>
           <SyncProvider>
             <ProfileProvider>
+            <HistoryProvider>
             <ToastProvider>
               <CopyPromptProvider>
                 <Navigator />
               </CopyPromptProvider>
             </ToastProvider>
+            </HistoryProvider>
             </ProfileProvider>
           </SyncProvider>
         </PromptStoreProvider>
@@ -63,6 +67,7 @@ function Navigator() {
   return (
     <>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />
+      <UpdatePrompt />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: theme.bg },
@@ -77,6 +82,7 @@ function Navigator() {
         <Stack.Screen name="categories" options={{ title: 'Categories', presentation: 'modal' }} />
         <Stack.Screen name="account" options={{ title: 'Cloud sync' }} />
         <Stack.Screen name="profile" options={{ title: 'Profile' }} />
+        <Stack.Screen name="history/[id]" options={{ title: 'Version history' }} />
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="about" options={{ title: 'About' }} />
         <Stack.Screen name="trash" options={{ title: 'Trash' }} />

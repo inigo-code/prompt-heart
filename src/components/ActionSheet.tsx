@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/lib/theme';
@@ -25,10 +25,11 @@ export function ActionSheet({ visible, title, actions, onClose }: Props) {
           onStartShouldSetResponder={() => true}
         >
           {title && (
-            <Text style={[styles.title, { color: theme.textMuted }]} numberOfLines={1}>
+            <Text style={[styles.title, { color: theme.textMuted }]} numberOfLines={3}>
               {title}
             </Text>
           )}
+          <ScrollView style={styles.list} bounces={false}>
           {actions.map((a) => (
             <Pressable
               key={a.label}
@@ -41,6 +42,7 @@ export function ActionSheet({ visible, title, actions, onClose }: Props) {
               <Text style={[styles.rowText, { color: a.destructive ? theme.danger : theme.text }]}>{a.label}</Text>
             </Pressable>
           ))}
+          </ScrollView>
           <Pressable onPress={onClose} style={[styles.row, styles.cancel, { borderTopColor: theme.border }]}>
             <Text style={[styles.rowText, { color: theme.textMuted }]}>Cancel</Text>
           </Pressable>
@@ -53,6 +55,7 @@ export function ActionSheet({ visible, title, actions, onClose }: Props) {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingTop: 12, paddingHorizontal: 8 },
+  list: { maxHeight: 420 },
   title: { fontSize: 13, fontWeight: '600', textAlign: 'center', paddingVertical: 8, paddingHorizontal: 16 },
   row: { paddingVertical: 15, paddingHorizontal: 16, borderRadius: 12 },
   rowText: { fontSize: 16, fontWeight: '600', textAlign: 'center' },

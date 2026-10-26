@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,12 +16,28 @@ import { useTheme } from '@/lib/theme';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
+import { useHistory } from '@/store/HistoryProvider';
 import { normalizeTag, usePromptStore } from '@/store/PromptStore';
 import type { PromptDraft } from '@/store/types';
 
 type TextDraft = Omit<PromptDraft, 'images'>;
 
-export default function PromptEditor() {
+// Wait for saved data before setting up the editor, so a cold start straight into a prompt
+// (deep link or restored route) doesn't begin from an empty draft and overwrite the text.
+export default function PromptEditorScreen() {
+  const { ready } = usePromptStore();
+  const theme = useTheme();
+  if (!ready) {
+    return (
+      <View style={[styles.missing, { backgroundColor: theme.bg }]}>
+        <ActivityIndicator color={theme.textMuted} />
+      </View>
+    );
+  }
+  return <PromptEditor />;
+}
+
+function PromptEditor() {
   const params = useLocalSearchParams<{ id: string; folderId?: string }>();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -29,6 +45,9 @@ export default function PromptEditor() {
   const { settings } = useSettings();
   const store = usePromptStore();
   const copy = useCopyPrompt();
+  const history = useHistory();
+  // One version is saved per editing session, right before the first change to the text.
+  const snapped = useRef(false);
   const aiApps = useEnabledAiApps();
   const folders = useVisibleFolders();
 
@@ -54,6 +73,10 @@ export default function PromptEditor() {
   const launchApp = useLaunchApp(draft.folderId);
 
   const change = (patch: Partial<TextDraft>) => {
+    if (id && !snapped.current && (patch.title !== undefined || patch.body !== undefined)) {
+      history.snapshot(id);
+      snapped.current = true;
+    }
     const next = { ...draft, ...patch };
     setDraft(next);
     if (id) store.updatePrompt(id, patch);
@@ -72,6 +95,16 @@ export default function PromptEditor() {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
+  );
+
+  const getSnapshot = store.sync.getSnapshot;
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) return;
+      const p = getSnapshot().prompts.find((x) => x.id === id);
+      if (p) setDraft((d) => (d.title === p.title && d.body === p.body ? d : { ...d, title: p.title, body: p.body }));
+      snapped.current = false;
+    }, [id, getSnapshot]),
   );
 
   const addTags = (raw: string[]) => {
@@ -283,6 +316,10 @@ export default function PromptEditor() {
         onClose={() => setMenuOpen(false)}
         actions={[
           ...(prompt ? aiApps.map((a) => ({ label: `Copy & open in ${a.label}`, onPress: () => copy(prompt, { openIn: a }) })) : []),
+          {
+            label: `Version history${id && history.versionsFor(id).length ? ` (${history.versionsFor(id).length})` : ''}`,
+            onPress: () => id && router.push({ pathname: '/history/[id]', params: { id } }),
+          },
           {
             label: 'Duplicate',
             onPress: () => {

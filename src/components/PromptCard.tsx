@@ -19,6 +19,9 @@ type Props = {
   /** Set for prompts in an AI app's category: shows a button that copies and opens that app. */
   launchApp?: AiApp;
   onLaunch?: (prompt: Prompt, app: AiApp) => void;
+  /** Multi-select mode: taps select instead of opening, and copy/launch buttons are hidden. */
+  selecting?: boolean;
+  selected?: boolean;
   onOpen: (prompt: Prompt) => void;
   onCopy: (prompt: Prompt) => void;
   onLongPress: (prompt: Prompt) => void;
@@ -33,6 +36,8 @@ export const PromptCard = memo(function PromptCard({
   showTokens,
   launchApp,
   onLaunch,
+  selecting = false,
+  selected = false,
   onOpen,
   onCopy,
   onLongPress,
@@ -51,7 +56,8 @@ export const PromptCard = memo(function PromptCard({
         grid && styles.gridCard,
         {
           backgroundColor: prompt.pinned ? theme.cardPinned : theme.card,
-          borderColor: prompt.pinned ? theme.accent + '55' : theme.border,
+          borderColor: selected ? theme.accent : prompt.pinned ? theme.accent + '55' : theme.border,
+          borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
           transform: [{ scale: pressed ? 0.985 : 1 }],
         },
       ]}
@@ -76,6 +82,14 @@ export const PromptCard = memo(function PromptCard({
             {prompt.title || 'Untitled'}
           </Text>
         </View>
+        {selecting ? (
+          <View
+            accessibilityLabel={selected ? 'Selected' : 'Not selected'}
+            style={[styles.check, { borderColor: selected ? theme.accent : theme.textMuted, backgroundColor: selected ? theme.accent : 'transparent' }]}
+          >
+            {selected && <Ionicons name="checkmark" size={18} color={theme.accentText} />}
+          </View>
+        ) : (
         <Pressable
           onPress={() => onCopy(prompt)}
           hitSlop={10}
@@ -85,6 +99,7 @@ export const PromptCard = memo(function PromptCard({
         >
           <Ionicons name="copy-outline" size={17} color={theme.text} />
         </Pressable>
+        )}
       </View>
 
       {!!prompt.body && (
@@ -118,7 +133,7 @@ export const PromptCard = memo(function PromptCard({
         )}
       </View>
 
-      {launchApp && onLaunch && (
+      {launchApp && onLaunch && !selecting && (
         <Pressable
           onPress={() => onLaunch(prompt, launchApp)}
           accessibilityRole="button"
@@ -159,6 +174,7 @@ const styles = StyleSheet.create({
   titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', minHeight: 34 },
   pin: { marginRight: 5 },
   title: { flex: 1, fontSize: 16, fontWeight: '700', letterSpacing: -0.2 },
+  check: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center', justifyContent: 'center', margin: 3 },
   launchBtn: {
     flexDirection: 'row',
     alignItems: 'center',
