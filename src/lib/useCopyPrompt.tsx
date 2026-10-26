@@ -2,11 +2,12 @@ import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 import { FillTemplateSheet } from '@/components/FillTemplateSheet';
 import { useToast } from '@/components/Toast';
 import type { AiApp } from '@/lib/ai';
+import { openAiApp } from '@/lib/launch';
 import { extractDefaults, extractVariables } from '@/lib/templates';
 import { useSettings } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
@@ -38,8 +39,9 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
       recordCopy(prompt.id);
       const app = options?.openIn;
       if (app) {
-        toast(app.prefills ? `Copied — opening ${app.label}` : `Copied — paste it in ${app.label}`);
-        Linking.openURL(app.url(text)).catch(() => toast(`Couldn't open ${app.label}`));
+        openAiApp(app, text)
+          .then((how) => toast(how === 'app-prefilled' ? `Copied — opening ${app.label}` : `Copied — paste it in ${app.label}`))
+          .catch(() => toast(`Couldn't open ${app.label}`));
       } else {
         toast('Copied to clipboard');
       }

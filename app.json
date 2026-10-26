@@ -67,7 +67,8 @@
           "cameraPermission": false,
           "microphonePermission": false
         }
-      ]
+      ],
+      "./plugins/withAiAppQueries"
     ],
     "scheme": "promptnotes",
     "experiments": {

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { BackHandler, FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { BackHandler, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
@@ -19,6 +19,7 @@ import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { greeting, useHour } from '@/lib/greeting';
 import { useTheme } from '@/lib/theme';
+import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useProfile } from '@/profile/ProfileProvider';
@@ -239,7 +240,7 @@ export default function HomeScreen() {
           {aiApps.map((app) => (
             <Pressable
               key={app.key}
-              onPress={() => Linking.openURL(app.home).catch(() => toast(`Couldn't open ${app.label}`))}
+              onPress={() => openAiApp(app).catch(() => toast(`Couldn't open ${app.label}`))}
               accessibilityLabel={`Open ${app.label}`}
               style={({ pressed }) => [styles.aiPill, { backgroundColor: theme.card, borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
             >
