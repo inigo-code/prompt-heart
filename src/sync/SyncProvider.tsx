@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
+import { createAutoSync } from './autoSync';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
 import type { FolderRow, PromptRow } from './rows';
 import { supabase } from './supabase';
@@ -153,6 +154,21 @@ async function pullTable<R extends { server_updated_at?: string }>(
   }
 }
 
+/** Local changes or image work that haven't reached the cloud yet. */
+function hasUnsentChanges(store: SyncStoreApi) {
+  const s = store.getSnapshot().sync;
+  return s.pendingPrompts.length + s.pendingFolders.length + s.pendingImageUploads.length + s.pendingImageDeletes.length > 0;
+}
+
+/** True when a live change carries a version this phone already has (or a newer one), such as our own upload. */
+function alreadyHave(store: SyncStoreApi, table: 'prompts' | 'folders', row: unknown) {
+  const r = row as { id?: unknown; modified_at?: unknown } | null | undefined;
+  if (typeof r?.id !== 'string' || r.modified_at == null) return false;
+  const d = store.getSnapshot();
+  const local = (table === 'prompts' ? d.prompts : d.folders).find((x) => x.id === r.id);
+  return local !== undefined && Number(r.modified_at) <= local.modifiedAt;
+}
+
 async function pull(client: SupabaseClient, userId: string, store: SyncStoreApi) {
   const cursor = store.getSnapshot().sync.lastPulledAt;
   const since = cursor ? new Date(Date.parse(cursor) - PULL_OVERLAP_MS).toISOString() : null;
@@ -191,6 +207,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   });
   const running = useRef(false);
   const again = useRef(false);
+  // Automatic syncs go through the cooldown; manual ones (syncNow) call runSync directly.
+  const runSyncRef = useRef<() => Promise<void>>(async () => {});
+  const [autoSync] = useState(() => createAutoSync(() => void runSyncRef.current()));
 
   useEffect(() => {
     if (!supabase) return;
@@ -210,6 +229,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       return;
     }
     running.current = true;
+    autoSync.started();
     setState((s) => ({ ...s, status: 'syncing' }));
     try {
       do {
@@ -229,49 +249,58 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, status: 'error', error: message }));
     } finally {
       running.current = false;
+      autoSync.finished();
     }
-  }, [userId]);
+  }, [userId, autoSync]);
 
-  // On sign-in, and shortly after each local edit.
+  useEffect(() => {
+    runSyncRef.current = runSync;
+  }, [runSync]);
+
+  // Nothing automatic while signed out, or after unmounting.
+  useEffect(() => {
+    if (!active) autoSync.cancel();
+  }, [active, autoSync]);
+  useEffect(() => () => autoSync.cancel(), [autoSync]);
+
+  // On sign-in, and after local edits (including copies), at most once per cooldown.
+  useEffect(() => {
+    if (active) autoSync.request(localRevision === 0 ? 0 : LOCAL_DEBOUNCE_MS);
+  }, [active, localRevision, autoSync]);
+
+  // Coming back to the app syncs (after the cooldown); leaving it uploads anything unsent right
+  // away, so your other devices see the change.
   useEffect(() => {
     if (!active) return;
-    const t = setTimeout(() => void runSync(), localRevision === 0 ? 0 : LOCAL_DEBOUNCE_MS);
-    return () => clearTimeout(t);
-  }, [active, localRevision, runSync]);
-
-  // When the app comes back to the foreground.
-  useEffect(() => {
-    if (!active) return;
-    const sub = AppState.addEventListener('change', (s) => s === 'active' && void runSync());
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') autoSync.request();
+      else if (s === 'background' && hasUnsentChanges(storeRef.current)) void runSync();
+    });
     return () => sub.remove();
-  }, [active, runSync]);
+  }, [active, autoSync, runSync]);
 
-  // Live updates from other devices.
+  // Live updates from other devices. Changes this phone already has (including our own upload
+  // coming back) are ignored, so they don't cause a second sync.
   useEffect(() => {
     if (!active || !supabase || !userId) return;
     const client = supabase;
-    let t: ReturnType<typeof setTimeout> | null = null;
-    const onChange = () => {
-      if (t) clearTimeout(t);
-      t = setTimeout(() => void runSync(), 400);
+    const onChange = (table: 'prompts' | 'folders') => (payload: { new?: unknown }) => {
+      if (!alreadyHave(storeRef.current, table, payload.new)) autoSync.request(400);
     };
     const channel = client
       .channel(`sync-${userId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'prompts', filter: `user_id=eq.${userId}` }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'folders', filter: `user_id=eq.${userId}` }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'prompts', filter: `user_id=eq.${userId}` }, onChange('prompts'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'folders', filter: `user_id=eq.${userId}` }, onChange('folders'))
       .subscribe();
     return () => {
-      if (t) clearTimeout(t);
       client.removeChannel(channel);
     };
-  }, [active, userId, runSync]);
+  }, [active, userId, autoSync]);
 
   // Retry after a failure (offline, server hiccup).
   useEffect(() => {
-    if (!active || state.status !== 'error') return;
-    const t = setTimeout(() => void runSync(), RETRY_MS);
-    return () => clearTimeout(t);
-  }, [active, state.status, runSync]);
+    if (active && state.status === 'error') autoSync.request(RETRY_MS);
+  }, [active, state.status, autoSync]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     if (!supabase) throw new Error('Cloud sync is not configured.');
