@@ -21,6 +21,7 @@ export type PromptRow = {
   folder_id: string | null;
   tags: string[];
   pinned: boolean;
+  images: string[];
   copy_count: number;
   created_at: number;
   updated_at: number;
@@ -61,6 +62,7 @@ export const promptToRow = (p: Prompt, userId: string): PromptRow => ({
   folder_id: p.folderId,
   tags: p.tags,
   pinned: p.pinned,
+  images: p.images,
   copy_count: p.copyCount,
   created_at: p.createdAt,
   updated_at: p.updatedAt,
@@ -76,6 +78,7 @@ export const rowToPrompt = (r: PromptRow): Prompt => ({
   folderId: r.folder_id,
   tags: r.tags ?? [],
   pinned: r.pinned,
+  images: r.images ?? [],
   copyCount: r.copy_count,
   createdAt: num(r.created_at),
   updatedAt: num(r.updated_at),

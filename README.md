@@ -1,31 +1,43 @@
-# Prompt Notes
+# Cuebox
 
-A notes-style mobile app for saving AI prompts and copying them with one tap. Built with Expo (SDK 58), Expo Router and TypeScript. Runs on iOS, Android and web.
+*Your AI prompts, one tap away.* A notes-style app for saving AI prompts and copying them with one tap. Built with Expo (SDK 58), Expo Router and TypeScript. Runs on Android, iOS and web. (Formerly "Prompt Notes".)
 
-## Run it
+## Install
+
+Download the latest Android APK from this repo's **Releases** page, or from the EAS build page. Installed builds update themselves over the air for code-only changes.
+
+## Run it locally
 
 ```bash
 npm install
 npx expo start
 ```
 
-Scan the QR code with **Expo Go** on your phone, or press `w` for the web version, `a` for an Android emulator.
+Press `w` for web, or scan the QR code with Expo Go. Saving from other apps and image attachments need a real build: Expo Go and web don't include those native modules.
 
-## What's in v1
+## Features
 
-- **Home screen**: note cards with a **copy button on every card**. Copying gives haptic feedback and shows a "Copied" toast.
-- **Template variables**: write `{{code}}` or `{{target audience}}` in a prompt. When you copy it, a sheet asks for each value and shows a live preview, then copies the filled-in text. "Copy as-is" copies the raw template instead. Any blanks you leave stay as `{{name}}`. The app remembers the last values you used for each prompt until it's closed.
-- **Notes-style editor**: title and body, autosaves as you type. A new note that's left empty is discarded. It also lists the variables it found in the prompt.
-- **Categories**: each prompt belongs to one category, which has a colour. You can create, rename, recolour and delete them. Deleting a category keeps its prompts.
-- **Tags**: group prompts across categories (`#email`, `#review`). Type a comma or space to finish a tag.
-- **Filter chips**: All, Pinned, each category and each tag.
-- **Search**: across titles, bodies and `#tags`.
-- **Pin to top**, **duplicate** and **delete**, from a long-press on a card or the editor's ⋯ menu.
-- **Sort**: recent or most-copied.
-- **Copy stats**: counts how many times each prompt was copied.
-- **Light and dark mode** that follow the system setting.
-- **Offline-first**: data is stored on the device (AsyncStorage).
-- **Cloud sync (Supabase)**: sign in with email and password to keep prompts in sync across devices. Changes upload about 1.5 s after you edit and show up live on your other devices. The app works fully offline and catches up when you're back online. See [Set up cloud sync](#set-up-cloud-sync).
+**Prompts**
+- **One-tap copy**: every card has a copy button. Only the text is copied, never attached images.
+- **Templates**: `{{placeholders}}` open a fill-in sheet with a live preview before copying. `{{tone|friendly}}` sets a default. The app remembers the last values you used.
+- **Copy & open in ChatGPT, Claude, Perplexity or Gemini**: copies the prompt and opens the app, prefilled where supported.
+- **Image attachments**: attach reference screenshots or photos. They're resized, stored on the device and synced to private cloud storage.
+- **Notes-style editor**: autosaves, with categories, tags, pin, word count and a token estimate.
+
+**Organising**
+- **Categories** with colours, **#tags**, **pins**, **search**, and a **Recently copied** filter.
+- **List or grid** home layout. Sort by recent, most copied or A–Z.
+- **Trash**: deleted prompts stay for 30 days, with Undo and Restore.
+
+**Capture and backup**
+- **Save from other apps**: use Share → Cuebox from Chrome, ChatGPT, Photos or anywhere else to save text, links or images as a prompt (Android).
+- **Export / import**: a JSON backup that includes images, plus a readable Markdown export. Importing merges and never deletes.
+
+**App**
+- **Settings**: theme (System, Light or Dark), five accent colours, layout, preview length, vibrate on copy, token estimates.
+- **Cloud sync** across devices (Supabase). Works offline and updates live.
+- **Over-the-air updates**, plus a Check for updates button in About.
+- **About** screen with version and developer info.
 
 ## Set up cloud sync
 
@@ -124,3 +136,15 @@ All data access goes through `usePromptStore()`. The sync engine (`src/sync/`) s
 1. Set the app icon and splash screen in `app.json` and `assets/`.
 2. `npx eas-cli@latest build --profile preview` builds an installable APK or iOS build.
 3. `npx eas-cli@latest submit` submits to the App Store and Play Store.
+
+## Releasing
+
+- **Code-only changes** (screens, logic, styles) can go out over the air, with no reinstall needed:
+  ```bash
+  npx eas-cli@latest update --channel preview --environment preview --message "What changed"
+  ```
+- **Native changes** (new native modules or app.json plugins) need a new build. The `fingerprint` runtime policy makes sure old builds never receive an update they can't run.
+  ```bash
+  npx eas-cli@latest build --platform android --profile preview
+  ```
+  Then attach the APK to a GitHub release: `gh release create vX.Y.Z cuebox-X.Y.Z.apk`.

@@ -1,41 +1,72 @@
 import { useColorScheme } from 'react-native';
 
+import { useSettings } from '@/settings/SettingsProvider';
+import type { AccentKey } from '@/settings/SettingsProvider';
+
 const light = {
-  bg: '#F7F5F0',
+  dark: false,
+  bg: '#F6F4EF',
   card: '#FFFFFF',
-  cardPinned: '#FFF8E6',
-  text: '#1D1B18',
-  textMuted: '#77716A',
-  border: '#E6E1D8',
-  accent: '#E0A422',
-  accentText: '#1D1B18',
+  cardPinned: '#FFF8E8',
+  elevated: '#FFFFFF',
+  text: '#1C1A17',
+  textMuted: '#76706A',
+  border: '#E5E0D7',
+  accent: '#D99A1E',
+  accentText: '#1C1A17',
+  accentSoft: '#F7E7C4',
   chip: '#ECE8E0',
-  chipActive: '#1D1B18',
+  chipActive: '#1C1A17',
   chipActiveText: '#FFFFFF',
-  danger: '#D64545',
-  toast: '#1D1B18',
+  danger: '#D14343',
+  toast: '#1C1A17',
   toastText: '#FFFFFF',
+  overlay: 'rgba(0,0,0,0.35)',
 };
 
 const dark: typeof light = {
-  bg: '#141311',
-  card: '#1F1D1A',
-  cardPinned: '#2A2415',
+  dark: true,
+  bg: '#121110',
+  card: '#1C1B19',
+  cardPinned: '#272217',
+  elevated: '#232220',
   text: '#F2EFEA',
-  textMuted: '#9A948C',
-  border: '#2E2B27',
+  textMuted: '#9C968E',
+  border: '#2D2A26',
   accent: '#F2B84B',
-  accentText: '#141311',
-  chip: '#2A2724',
+  accentText: '#121110',
+  accentSoft: '#3A2F17',
+  chip: '#272522',
   chipActive: '#F2EFEA',
-  chipActiveText: '#141311',
+  chipActiveText: '#121110',
   danger: '#F06A6A',
   toast: '#F2EFEA',
-  toastText: '#141311',
+  toastText: '#121110',
+  overlay: 'rgba(0,0,0,0.55)',
 };
 
 export type Theme = typeof light;
 
+type AccentSpec = { label: string; light: [string, string, string]; dark: [string, string, string] };
+
+// [accent, text on accent, soft tint] for each scheme.
+export const ACCENTS: Record<AccentKey, AccentSpec> = {
+  amber: { label: 'Amber', light: ['#D99A1E', '#1C1A17', '#F7E7C4'], dark: ['#F2B84B', '#121110', '#3A2F17'] },
+  blue: { label: 'Blue', light: ['#3467D6', '#FFFFFF', '#DCE6FA'], dark: ['#7AA2FF', '#0E1424', '#1B2640'] },
+  green: { label: 'Green', light: ['#258A5C', '#FFFFFF', '#D5EFE2'], dark: ['#52C98F', '#0C1A13', '#163327'] },
+  rose: { label: 'Rose', light: ['#C93D70', '#FFFFFF', '#F7DCE6'], dark: ['#F27CA5', '#22101A', '#3A1B28'] },
+  violet: { label: 'Violet', light: ['#6E52D9', '#FFFFFF', '#E5DFFA'], dark: ['#A693FF', '#16112B', '#29224A'] },
+};
+
+export function buildTheme(isDark: boolean, accent: AccentKey): Theme {
+  const base = isDark ? dark : light;
+  const [a, aText, aSoft] = ACCENTS[accent][isDark ? 'dark' : 'light'];
+  return { ...base, accent: a, accentText: aText, accentSoft: aSoft, cardPinned: isDark ? aSoft : `${aSoft}99` };
+}
+
 export function useTheme(): Theme {
-  return useColorScheme() === 'dark' ? dark : light;
+  const system = useColorScheme();
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'system' ? system === 'dark' : settings.themeMode === 'dark';
+  return buildTheme(isDark, settings.accent);
 }

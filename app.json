@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Prompt Notes",
+    "name": "Cuebox",
     "slug": "prompt-notes",
     "owner": "inigojo",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,7 @@
     "android": {
       "package": "com.inigocode.promptnotes",
       "adaptiveIcon": {
-        "backgroundColor": "#1D1B18",
+        "backgroundColor": "#121110",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -31,10 +31,32 @@
         {
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
-          "backgroundColor": "#1D1B18"
+          "backgroundColor": "#121110"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-sharing",
+      [
+        "expo-share-intent",
+        {
+          "androidIntentFilters": [
+            "text/*",
+            "image/*"
+          ],
+          "androidMultiIntentFilters": [
+            "image/*"
+          ]
+        }
+      ],
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cuebox uses your photos so you can attach reference images to prompts.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "scheme": "promptnotes",
     "experiments": {

@@ -1,4 +1,4 @@
--- Prompt Notes: cloud sync schema.
+-- Cuebox (formerly Prompt Notes): cloud sync schema.
 -- Paste into Supabase Dashboard -> SQL Editor -> New query, then Run. Safe to run more than once.
 --
 -- Sync model:
@@ -91,3 +91,28 @@ begin
   end if;
 end;
 $$;
+
+-- Image attachments (added later; safe to re-run).
+alter table public.prompts add column if not exists images text[] not null default '{}';
+
+-- Private bucket; files live at <user id>/<image id>.jpg and only their owner can reach them.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('prompt-images', 'prompt-images', false, 5242880, array['image/jpeg'])
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "own prompt images read" on storage.objects;
+create policy "own prompt images read" on storage.objects for select to authenticated
+  using (bucket_id = 'prompt-images' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "own prompt images insert" on storage.objects;
+create policy "own prompt images insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'prompt-images' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "own prompt images update" on storage.objects;
+create policy "own prompt images update" on storage.objects for update to authenticated
+  using (bucket_id = 'prompt-images' and (storage.foldername(name))[1] = (select auth.uid())::text)
+  with check (bucket_id = 'prompt-images' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "own prompt images delete" on storage.objects;
+create policy "own prompt images delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'prompt-images' and (storage.foldername(name))[1] = (select auth.uid())::text);

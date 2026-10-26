@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState } from 'react-native';
 
+import { deleteRemoteImages, downloadMissingImages, imagesSupported, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
 import { folderToRow, promptToRow, rowToFolder, rowToPrompt } from './rows';
@@ -24,6 +25,8 @@ type SyncContext = {
   lastSyncedAt: number | null;
   email: string | null;
   pendingCount: number;
+  /** Bumps when images finish downloading, so thumbnails can re-check for their files. */
+  imagesVersion: number;
   syncNow: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   /** Resolves to true when signed in straight away, false if Supabase wants the email confirmed first. */
@@ -59,6 +62,27 @@ async function push(client: SupabaseClient, userId: string, store: SyncStoreApi)
     folders: Object.fromEntries(folders.map((f) => [f.id, f.modifiedAt])),
     prompts: Object.fromEntries(prompts.map((p) => [p.id, p.modifiedAt])),
   });
+}
+
+/** Uploads new attachments before the prompt rows that reference them, and removes deleted ones. */
+async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi) {
+  if (!imagesSupported) return;
+  const { pendingImageUploads, pendingImageDeletes } = store.getSnapshot().sync;
+  const uploaded: string[] = [];
+  for (const id of pendingImageUploads) {
+    // A missing file can't be uploaded from here (another device has it); drop it from the queue.
+    await uploadImage(client, userId, id);
+    uploaded.push(id);
+  }
+  await deleteRemoteImages(client, userId, pendingImageDeletes);
+  store.markImagesSynced({ uploaded, deleted: pendingImageDeletes });
+}
+
+/** Fetches attachments referenced by prompts that this device doesn't have a file for yet. */
+async function pullImages(client: SupabaseClient, userId: string, store: SyncStoreApi): Promise<number> {
+  if (!imagesSupported) return 0;
+  const ids = [...new Set(store.getSnapshot().prompts.filter((p) => p.deletedAt === null || p.body || p.title).flatMap((p) => p.images))];
+  return downloadMissingImages(client, userId, ids);
 }
 
 async function pullTable<R extends { server_updated_at?: string }>(
@@ -103,6 +127,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     lastSyncedAt: null,
   });
 
+  const [imagesVersion, setImagesVersion] = useState(0);
   const userId = session?.user.id ?? null;
   // Sync only once the store has been switched over to this account.
   const active = ready && userId !== null && meta.userId === userId;
@@ -136,8 +161,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     try {
       do {
         again.current = false;
+        await pushImages(supabase, userId, storeRef.current);
         await push(supabase, userId, storeRef.current);
         await pull(supabase, userId, storeRef.current);
+        if ((await pullImages(supabase, userId, storeRef.current)) > 0) setImagesVersion((v) => v + 1);
       } while (again.current);
       setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
     } catch (e) {
@@ -214,13 +241,14 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       error: state.error,
       lastSyncedAt: state.lastSyncedAt,
       email: session?.user.email ?? null,
-      pendingCount: meta.pendingPrompts.length + meta.pendingFolders.length,
+      pendingCount: meta.pendingPrompts.length + meta.pendingFolders.length + meta.pendingImageUploads.length,
+      imagesVersion,
       syncNow: () => void runSync(),
       signIn,
       signUp,
       signOut,
     }),
-    [userId, session, state, meta, runSync, signIn, signUp, signOut],
+    [userId, session, state, meta, imagesVersion, runSync, signIn, signUp, signOut],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

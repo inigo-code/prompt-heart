@@ -5,6 +5,8 @@ export type Prompt = {
   folderId: string | null;
   tags: string[];
   pinned: boolean;
+  /** Attached image ids (files live in the images folder and in cloud storage). Never copied with the prompt. */
+  images: string[];
   copyCount: number;
   createdAt: number;
   /** Last content edit; drives the "recent" sort. */
@@ -12,7 +14,7 @@ export type Prompt = {
   lastCopiedAt: number | null;
   /** Last change of any kind; drives sync conflict resolution. */
   modifiedAt: number;
-  /** Soft delete, so the deletion can sync to other devices. */
+  /** Soft delete: the prompt sits in Trash, and the deletion can sync to other devices. */
   deletedAt: number | null;
 };
 
@@ -33,6 +35,9 @@ export type SyncMeta = {
   /** Ids changed locally that the server hasn't confirmed yet. */
   pendingPrompts: string[];
   pendingFolders: string[];
+  /** Image ids to upload to / remove from cloud storage. */
+  pendingImageUploads: string[];
+  pendingImageDeletes: string[];
 };
 
 export type StoreData = {
@@ -42,4 +47,4 @@ export type StoreData = {
   sync: SyncMeta;
 };
 
-export type PromptDraft = Pick<Prompt, 'title' | 'body' | 'folderId' | 'tags' | 'pinned'>;
+export type PromptDraft = Pick<Prompt, 'title' | 'body' | 'folderId' | 'tags' | 'pinned' | 'images'>;

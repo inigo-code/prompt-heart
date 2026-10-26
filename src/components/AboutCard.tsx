@@ -3,6 +3,7 @@ import * as Updates from 'expo-updates';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { APP_NAME } from '@/lib/app';
 import type { Theme } from '@/lib/theme';
 
 // Updates download on launch and apply on the next restart; this lets you check and apply one right away.
@@ -42,8 +43,8 @@ export function AboutCard({ theme }: { theme: Theme }) {
 
   return (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      <Text style={[styles.label, { color: theme.textMuted }]}>About</Text>
-      <Text style={[styles.line, { color: theme.text }]}>Prompt Notes {Constants.expoConfig?.version ?? ''}</Text>
+      <Text style={[styles.label, { color: theme.textMuted }]}>Version</Text>
+      <Text style={[styles.line, { color: theme.text }]}>{APP_NAME} {Constants.expoConfig?.version ?? ''}</Text>
       <Text style={[styles.meta, { color: theme.textMuted }]}>
         {describeRunning()}
         {Updates.channel ? ` · ${Updates.channel}` : ''}

@@ -10,12 +10,13 @@ type Props = {
   prompt: Prompt;
   variables: string[];
   initialValues: Record<string, string>;
+  actionLabel?: string;
   onCopy: (text: string, values: Record<string, string>) => void;
   onClose: () => void;
 };
 
 // Mounted fresh for each copy, so its state always starts from initialValues.
-export function FillTemplateSheet({ prompt, variables, initialValues, onCopy, onClose }: Props) {
+export function FillTemplateSheet({ prompt, variables, initialValues, actionLabel = 'Copy', onCopy, onClose }: Props) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [values, setValues] = useState(initialValues);
@@ -70,7 +71,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, onCopy, on
               accessibilityLabel="Copy filled prompt"
             >
               <Text style={[styles.btnText, { color: theme.accentText }]}>
-                {remaining > 0 ? `Copy (${remaining} blank)` : 'Copy'}
+                {remaining > 0 ? `${actionLabel} (${remaining} blank)` : actionLabel}
               </Text>
             </Pressable>
           </View>

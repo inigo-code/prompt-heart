@@ -6,7 +6,7 @@ const now = Date.now();
 // (on any device) wins over the seed copy when syncing.
 export const seedData: StoreData = {
   version: 2,
-  sync: { userId: null, lastPulledAt: null, pendingPrompts: [], pendingFolders: [] },
+  sync: { userId: null, lastPulledAt: null, pendingPrompts: [], pendingFolders: [], pendingImageUploads: [], pendingImageDeletes: [] },
   folders: [
     { id: 'f-writing', name: 'Writing', color: '#F2B84B', createdAt: now, modifiedAt: 0, deletedAt: null },
     { id: 'f-coding', name: 'Coding', color: '#5B8DEF', createdAt: now, modifiedAt: 0, deletedAt: null },
@@ -15,7 +15,7 @@ export const seedData: StoreData = {
   prompts: [
     {
       id: 'p-welcome',
-      title: 'Welcome to Prompt Notes',
+      title: 'Welcome to Cuebox',
       body: 'Tap the copy icon on any card to put the prompt on your clipboard. Tap the card itself to edit it.\n\nUse categories to file prompts, and #tags to group related ones across categories.',
       folderId: null,
       tags: ['tips'],
@@ -23,6 +23,7 @@ export const seedData: StoreData = {
       copyCount: 0,
       createdAt: now,
       updatedAt: now,
+      images: [],
       lastCopiedAt: null,
       modifiedAt: 0,
       deletedAt: null,
@@ -37,6 +38,7 @@ export const seedData: StoreData = {
       copyCount: 0,
       createdAt: now - 1000,
       updatedAt: now - 1000,
+      images: [],
       lastCopiedAt: null,
       modifiedAt: 0,
       deletedAt: null,
@@ -51,6 +53,7 @@ export const seedData: StoreData = {
       copyCount: 0,
       createdAt: now - 2000,
       updatedAt: now - 2000,
+      images: [],
       lastCopiedAt: null,
       modifiedAt: 0,
       deletedAt: null,
@@ -65,6 +68,7 @@ export const seedData: StoreData = {
       copyCount: 0,
       createdAt: now - 3000,
       updatedAt: now - 3000,
+      images: [],
       lastCopiedAt: null,
       modifiedAt: 0,
       deletedAt: null,
