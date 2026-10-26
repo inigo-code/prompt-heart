@@ -43,7 +43,14 @@ export function Avatar({ theme, uri, name, size = 36, dot, dotRing }: Props) {
         <View
           style={[
             styles.dot,
-            { width: size * 0.32, height: size * 0.32, borderRadius: size * 0.16, backgroundColor: dotRing ? theme.bg : dot, borderColor: dotRing ? dot : theme.bg },
+            {
+              // The ring is drawn larger so its hollow centre stays visible at phone size.
+              width: size * (dotRing ? 0.42 : 0.32),
+              height: size * (dotRing ? 0.42 : 0.32),
+              borderRadius: size * (dotRing ? 0.21 : 0.16),
+              backgroundColor: dotRing ? theme.bg : dot,
+              borderColor: dotRing ? dot : theme.bg,
+            },
             dotRing && styles.ring,
           ]}
         />
@@ -56,5 +63,5 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   letters: { fontWeight: '800', letterSpacing: -0.3 },
   dot: { position: 'absolute', right: -1, bottom: -1, borderWidth: 2 },
-  ring: { borderWidth: 3 },
+  ring: { borderWidth: 3.5, right: -3, bottom: -3 },
 });

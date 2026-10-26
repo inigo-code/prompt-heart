@@ -5,6 +5,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollVie
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
+import { SYNC_AMBER } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
 import type { SyncStatus } from '@/sync/SyncProvider';
 
@@ -187,14 +188,16 @@ function SignedIn({ theme }: { theme: Theme }) {
 
       <Card theme={theme}>
         <View style={styles.statusRow}>
-          <Ionicons name={s.icon} size={22} color={status === 'error' ? theme.danger : theme.accent} />
+          <Ionicons name={s.icon} size={22} color={status === 'error' ? theme.danger : status === 'waiting' ? SYNC_AMBER : theme.accent} />
           <Text style={[styles.statusText, { color: theme.text }]}>{s.label}</Text>
         </View>
         <Text style={[styles.p, { color: theme.textMuted }]}>
           {lastSyncedAt ? `Last synced ${new Date(lastSyncedAt).toLocaleTimeString()}` : 'Not synced yet this session'}
           {unsentCount > 0 ? ` · ${unsentCount} change${unsentCount === 1 ? '' : 's'} waiting` : ''}
-          {status === 'waiting' ? (secondsLeft ? ` · syncs in ${secondsLeft} s` : ' · syncs soon') : ''}
         </Text>
+        {status === 'waiting' && (
+          <Text style={[styles.p, styles.countdown, { color: theme.text }]}>{secondsLeft ? `Syncs in ${secondsLeft} s` : 'Syncing soon'}</Text>
+        )}
         {status === 'waiting' && (
           <Text style={[styles.p, { color: theme.textMuted }]}>
             To save data, the app syncs at most once a minute. Tap Sync now to send changes straight away.
@@ -228,6 +231,7 @@ function SignedIn({ theme }: { theme: Theme }) {
 }
 
 const styles = StyleSheet.create({
+  countdown: { fontWeight: '700' },
   content: { padding: 16, gap: 12 },
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   h: { fontSize: 18, fontWeight: '800' },
