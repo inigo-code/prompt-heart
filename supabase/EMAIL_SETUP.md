@@ -71,25 +71,21 @@ Supabase Dashboard → your project → **Authentication → Emails → SMTP Set
 ## 3. Put the code in the emails
 
 Still under **Authentication → Emails → Templates**. The app needs `{{ .Token }}` (the code) in two
-templates. Paste these in:
+templates. Branded versions, with the Prompt Heart logo and the code in a large box, are in
+[email-templates/](email-templates/). For each one, copy the whole file into **Message body (HTML)**
+and set the subject:
 
-**Confirm signup**: subject `Your Prompt Heart code: {{ .Token }}`
+| Template | Subject | File |
+|---|---|---|
+| Confirm signup | `Your Prompt Heart code: {{ .Token }}` | [confirm-signup.html](email-templates/confirm-signup.html) |
+| Reset password | `Your Prompt Heart password code: {{ .Token }}` | [reset-password.html](email-templates/reset-password.html) |
 
-```html
-<h2>Welcome to Prompt Heart</h2>
-<p>Enter this code in the app to finish creating your account:</p>
-<p style="font-size:28px;font-weight:700;letter-spacing:6px">{{ .Token }}</p>
-<p>It expires in 1 hour. If you didn't sign up, you can ignore this email.</p>
-```
+The logo is loaded from `https://inigo-code.github.io/prompt-heart-site/email-logo.png`. Some email
+apps hide images until you tap "Show images"; the emails still read correctly without them.
 
-**Reset password**: subject `Your Prompt Heart password code: {{ .Token }}`
-
-```html
-<h2>Reset your Prompt Heart password</h2>
-<p>Enter this code in the app, then choose a new password:</p>
-<p style="font-size:28px;font-weight:700;letter-spacing:6px">{{ .Token }}</p>
-<p>It expires in 1 hour. If you didn't ask for this, you can ignore this email; your password stays the same.</p>
-```
+The small picture next to a sender in the inbox list isn't part of the email. Gmail only shows one for
+Google accounts or for domains set up with BIMI (strict DMARC plus a paid logo certificate), so these
+emails show a letter there.
 
 Under **Authentication → Providers → Email** (sometimes listed as **Sign In / Providers**), check that
 **Email OTP Length** is 6. The app accepts 6 to 8 digits.
