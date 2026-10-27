@@ -41,9 +41,12 @@ const prefixLines = (text: string, sel: Selection, pattern: RegExp, prefix: (i: 
   const nl = text.indexOf('\n', sel.end > sel.start && text[sel.end - 1] === '\n' ? sel.end - 1 : sel.end);
   const to = nl === -1 ? text.length : nl;
   const lines = text.slice(from, to).split('\n');
-  const all = lines.every((l) => pattern.test(l) || !l.trim());
+  // Only blank lines (the usual way to start a list): add the marker so you can type after it.
+  const blank = lines.every((l) => !l.trim());
+  const all = !blank && lines.every((l) => pattern.test(l) || !l.trim());
   let i = 0;
-  const next = lines.map((l) => {
+  const next = lines.map((l, n) => {
+    if (blank) return n === 0 ? prefix(0) : l;
     if (all) return l.replace(pattern, '');
     if (!l.trim()) return l;
     // Swap a different list or heading marker rather than stacking them ("- 1. item").
@@ -51,6 +54,7 @@ const prefixLines = (text: string, sel: Selection, pattern: RegExp, prefix: (i: 
   });
   const block = next.join('\n');
   const delta = block.length - (to - from);
+  if (blank) return { text: text.slice(0, from) + block + text.slice(to), selection: { start: from + next[0].length, end: from + next[0].length } };
   const single = lines.length === 1;
   return {
     text: text.slice(0, from) + block + text.slice(to),

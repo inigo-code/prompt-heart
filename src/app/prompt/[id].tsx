@@ -18,7 +18,7 @@ import type { FormatKind, Selection } from '@/lib/format';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
-import { createUndo } from '@/lib/undo';
+import { createUndo, textChange } from '@/lib/undo';
 import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
@@ -79,8 +79,12 @@ function PromptEditor() {
   const [attaching, setAttaching] = useState(false);
   // Saved prompts open read-only so a stray tap can't change them; Edit switches to the editor.
   const [editing, setEditing] = useState(params.id === 'new');
-  const [undo] = useState(() => createUndo<Typed>({ title: draft.title, body: draft.body }));
+  const [undo] = useState(() =>
+    createUndo<Typed>({ title: draft.title, body: draft.body }, { same: (a, b) => a.title === b.title && a.body === b.body }),
+  );
   const [undoable, setUndoable] = useState({ canUndo: false, canRedo: false });
+  // The field typed in last, and whether the current undo step already has a word in it.
+  const burst = useRef<{ field: keyof Typed | null; word: boolean }>({ field: null, word: false });
   const syncUndo = () => setUndoable({ canUndo: undo.canUndo(), canRedo: undo.canRedo() });
   const bodyRef = useRef<ComponentRef<typeof TextInput>>(null);
   // Where formatting applies: the body's last selection (the end of the text until it's focused).
@@ -106,9 +110,20 @@ function PromptEditor() {
     else if (next.title.trim() || next.body.trim()) setId(store.createPrompt(next).id);
   };
 
+  // Undo steps: a word of typing (with the spaces after it), a paste, or one format button press.
+  // Moving to the other field always starts a new step.
   const type = (patch: Partial<Typed>, kind: UndoKind = 'typing') => {
+    const field: keyof Typed = patch.body !== undefined ? 'body' : 'title';
+    const before = draft[field];
+    const { start, inserted, removed } = textChange(before, patch[field] ?? before);
+    // Pastes and typing over a selection are a step of their own.
+    const step: UndoKind = kind === 'typing' && (inserted.length > 1 || (inserted && removed)) ? 'action' : kind;
+    const letter = inserted.length === 1 && /\S/.test(inserted);
+    const newWord = letter && burst.current.word && /\s/.test(before[start - 1] ?? '');
+    if (field !== burst.current.field || (step === 'typing' && newWord)) undo.breakBurst();
     change(patch);
-    undo.record({ title: patch.title ?? draft.title, body: patch.body ?? draft.body }, Date.now(), kind);
+    const fresh = undo.record({ title: patch.title ?? draft.title, body: patch.body ?? draft.body }, Date.now(), step);
+    burst.current = { field, word: (fresh ? false : burst.current.word) || letter };
     syncUndo();
   };
 
@@ -118,7 +133,15 @@ function PromptEditor() {
     if (to.title !== draft.title) patch.title = to.title;
     if (to.body !== draft.body) patch.body = to.body;
     change(patch);
+    burst.current = { field: null, word: false };
     syncUndo();
+    // Put the caret where the text changed rather than at the end.
+    if (patch.body !== undefined) {
+      const { start, inserted } = textChange(draft.body, patch.body);
+      const at = { start: start + inserted.length, end: start + inserted.length };
+      selectionRef.current = at;
+      setSelection(at);
+    }
   };
 
   const format = (kind: FormatKind) => {
@@ -154,8 +177,11 @@ function PromptEditor() {
     useCallback(() => {
       if (!id) return;
       const p = getSnapshot().prompts.find((x) => x.id === id);
-      if (p) {
-        setDraft((d) => (d.title === p.title && d.body === p.body ? d : { ...d, title: p.title, body: p.body }));
+      // Only when the saved text differs (a version was restored): this also runs when a new
+      // prompt gets its id on the first letter, and resetting then would lose that undo step.
+      const d = latest.current.draft;
+      if (p && (d.title !== p.title || d.body !== p.body)) {
+        setDraft({ ...d, title: p.title, body: p.body });
         undo.reset({ title: p.title, body: p.body });
         setUndoable({ canUndo: false, canRedo: false });
       }
