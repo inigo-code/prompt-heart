@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 type Props = {
@@ -47,11 +48,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: 34,
     borderRadius: 17,
   },
-  withLeading: { paddingLeft: 5 },
+  withLeading: { paddingLeft: 4 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  label: { fontSize: 14, fontWeight: '600' },
+  label: { fontSize: font.body, fontWeight: '600' },
 });

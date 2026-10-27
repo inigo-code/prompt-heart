@@ -9,7 +9,7 @@ import { Chip } from '@/components/Chip';
 import { useToast } from '@/components/Toast';
 import { APP_NAME } from '@/lib/app';
 import { saveImage } from '@/lib/images';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useVisibleFolders } from '@/lib/useAiApps';
 import { usePromptStore } from '@/store/PromptStore';
 
@@ -82,12 +82,18 @@ export default function ShareScreen() {
         <Text style={[styles.muted, { color: theme.textMuted }]}>
           {error ? `Couldn't read what was shared: ${error}` : `Nothing was shared. Use Share → ${APP_NAME} in another app.`}
         </Text>
-        <Pressable onPress={() => router.replace('/')} style={[styles.secondary, { backgroundColor: theme.chip }]}>
+        <Pressable
+          onPress={() => router.replace('/')}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+        >
           <Text style={[styles.btnText, { color: theme.text }]}>Go to prompts</Text>
         </Pressable>
       </View>
     );
   }
+
+  const empty = !body.trim() && !title.trim() && sharedImages.length === 0;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -127,13 +133,20 @@ export default function ShareScreen() {
         />
 
         <View style={styles.actions}>
-          <Pressable onPress={done} style={[styles.secondary, { backgroundColor: theme.chip }]}>
+          <Pressable
+            onPress={done}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+          >
             <Text style={[styles.btnText, { color: theme.text }]}>Cancel</Text>
           </Pressable>
           <Pressable
             onPress={save}
-            disabled={saving || (!body.trim() && !title.trim() && sharedImages.length === 0)}
-            style={[styles.primary, { backgroundColor: theme.accent }]}
+            disabled={saving || empty}
+            accessibilityRole="button"
+            accessibilityLabel="Save prompt"
+            accessibilityState={{ disabled: saving || empty, busy: saving }}
+            style={({ pressed }) => [styles.primary, { backgroundColor: theme.accent, opacity: empty ? 0.5 : pressed ? 0.8 : 1 }]}
           >
             {saving ? <ActivityIndicator color={theme.accentText} /> : <Text style={[styles.btnText, { color: theme.accentText }]}>Save prompt</Text>}
           </Pressable>
@@ -144,15 +157,15 @@ export default function ShareScreen() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 32 },
-  muted: { fontSize: 15, textAlign: 'center' },
-  content: { padding: 20, gap: 14 },
-  title: { fontSize: 24, fontWeight: '800', letterSpacing: -0.4 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32 },
+  muted: { fontSize: font.body, textAlign: 'center' },
+  content: { padding: 20, gap: 16 },
+  title: { fontSize: font.title2, fontWeight: '800', letterSpacing: -0.4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   thumb: { width: 96, height: 96, borderRadius: 12 },
-  body: { minHeight: 200, fontSize: 15, lineHeight: 22, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 14 },
+  body: { minHeight: 200, fontSize: font.body, lineHeight: 22, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 16 },
   actions: { flexDirection: 'row', gap: 10 },
   secondary: { flex: 1, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   primary: { flex: 2, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontSize: 15, fontWeight: '700' },
+  btnText: { fontSize: font.body, fontWeight: '700' },
 });

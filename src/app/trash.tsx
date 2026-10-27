@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionSheet } from '@/components/ActionSheet';
 import { useToast } from '@/components/Toast';
 import { deleteLocalImage } from '@/lib/images';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { TRASH_DAYS, usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
 
@@ -17,6 +17,7 @@ export default function TrashScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
+  const router = useRouter();
   const { trash, restorePrompt, purgePrompt, emptyTrash } = usePromptStore();
   const [now] = useState(() => Date.now());
   const [confirm, setConfirm] = useState<{ kind: 'one'; prompt: Prompt } | { kind: 'all' } | null>(null);
@@ -29,8 +30,8 @@ export default function TrashScreen() {
         options={{
           headerRight: () =>
             trash.length > 0 ? (
-              <Pressable onPress={() => setConfirm({ kind: 'all' })} hitSlop={8} accessibilityLabel="Empty trash">
-                <Text style={{ color: theme.danger, fontWeight: '700', fontSize: 15 }}>Empty</Text>
+              <Pressable onPress={() => setConfirm({ kind: 'all' })} hitSlop={12} accessibilityRole="button" accessibilityLabel="Empty trash">
+                <Text style={{ color: theme.danger, fontWeight: '700', fontSize: font.body }}>Empty</Text>
               </Pressable>
             ) : null,
         }}
@@ -40,9 +41,11 @@ export default function TrashScreen() {
         keyExtractor={(p) => p.id}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 24 }]}
         ListHeaderComponent={
-          <Text style={[styles.note, { color: theme.textMuted }]}>
-            Deleted prompts stay here for {TRASH_DAYS} days, on every synced device.
-          </Text>
+          trash.length === 0 ? undefined : (
+            <Text style={[styles.note, { color: theme.textMuted }]}>
+              Deleted prompts stay here for {TRASH_DAYS} days, on every synced device.
+            </Text>
+          )
         }
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -76,8 +79,20 @@ export default function TrashScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="trash-outline" size={36} color={theme.textMuted} />
-            <Text style={[styles.emptyText, { color: theme.textMuted }]}>Trash is empty.</Text>
+            <View style={[styles.emptyIcon, { backgroundColor: theme.accentSoft }]}>
+              <Ionicons name="trash-outline" size={32} color={theme.text} />
+            </View>
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>Trash is empty</Text>
+            <Text style={[styles.emptyText, { color: theme.textMuted }]}>
+              Prompts you delete wait here for {TRASH_DAYS} days, so you can bring them back.
+            </Text>
+            <Pressable
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text style={[styles.emptyBtnText, { color: theme.text }]}>Back to prompts</Text>
+            </Pressable>
           </View>
         }
       />
@@ -105,12 +120,16 @@ export default function TrashScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   list: { padding: 16, gap: 10 },
-  note: { fontSize: 13, marginBottom: 4 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
-  title: { fontSize: 15, fontWeight: '700' },
-  body: { fontSize: 13, lineHeight: 18 },
-  days: { fontSize: 11, fontWeight: '600', marginTop: 2 },
-  btn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  empty: { alignItems: 'center', gap: 10, paddingTop: 80 },
-  emptyText: { fontSize: 15 },
+  note: { fontSize: font.footnote, marginBottom: 4 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
+  title: { fontSize: font.body, fontWeight: '700' },
+  body: { fontSize: font.footnote, lineHeight: 18 },
+  days: { fontSize: font.caption, fontWeight: '600', marginTop: 2 },
+  btn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  empty: { alignItems: 'center', gap: 8, paddingTop: 96, paddingHorizontal: 24 },
+  emptyIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  emptyTitle: { fontSize: font.headline, fontWeight: '700' },
+  emptyText: { fontSize: font.body, lineHeight: 21, textAlign: 'center', maxWidth: 300 },
+  emptyBtn: { marginTop: 12, height: 44, paddingHorizontal: 20, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  emptyBtnText: { fontSize: font.body, fontWeight: '700' },
 });

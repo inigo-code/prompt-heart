@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { font, shadow } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 // Small building blocks for settings-style screens.
@@ -113,7 +114,7 @@ export function Segmented<T extends string | number>({ theme, options, value, on
             accessibilityState={{ selected: active }}
             style={({ pressed }) => [
               styles.segment,
-              active ? { backgroundColor: theme.accent, shadowOpacity: 0.18 } : pressed ? { backgroundColor: theme.border } : null,
+              active ? { backgroundColor: theme.accent, boxShadow: shadow.subtle } : pressed ? { backgroundColor: theme.border } : null,
             ]}
           >
             {o.icon && <Ionicons name={o.icon} size={15} color={color} />}
@@ -147,17 +148,17 @@ export function ControlRow({ theme, label, value, children, last }: {
 
 const styles = StyleSheet.create({
   section: { gap: 8 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 6 },
+  sectionTitle: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 6 },
   group: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  footer: { fontSize: 12, paddingHorizontal: 6, lineHeight: 17 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, minHeight: 52, paddingVertical: 8 },
+  footer: { fontSize: font.caption, paddingHorizontal: 6, lineHeight: 17 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, minHeight: 52, paddingVertical: 8 },
   iconWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  label: { flex: 1, fontSize: 15, fontWeight: '600' },
-  value: { fontSize: 14, maxWidth: '45%' },
-  control: { paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  label: { flex: 1, fontSize: font.body, fontWeight: '600' },
+  value: { fontSize: font.body, maxWidth: '45%' },
+  control: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
   controlHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  controlLabel: { fontSize: 15, fontWeight: '600' },
-  controlValue: { fontSize: 14, fontWeight: '600' },
+  controlLabel: { fontSize: font.body, fontWeight: '600' },
+  controlValue: { fontSize: font.body, fontWeight: '600' },
   segmented: { flexDirection: 'row', borderRadius: 11, padding: 3 },
   segment: {
     flex: 1,
@@ -167,11 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
   },
-  segmentText: { fontSize: 14, fontWeight: '600' },
+  segmentText: { fontSize: font.body, fontWeight: '600' },
   segmentTextActive: { fontWeight: '800' },
 });

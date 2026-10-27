@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState, Image, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useSettings } from '@/settings/SettingsProvider';
 
 import { AppPrivacy } from '../../modules/app-privacy';
@@ -150,9 +150,9 @@ const styles = StyleSheet.create({
   screen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 20 },
   icon: { width: 88, height: 88, borderRadius: 22 },
   texts: { alignItems: 'center', gap: 6 },
-  title: { fontSize: 20, fontWeight: '800' },
-  body: { fontSize: 15, textAlign: 'center', lineHeight: 21 },
+  title: { fontSize: font.title, fontWeight: '800' },
+  body: { fontSize: font.body, textAlign: 'center', lineHeight: 21 },
   button: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 48, paddingHorizontal: 28, borderRadius: 24, marginTop: 8 },
-  buttonText: { fontSize: 16, fontWeight: '700' },
-  message: { fontSize: 14, textAlign: 'center' },
+  buttonText: { fontSize: font.headline, fontWeight: '700' },
+  message: { fontSize: font.body, textAlign: 'center' },
 });

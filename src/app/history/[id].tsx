@@ -6,7 +6,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/Toast';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useHistory } from '@/store/HistoryProvider';
 import type { Version } from '@/store/HistoryProvider';
 import { usePromptStore } from '@/store/PromptStore';
@@ -64,6 +64,9 @@ export default function HistoryScreen() {
         return (
           <Pressable
             onPress={() => setOpen(expanded ? null : item.at)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            accessibilityHint={expanded ? 'Hides this version' : 'Shows this version'}
             style={[styles.card, { backgroundColor: theme.card, borderColor: expanded ? theme.accent : theme.border }]}
           >
             <View style={styles.row}>
@@ -84,12 +87,17 @@ export default function HistoryScreen() {
                     await Clipboard.setStringAsync(item.body);
                     toast('Copied this version');
                   }}
-                  style={[styles.btn, { backgroundColor: theme.chip }]}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
                 >
                   <Ionicons name="copy-outline" size={16} color={theme.text} />
                   <Text style={[styles.btnText, { color: theme.text }]}>Copy</Text>
                 </Pressable>
-                <Pressable onPress={() => restore(item)} style={[styles.btn, styles.primary, { backgroundColor: theme.accent }]}>
+                <Pressable
+                  onPress={() => restore(item)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.btn, styles.primary, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                >
                   <Ionicons name="arrow-undo-outline" size={16} color={theme.accentText} />
                   <Text style={[styles.btnText, { color: theme.accentText }]}>Restore this version</Text>
                 </Pressable>
@@ -104,19 +112,19 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   list: { padding: 16, gap: 10 },
-  current: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 3, marginBottom: 6 },
-  label: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
-  meta: { fontSize: 12 },
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 6 },
+  current: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 3, marginBottom: 6 },
+  label: { fontSize: font.caption, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
+  meta: { fontSize: font.caption },
+  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  time: { flex: 1, fontSize: 13, fontWeight: '700' },
-  title: { fontSize: 15, fontWeight: '700' },
-  body: { fontSize: 14, lineHeight: 20 },
+  time: { flex: 1, fontSize: font.footnote, fontWeight: '700' },
+  title: { fontSize: font.body, fontWeight: '700' },
+  body: { fontSize: font.body, lineHeight: 20 },
   actions: { flexDirection: 'row', gap: 8, marginTop: 6 },
-  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, height: 40, borderRadius: 12 },
+  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, height: 44, borderRadius: 12 },
   primary: { flex: 1, justifyContent: 'center' },
-  btnText: { fontSize: 14, fontWeight: '700' },
+  btnText: { fontSize: font.body, fontWeight: '700' },
   empty: { alignItems: 'center', gap: 10, paddingTop: 50, paddingHorizontal: 24 },
-  emptyText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
 });

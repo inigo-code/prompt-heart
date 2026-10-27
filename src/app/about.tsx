@@ -7,7 +7,7 @@ import { AboutCard } from '@/components/AboutCard';
 import { BrandTitle } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
 import { APP_NAME, APP_TAGLINE, DEVELOPER, LINKS, SUPPORT_EMAIL } from '@/lib/app';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'copy-outline', text: 'One-tap copy from the home screen' },
@@ -69,7 +69,12 @@ export default function AboutScreen() {
         />
       </Section>
 
-      <Pressable onPress={() => WebBrowser.openBrowserAsync(DEVELOPER.github)}>
+      <Pressable
+        onPress={() => WebBrowser.openBrowserAsync(DEVELOPER.github)}
+        accessibilityRole="link"
+        accessibilityLabel={`${DEVELOPER.name} on GitHub`}
+        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      >
         <Text style={[styles.credit, { color: theme.textMuted }]}>
           {APP_NAME} © {new Date().getFullYear()} {DEVELOPER.name}
         </Text>
@@ -82,8 +87,8 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 24 },
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
   icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
-  tagline: { fontSize: 15 },
-  feature: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 13 },
-  featureText: { flex: 1, fontSize: 14, lineHeight: 19 },
-  credit: { textAlign: 'center', fontSize: 12 },
+  tagline: { fontSize: font.body },
+  feature: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  featureText: { flex: 1, fontSize: font.body, lineHeight: 19 },
+  credit: { textAlign: 'center', fontSize: font.caption },
 });

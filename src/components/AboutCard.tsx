@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { APP_NAME } from '@/lib/app';
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 // Updates download on launch and apply on the next restart; this lets you check and apply one right away.
@@ -50,7 +51,14 @@ export function AboutCard({ theme }: { theme: Theme }) {
         {Updates.channel ? ` · ${Updates.channel}` : ''}
       </Text>
       {canUpdate && (
-        <Pressable onPress={check} disabled={busy} style={[styles.btn, { backgroundColor: theme.chip }]}>
+        <Pressable
+          onPress={check}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Check for updates"
+          accessibilityState={{ busy }}
+          style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+        >
           {busy ? <ActivityIndicator color={theme.text} /> : <Text style={[styles.btnText, { color: theme.text }]}>Check for updates</Text>}
         </Pressable>
       )}
@@ -61,9 +69,9 @@ export function AboutCard({ theme }: { theme: Theme }) {
 
 const styles = StyleSheet.create({
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
-  label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  line: { fontSize: 16, fontWeight: '700' },
-  meta: { fontSize: 13 },
+  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  line: { fontSize: font.headline, fontWeight: '700' },
+  meta: { fontSize: font.footnote },
   btn: { height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  btnText: { fontSize: 15, fontWeight: '700' },
+  btnText: { fontSize: font.body, fontWeight: '700' },
 });

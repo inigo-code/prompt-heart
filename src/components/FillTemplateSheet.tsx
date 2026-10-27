@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleShee
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fillTemplate } from '@/lib/templates';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import type { Prompt } from '@/store/types';
 
 type Props = {
@@ -86,16 +86,16 @@ const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: { maxHeight: '85%', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
   grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 12 },
-  title: { fontSize: 18, fontWeight: '800' },
-  subtitle: { fontSize: 13, marginTop: 2, marginBottom: 12 },
+  title: { fontSize: font.headline, fontWeight: '800' },
+  subtitle: { fontSize: font.footnote, marginTop: 2, marginBottom: 12 },
   fields: { flexGrow: 0 },
   fieldsContent: { gap: 12, paddingBottom: 12 },
   field: { gap: 6 },
-  label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { fontSize: 15, minHeight: 44, maxHeight: 140, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10 },
-  preview: { fontSize: 14, lineHeight: 20, borderRadius: 12, padding: 12 },
+  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { fontSize: font.body, minHeight: 44, maxHeight: 140, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10 },
+  preview: { fontSize: font.body, lineHeight: 20, borderRadius: 12, padding: 12 },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 4 },
   btn: { flex: 1, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   primary: { flex: 1.6 },
-  btnText: { fontSize: 15, fontWeight: '700' },
+  btnText: { fontSize: font.body, fontWeight: '700' },
 });

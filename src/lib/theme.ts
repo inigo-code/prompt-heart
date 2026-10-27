@@ -47,6 +47,27 @@ const dark: typeof light = {
 
 export type Theme = typeof light;
 
+/**
+ * The type scale. Every text size in the app is one of these steps; pick the nearest one rather than
+ * a new number. (Sizes computed from a component's own size, like avatar initials, stay computed.)
+ */
+export const font = {
+  caption: 12,
+  footnote: 13,
+  body: 15,
+  headline: 17,
+  title: 20,
+  title2: 24,
+  largeTitle: 28,
+} as const;
+
+/** Elevation, as boxShadow strings in a warm tint that matches the backgrounds. */
+export const shadow = {
+  subtle: '0 1px 3px rgba(28, 26, 23, 0.12)',
+  raised: '0 4px 12px rgba(28, 26, 23, 0.20)',
+  floating: '0 6px 16px rgba(28, 26, 23, 0.24)',
+} as const;
+
 type AccentSpec = { label: string; light: [string, string, string]; dark: [string, string, string] };
 
 // [accent, text on accent, soft tint] for each scheme.

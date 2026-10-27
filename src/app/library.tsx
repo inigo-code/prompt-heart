@@ -9,7 +9,7 @@ import { useToast } from '@/components/Toast';
 import { LIBRARY_CATEGORIES, LIBRARY_PROMPTS } from '@/library/prompts';
 import type { LibraryCategory, LibraryPrompt } from '@/library/prompts';
 import { extractVariables } from '@/lib/templates';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { usePromptStore } from '@/store/PromptStore';
@@ -231,22 +231,22 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   top: { paddingHorizontal: 16, paddingTop: 10 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
-  searchInput: { flex: 1, fontSize: 15, height: '100%' },
+  searchInput: { flex: 1, fontSize: font.body, height: '100%' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
   catIcon: { alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 16, paddingTop: 6, gap: 12 },
-  intro: { fontSize: 14, lineHeight: 20, marginBottom: 2 },
-  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 14, paddingLeft: 16, gap: 8, overflow: 'hidden' },
+  intro: { fontSize: font.body, lineHeight: 20, marginBottom: 2 },
+  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, paddingLeft: 16, gap: 8, overflow: 'hidden' },
   categoryBar: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
-  pill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
-  metaText: { fontSize: 12, fontWeight: '600' },
-  title: { fontSize: 16, fontWeight: '700', letterSpacing: -0.2 },
-  body: { fontSize: 14, lineHeight: 20 },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  metaText: { fontSize: font.caption, fontWeight: '600' },
+  title: { fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
+  body: { fontSize: font.body, lineHeight: 20 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
   btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 16, borderRadius: 18 },
   btnOutline: { borderWidth: 1.5, backgroundColor: 'transparent' },
-  btnText: { fontSize: 14, fontWeight: '700' },
+  btnText: { fontSize: font.body, fontWeight: '700' },
   empty: { alignItems: 'center', gap: 10, paddingTop: 60, paddingHorizontal: 32 },
-  emptyText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
 });

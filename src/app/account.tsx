@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { SignOutSheet } from '@/components/SignOutSheet';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { SYNC_AMBER } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
@@ -352,19 +352,19 @@ function SignedIn({ theme }: { theme: Theme }) {
 
 const styles = StyleSheet.create({
   countdown: { fontWeight: '700' },
-  code: { fontSize: 22, letterSpacing: 6, textAlign: 'center', fontWeight: '700' },
+  code: { fontSize: font.title, letterSpacing: 6, textAlign: 'center', fontWeight: '700' },
   codeEmpty: { textAlign: 'center' },
   content: { padding: 16, gap: 12 },
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
-  h: { fontSize: 18, fontWeight: '800' },
-  p: { fontSize: 14, lineHeight: 20 },
-  label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: -8 },
-  input: { fontSize: 16, height: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
-  switch: { fontSize: 14, textAlign: 'center', paddingVertical: 4 },
+  h: { fontSize: font.headline, fontWeight: '800' },
+  p: { fontSize: font.body, lineHeight: 20 },
+  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: -8 },
+  input: { fontSize: font.headline, height: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16 },
+  switch: { fontSize: font.body, textAlign: 'center', paddingVertical: 4 },
   btn: { height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontSize: 15, fontWeight: '700' },
-  error: { fontSize: 13 },
+  btnText: { fontSize: font.body, fontWeight: '700' },
+  error: { fontSize: font.footnote },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  statusText: { fontSize: 16, fontWeight: '700' },
-  hint: { fontSize: 12, textAlign: 'center', paddingHorizontal: 12 },
+  statusText: { fontSize: font.headline, fontWeight: '700' },
+  hint: { fontSize: font.caption, textAlign: 'center', paddingHorizontal: 12 },
 });

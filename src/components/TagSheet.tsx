@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { normalizeTag } from '@/store/PromptStore';
 
 type Props = {
@@ -30,7 +30,7 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Pressable style={[styles.backdrop, { backgroundColor: theme.overlay }]} onPress={onClose} />
+        <Pressable style={[styles.backdrop, { backgroundColor: theme.overlay }]} onPress={onClose} accessibilityLabel="Close" />
         <View style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}>
           <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
           <View style={styles.inputRow}>
@@ -48,6 +48,9 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
             <Pressable
               onPress={() => tag && add(tag)}
               disabled={!tag}
+              accessibilityRole="button"
+              accessibilityLabel={tag ? `Add tag ${tag}` : 'Add tag'}
+              accessibilityState={{ disabled: !tag }}
               style={[styles.addBtn, { backgroundColor: theme.accent, opacity: tag ? 1 : 0.5 }]}
             >
               <Text style={[styles.addText, { color: theme.accentText }]}>Add</Text>
@@ -58,8 +61,14 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
               <Text style={[styles.label, { color: theme.textMuted }]}>Or pick one</Text>
               <ScrollView style={{ maxHeight: 160 }} contentContainerStyle={styles.tags}>
                 {existingTags.map((t) => (
-                  <Pressable key={t} onPress={() => add(t)} style={[styles.tag, { backgroundColor: theme.chip }]}>
-                    <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>#{t}</Text>
+                  <Pressable
+                    key={t}
+                    onPress={() => add(t)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Add tag ${t}`}
+                    style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+                  >
+                    <Text style={{ color: theme.text, fontSize: font.body, fontWeight: '600' }}>#{t}</Text>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -73,13 +82,13 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1 },
-  sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 18, gap: 12 },
-  title: { fontSize: 17, fontWeight: '800' },
+  sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, gap: 12 },
+  title: { fontSize: font.headline, fontWeight: '800' },
   inputRow: { flexDirection: 'row', gap: 8 },
-  input: { flex: 1, fontSize: 15, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
-  addBtn: { height: 46, paddingHorizontal: 18, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  addText: { fontSize: 15, fontWeight: '700' },
-  label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  input: { flex: 1, fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
+  addBtn: { height: 46, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  addText: { fontSize: font.body, fontWeight: '700' },
+  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tag: { paddingHorizontal: 12, height: 32, borderRadius: 16, justifyContent: 'center' },
+  tag: { paddingHorizontal: 12, height: 36, borderRadius: 18, justifyContent: 'center' },
 });

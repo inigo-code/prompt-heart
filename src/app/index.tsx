@@ -18,7 +18,7 @@ import { aiAppForFolder } from '@/lib/ai';
 import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { greeting, useHour } from '@/lib/greeting';
-import { useTheme } from '@/lib/theme';
+import { font, shadow, useTheme } from '@/lib/theme';
 import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
@@ -349,6 +349,8 @@ export default function HomeScreen() {
           onPress={() => update({ sort: SORTS[settings.sort].next })}
           disabled={filter.kind === 'copied'}
           style={styles.sortBtn}
+          hitSlop={12}
+          accessibilityRole="button"
           accessibilityLabel="Change sort order"
         >
           <Ionicons name="swap-vertical" size={15} color={theme.textMuted} />
@@ -359,7 +361,7 @@ export default function HomeScreen() {
         <View style={styles.toolbarRight}>
           <Pressable
             onPress={() => (selecting ? exitSelect() : setSelected([]))}
-            hitSlop={6}
+            hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel={selecting ? 'Done selecting' : 'Select prompts'}
             style={styles.selectBtn}
@@ -378,7 +380,8 @@ export default function HomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => update({ layout: grid ? 'list' : 'grid' })}
-            hitSlop={8}
+            hitSlop={12}
+            accessibilityRole="button"
             accessibilityLabel={grid ? 'Show as list' : 'Show as grid'}
           >
             <Ionicons name={grid ? 'list-outline' : 'grid-outline'} size={18} color={theme.textMuted} />
@@ -603,7 +606,8 @@ function IconButton({ theme, icon, label, tint, onPress }: {
   return (
     <Pressable
       onPress={onPress}
-      hitSlop={6}
+      hitSlop={4}
+      accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => [styles.iconBtn, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
     >
@@ -617,30 +621,30 @@ const styles = StyleSheet.create({
   top: { paddingHorizontal: 16, gap: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   titleBlock: { flex: 1, minWidth: 0 },
-  hello: { fontSize: 15, fontWeight: '700', marginTop: 1 },
+  hello: { fontSize: font.body, fontWeight: '700', marginTop: 1 },
   avatarBtn: { padding: 2 },
-  subtitle: { fontSize: 13, marginTop: 2 },
+  subtitle: { fontSize: font.footnote, marginTop: 2 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
-  iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  waitingDot: { position: 'absolute', top: 5, right: 5, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
+  iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  waitingDot: { position: 'absolute', top: 7, right: 7, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
-  searchInput: { flex: 1, fontSize: 15, height: '100%' },
+  searchInput: { flex: 1, fontSize: font.body, height: '100%' },
   aiBar: { gap: 8, paddingHorizontal: 16, paddingTop: 12 },
-  aiPill: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingLeft: 5, paddingRight: 12, height: 34, borderRadius: 17, borderWidth: StyleSheet.hairlineWidth },
-  aiPillText: { fontSize: 13, fontWeight: '700' },
+  aiPill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 4, paddingRight: 12, height: 34, borderRadius: 17, borderWidth: StyleSheet.hairlineWidth },
+  aiPillText: { fontSize: font.footnote, fontWeight: '700' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
-  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
-  sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4 },
+  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 6 },
+  sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
   hidden: { display: 'none' },
   progress: { marginHorizontal: 16, marginTop: 10, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  progressText: { fontSize: 13, fontWeight: '700' },
+  progressText: { fontSize: font.footnote, fontWeight: '700' },
   progressTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: 4, borderRadius: 2 },
   selectHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56 },
   selectClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  selectCount: { flex: 1, fontSize: 20, fontWeight: '800' },
-  selectAll: { fontSize: 15, fontWeight: '700' },
+  selectCount: { flex: 1, fontSize: font.title, fontWeight: '800' },
+  selectAll: { fontSize: font.body, fontWeight: '700' },
   selectBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   bulkBar: {
     position: 'absolute',
@@ -651,28 +655,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: StyleSheet.hairlineWidth,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    boxShadow: shadow.floating,
   },
   bulkBtn: { alignItems: 'center', gap: 2, paddingHorizontal: 12, paddingVertical: 4 },
-  bulkText: { fontSize: 12, fontWeight: '700' },
-  toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 30, borderRadius: 10 },
-  manageText: { fontSize: 13, fontWeight: '700' },
+  bulkText: { fontSize: font.caption, fontWeight: '700' },
+  toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: 10 },
+  manageText: { fontSize: font.footnote, fontWeight: '700' },
   aiBarLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 2 },
-  aiBarLabelText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  toolbarText: { fontSize: 13, fontWeight: '600' },
+  aiBarLabelText: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  toolbarText: { fontSize: font.footnote, fontWeight: '600' },
   list: { paddingHorizontal: 16, gap: 12, paddingTop: 4 },
   gridRow: { gap: 12 },
   empty: { alignItems: 'center', gap: 8, paddingTop: 70, paddingHorizontal: 32 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
-  emptyTitle: { fontSize: 17, fontWeight: '700' },
-  emptyText: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 18, borderRadius: 21, marginTop: 10 },
-  emptyBtnText: { fontSize: 14, fontWeight: '700' },
+  emptyTitle: { fontSize: font.headline, fontWeight: '700' },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
+  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 16, borderRadius: 21, marginTop: 10 },
+  emptyBtnText: { fontSize: font.body, fontWeight: '700' },
   sheetDotWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   sheetDot: { width: 14, height: 14, borderRadius: 7 },
   fab: {
@@ -683,10 +683,6 @@ const styles = StyleSheet.create({
     borderRadius: 31,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 6,
+    boxShadow: shadow.raised,
   },
 });

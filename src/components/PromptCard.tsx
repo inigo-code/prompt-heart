@@ -6,6 +6,7 @@ import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
 import { estimateTokens, extractVariables } from '@/lib/templates';
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import type { Folder, Prompt } from '@/store/types';
 
@@ -158,41 +159,41 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 18,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 14,
+    padding: 16,
     paddingLeft: 16,
     gap: 8,
     overflow: 'hidden',
   },
-  gridCard: { flex: 1, padding: 12, paddingLeft: 14 },
+  gridCard: { flex: 1, padding: 12, paddingLeft: 16 },
   folderBar: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
   listImages: { flexDirection: 'row' },
   gridImage: { height: 110, marginBottom: 2 },
   gridImageInner: { width: '100%', height: 110 },
   moreBadge: { position: 'absolute', right: 6, bottom: 6, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
-  moreText: { color: '#fff', fontSize: 11, fontWeight: '800' },
+  moreText: { color: '#fff', fontSize: font.caption, fontWeight: '800' },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', minHeight: 34 },
-  pin: { marginRight: 5 },
-  title: { flex: 1, fontSize: 16, fontWeight: '700', letterSpacing: -0.2 },
+  pin: { marginRight: 4 },
+  title: { flex: 1, fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
   check: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center', justifyContent: 'center', margin: 3 },
   launchBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: 7,
-    paddingLeft: 5,
+    gap: 8,
+    paddingLeft: 4,
     paddingRight: 12,
     height: 32,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     marginTop: 2,
   },
-  launchText: { fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  launchText: { fontSize: font.footnote, fontWeight: '700', flexShrink: 1 },
   copyBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  body: { fontSize: 14, lineHeight: 20 },
+  body: { fontSize: font.body, lineHeight: 20 },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, maxWidth: 140 },
   dot: { width: 7, height: 7, borderRadius: 4 },
-  metaText: { fontSize: 12, fontWeight: '500' },
+  metaText: { fontSize: font.caption, fontWeight: '500' },
   tokens: { marginLeft: 'auto' },
 });

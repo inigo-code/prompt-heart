@@ -12,7 +12,7 @@ import { useToast } from '@/components/Toast';
 import { greeting, useHour } from '@/lib/greeting';
 import { deleteLocalImage } from '@/lib/images';
 import type { Theme } from '@/lib/theme';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useProfile } from '@/profile/ProfileProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import { useSync } from '@/sync/SyncProvider';
@@ -273,7 +273,7 @@ function PasswordForm({ theme, busy, onSave }: { theme: Theme; busy: boolean; on
         textContentType="newPassword"
         style={[styles.formInput, { color: theme.text, backgroundColor: theme.bg, borderColor: mismatch ? theme.danger : theme.border }]}
       />
-      {mismatch && <Text style={{ color: theme.danger, fontSize: 12 }}>Passwords don&apos;t match.</Text>}
+      {mismatch && <Text style={{ color: theme.danger, fontSize: font.caption }}>Passwords don&apos;t match.</Text>}
       <SaveButton theme={theme} label="Change password" disabled={pw.length < 6 || pw !== again} busy={busy} onPress={() => onSave(pw)} />
     </View>
   );
@@ -305,14 +305,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  hello: { fontSize: 20, fontWeight: '800', marginTop: 8 },
-  email: { fontSize: 14 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 8 },
-  input: { flex: 1, fontSize: 16, height: 52 },
+  hello: { fontSize: font.title, fontWeight: '800', marginTop: 8 },
+  email: { fontSize: font.body },
+  inputRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, gap: 8 },
+  input: { flex: 1, fontSize: font.headline, height: 52 },
   nameSave: { paddingHorizontal: 16, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  nameSaveText: { fontSize: 14, fontWeight: '800' },
-  form: { padding: 14, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
-  formInput: { fontSize: 15, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
+  nameSaveText: { fontSize: font.body, fontWeight: '800' },
+  form: { padding: 16, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
+  formInput: { fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
   save: { height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  saveText: { fontSize: 15, fontWeight: '700' },
+  saveText: { fontSize: font.body, fontWeight: '700' },
 });

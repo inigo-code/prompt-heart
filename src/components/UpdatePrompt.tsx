@@ -4,7 +4,7 @@ import { ActivityIndicator, AppState, Modal, Pressable, StyleSheet, Text, View }
 
 import { HeartMark } from '@/components/BrandTitle';
 import { APP_NAME } from '@/lib/app';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 
 // Only real builds receive over-the-air updates; dev, Expo Go and web don't.
 const enabled = Updates.isEnabled && !__DEV__;
@@ -75,10 +75,10 @@ function UpdatePromptInner() {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
   card: { width: '100%', maxWidth: 380, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 24, alignItems: 'center', gap: 10 },
-  title: { fontSize: 20, fontWeight: '800', textAlign: 'center', marginTop: 4 },
-  body: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
+  title: { fontSize: font.title, fontWeight: '800', textAlign: 'center', marginTop: 4 },
+  body: { fontSize: font.body, lineHeight: 20, textAlign: 'center' },
   primary: { alignSelf: 'stretch', height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  primaryText: { fontSize: 16, fontWeight: '800' },
+  primaryText: { fontSize: font.headline, fontWeight: '800' },
   secondary: { paddingVertical: 8, paddingHorizontal: 20 },
-  secondaryText: { fontSize: 15, fontWeight: '700' },
+  secondaryText: { fontSize: font.body, fontWeight: '700' },
 });

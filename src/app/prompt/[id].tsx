@@ -12,7 +12,7 @@ import { ImageViewer } from '@/components/ImageViewer';
 import { useToast } from '@/components/Toast';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
@@ -234,7 +234,7 @@ function PromptEditor() {
               accessibilityLabel={`Remove tag ${t}`}
               style={[styles.tag, { backgroundColor: theme.chip }]}
             >
-              <Text style={{ color: theme.text, fontSize: 13 }}>#{t}</Text>
+              <Text style={{ color: theme.text, fontSize: font.footnote }}>#{t}</Text>
               <Ionicons name="close" size={13} color={theme.textMuted} />
             </Pressable>
           ))}
@@ -299,10 +299,10 @@ function PromptEditor() {
         {variables.length > 0 && (
           <View style={[styles.row, styles.wrap]}>
             <Ionicons name="code-slash" size={14} color={theme.textMuted} />
-            <Text style={{ color: theme.textMuted, fontSize: 13 }}>Filled in when you copy:</Text>
+            <Text style={{ color: theme.textMuted, fontSize: font.footnote }}>Filled in when you copy:</Text>
             {variables.map((v) => (
               <View key={v} style={[styles.tag, { backgroundColor: theme.accentSoft }]}>
-                <Text style={{ color: theme.text, fontSize: 13 }}>{v}</Text>
+                <Text style={{ color: theme.text, fontSize: font.footnote }}>{v}</Text>
               </View>
             ))}
           </View>
@@ -362,16 +362,16 @@ function PromptEditor() {
 
 const styles = StyleSheet.create({
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 4 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 4 },
   content: { paddingHorizontal: 20, paddingTop: 4, gap: 12 },
-  title: { fontSize: 26, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
+  title: { fontSize: font.largeTitle, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   wrap: { flexWrap: 'wrap' },
   tag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 14 },
-  tagInput: { minWidth: 80, fontSize: 14, height: 28, paddingVertical: 0 },
+  tagInput: { minWidth: 80, fontSize: font.body, height: 28, paddingVertical: 0 },
   launch: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
-  launchTitle: { fontSize: 15, fontWeight: '700' },
-  launchSub: { fontSize: 12, marginTop: 1 },
+  launchTitle: { fontSize: font.body, fontWeight: '700' },
+  launchSub: { fontSize: font.caption, marginTop: 1 },
   addImage: {
     width: 76,
     height: 76,
@@ -382,8 +382,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 2,
   },
-  addImageText: { fontSize: 11, fontWeight: '600', textAlign: 'center' },
-  hint: { fontSize: 12, marginTop: -4 },
-  body: { fontSize: 16, lineHeight: 24, minHeight: 280, paddingVertical: 8 },
-  footer: { fontSize: 12, textAlign: 'right' },
+  addImageText: { fontSize: font.caption, fontWeight: '600', textAlign: 'center' },
+  hint: { fontSize: font.caption, marginTop: -4 },
+  body: { fontSize: font.headline, lineHeight: 24, minHeight: 280, paddingVertical: 8 },
+  footer: { fontSize: font.caption, textAlign: 'right' },
 });

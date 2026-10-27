@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 
 export type SheetAction = {
   label: string;
@@ -111,24 +111,24 @@ const styles = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 8, paddingHorizontal: 10 },
   handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
-  title: { fontSize: 13, fontWeight: '600', lineHeight: 18, paddingHorizontal: 12, paddingTop: 4, paddingBottom: 6 },
+  title: { fontSize: font.footnote, fontWeight: '600', lineHeight: 18, paddingHorizontal: 12, paddingTop: 4, paddingBottom: 6 },
   quick: { gap: 8, paddingTop: 4, paddingBottom: 8 },
-  quickLabel: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 12 },
+  quickLabel: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 12 },
   quickRow: { gap: 8, paddingHorizontal: 10 },
   quickItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: 8,
     height: 38,
     paddingLeft: 6,
     paddingRight: 12,
     borderRadius: 19,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  quickText: { fontSize: 14, fontWeight: '700' },
+  quickText: { fontSize: font.body, fontWeight: '700' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 46, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12 },
   icon: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  rowText: { flex: 1, fontSize: 15, fontWeight: '600' },
+  rowText: { flex: 1, fontSize: font.body, fontWeight: '600' },
   cancel: { marginTop: 8, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  cancelText: { fontSize: 15, fontWeight: '700' },
+  cancelText: { fontSize: font.body, fontWeight: '700' },
 });

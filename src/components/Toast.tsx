@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Animated, Pressable, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 
 type ToastAction = { label: string; onPress: () => void };
 type ShowToast = (message: string, action?: ToastAction) => void;
@@ -48,6 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           {action && (
             <Pressable
               hitSlop={10}
+              accessibilityRole="button"
               onPress={() => {
                 action.onPress();
                 hide();
@@ -71,11 +72,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 11,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 22,
     maxWidth: '90%',
   },
-  text: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
-  action: { fontSize: 14, fontWeight: '800' },
+  text: { fontSize: font.body, fontWeight: '600', flexShrink: 1 },
+  action: { fontSize: font.body, fontWeight: '800' },
 });

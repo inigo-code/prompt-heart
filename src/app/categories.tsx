@@ -5,7 +5,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
-import { useTheme } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useVisibleFolders } from '@/lib/useAiApps';
 import { FOLDER_COLORS, usePromptStore } from '@/store/PromptStore';
 import type { Folder } from '@/store/types';
@@ -155,29 +155,29 @@ export default function CategoriesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  newBox: { margin: 16, padding: 14, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
-  input: { fontSize: 16, paddingVertical: 4 },
+  newBox: { margin: 16, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
+  input: { fontSize: font.headline, paddingVertical: 4 },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   swatchRing: { width: 35, height: 35, borderRadius: 17.5, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
   swatch: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   addBtn: { height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  addText: { fontSize: 15, fontWeight: '700' },
+  addText: { fontSize: font.body, fontWeight: '700' },
   // Rows form one grouped card: outer edges and rounded corners on the first and last row, dividers between.
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: 52,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderRightWidth: StyleSheet.hairlineWidth,
   },
   first: { borderTopWidth: StyleSheet.hairlineWidth, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
   last: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
-  count: { minWidth: 26, height: 22, borderRadius: 11, paddingHorizontal: 7, alignItems: 'center', justifyContent: 'center' },
-  countText: { fontSize: 12, fontWeight: '700' },
+  count: { minWidth: 26, height: 22, borderRadius: 11, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' },
+  countText: { fontSize: font.caption, fontWeight: '700' },
   dot: { width: 18, height: 18, borderRadius: 9 },
-  rowName: { flex: 1, fontSize: 16, fontWeight: '600' },
+  rowName: { flex: 1, fontSize: font.headline, fontWeight: '600' },
   empty: { textAlign: 'center', paddingTop: 40 },
-  hint: { textAlign: 'center', fontSize: 12, paddingTop: 12 },
+  hint: { textAlign: 'center', fontSize: font.caption, paddingTop: 12 },
 });
