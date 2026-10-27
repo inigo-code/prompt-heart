@@ -24,6 +24,10 @@ export type Settings = {
   showAiBar: boolean;
   /** One-time tips the user has closed. */
   dismissedTips: string[];
+  /** Ask for fingerprint, face or the phone's screen lock to open the app. */
+  appLock: boolean;
+  /** How long the app can be in the background before it locks again, in seconds (0 = straight away). */
+  lockAfter: 0 | 60 | 300;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -37,10 +41,14 @@ export const DEFAULT_SETTINGS: Settings = {
   aiApps: defaultAiApps(),
   showAiBar: true,
   dismissedTips: [],
+  appLock: false,
+  lockAfter: 60,
 };
 
 type SettingsContext = {
   settings: Settings;
+  /** False until saved settings are loaded (so the app lock never flashes the app open first). */
+  ready: boolean;
   update: (patch: Partial<Settings>) => void;
   reset: () => void;
 };
@@ -50,6 +58,7 @@ const Ctx = createContext<SettingsContext | null>(null);
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const loaded = useRef(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
@@ -62,6 +71,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       .catch(() => {})
       .finally(() => {
         loaded.current = true;
+        setReady(true);
       });
   }, []);
 
@@ -70,9 +80,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings]);
 
   const update = useCallback((patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })), []);
-  const reset = useCallback(() => setSettings(DEFAULT_SETTINGS), []);
+  // Resetting keeps the app lock as it is: turning a lock off should always be deliberate.
+  const reset = useCallback(() => setSettings((s) => ({ ...DEFAULT_SETTINGS, appLock: s.appLock, lockAfter: s.lockAfter })), []);
 
-  const value = useMemo(() => ({ settings, update, reset }), [settings, update, reset]);
+  const value = useMemo(() => ({ settings, ready, update, reset }), [settings, ready, update, reset]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

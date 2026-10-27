@@ -54,6 +54,7 @@ MAKE IT YOURS
 • Accent colours, and a list or grid layout
 
 PRIVATE BY DESIGN
+• Optional App lock with your fingerprint, face or screen lock
 • No ads, no analytics, no tracking
 • Your data is never sold
 • Delete your account and its data at any time, right from the app

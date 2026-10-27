@@ -72,4 +72,4 @@ Why "Device or other IDs" is listed: the update service (Expo EAS Update) receiv
 
 ## Permissions declarations
 
-None needed. The app uses only Internet, network state and vibrate, and Android's photo picker (which doesn't need a permission). It declares the specific AI apps it can open with `<queries>`, not the broad `QUERY_ALL_PACKAGES`.
+None needed. The app uses Internet, network state, vibrate and biometric (USE_BIOMETRIC, for the optional App lock), and Android's photo picker (which doesn't need a permission). Biometric data isn't collected: Android checks the fingerprint, face or PIN itself and only tells the app whether it passed, so nothing goes in the Data safety form for it. It declares the specific AI apps it can open with `<queries>`, not the broad `QUERY_ALL_PACKAGES`.

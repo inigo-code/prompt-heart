@@ -5,7 +5,7 @@
 <p align="center">
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.6.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
   <img alt="Supabase" src="https://img.shields.io/badge/Sync-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
@@ -109,7 +109,7 @@ F-Droid checks the repository against this fingerprint, so you only ever get APK
 
 Both ways install the same signed APK, so you can switch between them without losing anything. Smaller updates also arrive by themselves, with a pop-up when they're ready.
 
-> Prompt Heart asks for just two Android permissions: **Internet**, for sync and updates, and **Vibrate**, for copy feedback. Photos are picked with Android's own photo picker, so the app never needs access to your gallery.
+> Prompt Heart asks for very little: **Internet**, for sync and updates, **Vibrate**, for copy feedback, and **Biometric**, only used if you turn on App lock. Photos are picked with Android's own photo picker, so the app never needs access to your gallery.
 
 ## 🔒 Your data
 
@@ -117,6 +117,7 @@ Both ways install the same signed APK, so you can switch between them without lo
 - **Private sync.** With an account, your prompts, images, name and photo sync through Supabase. Row Level Security means every account can only read its own rows, and images sit in a private bucket under your own folder.
 - **Version history stays on your device**, so sync stays fast and light.
 - **Light on the cloud.** Up to 20 images per account sync; any extras stay on your phone. Images are resized to about 100 KB.
+- **Optional App lock.** Unlock with your fingerprint, face or phone screen lock, and keep your prompts hidden in the recent-apps screen.
 - **You're in control.** Change your email or password, export everything, or delete your account and all of its cloud data from **Profile**.
 
 Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/privacy.html), or see [how to delete your account](https://inigo-code.github.io/prompt-heart-site/delete-account.html).

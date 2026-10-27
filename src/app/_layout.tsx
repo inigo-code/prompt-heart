@@ -13,6 +13,7 @@ import { UpdatePrompt } from '@/components/UpdatePrompt';
 import { useTheme } from '@/lib/theme';
 import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
+import { AppLockProvider } from '@/lock/AppLockProvider';
 import { ProfileProvider } from '@/profile/ProfileProvider';
 import { SettingsProvider } from '@/settings/SettingsProvider';
 import { HistoryProvider } from '@/store/HistoryProvider';
@@ -39,9 +40,11 @@ export default function RootLayout() {
             <ProfileProvider>
             <HistoryProvider>
             <ToastProvider>
-              <CopyPromptProvider>
-                <Navigator />
-              </CopyPromptProvider>
+              <AppLockProvider>
+                <CopyPromptProvider>
+                  <Navigator />
+                </CopyPromptProvider>
+              </AppLockProvider>
             </ToastProvider>
             </HistoryProvider>
             </ProfileProvider>

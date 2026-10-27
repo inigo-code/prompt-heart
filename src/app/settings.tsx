@@ -13,6 +13,9 @@ import { APP_NAME } from '@/lib/app';
 import { exportBackup, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
 import { LIBRARY_PROMPTS } from '@/library/prompts';
+import { useAppLock } from '@/lock/AppLockProvider';
+import { lockSupport } from '@/lock/authenticate';
+import { LOCK_AFTER_OPTIONS } from '@/lock/lockTiming';
 import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import type { AccentKey } from '@/settings/SettingsProvider';
@@ -36,6 +39,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { settings, update, reset } = useSettings();
+  const lock = useAppLock();
   const store = usePromptStore();
   const sync = useSync();
   const profile = useProfile();
@@ -51,6 +55,28 @@ export default function SettingsScreen() {
     } finally {
       setBusy(null);
     }
+  };
+
+  // Turning App lock on or off always asks for the phone's lock first, so someone holding an
+  // unlocked phone can't quietly switch it off (or lock you out by switching it on).
+  const toggleLock = async (on: boolean) => {
+    if (on) {
+      const support = await lockSupport();
+      if (support === 'no-screen-lock') {
+        toast('Set up a screen lock (PIN, pattern, password or fingerprint) in Android settings first.');
+        return;
+      }
+      if (support === 'unsupported') {
+        toast("App lock isn't available on this device.");
+        return;
+      }
+    }
+    const result = await lock.confirm(on ? 'Turn on App lock' : 'Turn off App lock');
+    if (result === 'locked-out') toast('Too many tries. Wait a moment, then try again.');
+    if (result !== 'ok') return;
+    update({ appLock: on });
+    if (on) lock.markUnlocked();
+    toast(on ? 'App lock is on' : 'App lock is off');
   };
 
   const doImport = () =>
@@ -149,8 +175,33 @@ export default function SettingsScreen() {
 
       <Section
         theme={theme}
+        title="Security"
+        footer="App lock uses your fingerprint, face or phone screen lock, and hides your prompts in the recent-apps screen. Prompt Heart never sees your fingerprint or PIN."
+      >
+        <ToggleRow
+          theme={theme}
+          icon="lock-closed-outline"
+          label="App lock"
+          value={settings.appLock}
+          onChange={(on) => void toggleLock(on)}
+          last={!settings.appLock}
+        />
+        {settings.appLock && (
+          <ControlRow theme={theme} label="Lock after leaving the app" last>
+            <Segmented
+              theme={theme}
+              value={settings.lockAfter}
+              onChange={(lockAfter) => update({ lockAfter })}
+              options={LOCK_AFTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            />
+          </ControlRow>
+        )}
+      </Section>
+
+      <Section
+        theme={theme}
         title="AI apps"
-        footer={`Each app you turn on gets its own category. Prompts saved there get a button that copies the prompt and opens the app (ChatGPT, Claude, Grok and Perplexity open with it pre-typed; for the others, just paste). Turning an app off hides it everywhere, including its category; its prompts stay under All.`}
+        footer={`Each app you turn on gets its own category. Prompts saved there get a button that copies the prompt and opens the app, ready to paste. Turning an app off hides it everywhere, including its category; its prompts stay under All.`}
       >
         <ToggleRow
           theme={theme}
