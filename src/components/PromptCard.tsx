@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
+import { stripMarkdown } from '@/lib/format';
 import { estimateTokens, extractVariables } from '@/lib/templates';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
@@ -105,7 +106,7 @@ export const PromptCard = memo(function PromptCard({
 
       {!!prompt.body && (
         <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={previewLines}>
-          {prompt.body}
+          {stripMarkdown(prompt.body)}
         </Text>
       )}
 

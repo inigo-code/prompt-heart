@@ -1,18 +1,25 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { ComponentRef } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
 import { Chip } from '@/components/Chip';
+import { FormatBar } from '@/components/FormatBar';
 import { ImageThumb } from '@/components/ImageThumb';
 import { ImageViewer } from '@/components/ImageViewer';
+import { PromptText } from '@/components/PromptText';
 import { useToast } from '@/components/Toast';
+import { applyFormat } from '@/lib/format';
+import type { FormatKind, Selection } from '@/lib/format';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
+import { createUndo } from '@/lib/undo';
+import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
@@ -22,6 +29,7 @@ import { normalizeTag, usePromptStore } from '@/store/PromptStore';
 import type { PromptDraft } from '@/store/types';
 
 type TextDraft = Omit<PromptDraft, 'images'>;
+type Typed = Pick<TextDraft, 'title' | 'body'>;
 
 // Wait for saved data before setting up the editor, so a cold start straight into a prompt
 // (deep link or restored route) doesn't begin from an empty draft and overwrite the text.
@@ -69,11 +77,23 @@ function PromptEditor() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
   const [attaching, setAttaching] = useState(false);
+  // Saved prompts open read-only so a stray tap can't change them; Edit switches to the editor.
+  const [editing, setEditing] = useState(params.id === 'new');
+  const [undo] = useState(() => createUndo<Typed>({ title: draft.title, body: draft.body }));
+  const [undoable, setUndoable] = useState({ canUndo: false, canRedo: false });
+  const syncUndo = () => setUndoable({ canUndo: undo.canUndo(), canRedo: undo.canRedo() });
+  const bodyRef = useRef<ComponentRef<typeof TextInput>>(null);
+  // Where formatting applies: the body's last selection (the end of the text until it's focused).
+  const selectionRef = useRef<Selection>({ start: draft.body.length, end: draft.body.length });
+  const [selection, setSelection] = useState<Selection | undefined>();
 
   // Images are edited straight in the store (they aren't typed), so read them from there.
   const prompt = id ? store.getPrompt(id) : undefined;
   const images = prompt?.images ?? [];
   const launchApp = useLaunchApp(draft.folderId);
+  const folder = folders.find((f) => f.id === draft.folderId);
+
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   const change = (patch: Partial<TextDraft>) => {
     if (id && !snapped.current && (patch.title !== undefined || patch.body !== undefined)) {
@@ -84,6 +104,35 @@ function PromptEditor() {
     setDraft(next);
     if (id) store.updatePrompt(id, patch);
     else if (next.title.trim() || next.body.trim()) setId(store.createPrompt(next).id);
+  };
+
+  const type = (patch: Partial<Typed>, kind: UndoKind = 'typing') => {
+    change(patch);
+    undo.record({ title: patch.title ?? draft.title, body: patch.body ?? draft.body }, Date.now(), kind);
+    syncUndo();
+  };
+
+  const stepBack = (to: Typed | null) => {
+    if (!to) return;
+    const patch: Partial<Typed> = {};
+    if (to.title !== draft.title) patch.title = to.title;
+    if (to.body !== draft.body) patch.body = to.body;
+    change(patch);
+    syncUndo();
+  };
+
+  const format = (kind: FormatKind) => {
+    const next = applyFormat(draft.body, selectionRef.current, kind);
+    type({ body: next.text }, 'action');
+    selectionRef.current = next.selection;
+    setSelection(next.selection);
+    bodyRef.current?.focus();
+  };
+
+  const finishEditing = () => {
+    Keyboard.dismiss();
+    if (!id) leave();
+    else setEditing(false);
   };
 
   // A prompt cleared out completely is removed for good rather than sent to Trash.
@@ -105,9 +154,13 @@ function PromptEditor() {
     useCallback(() => {
       if (!id) return;
       const p = getSnapshot().prompts.find((x) => x.id === id);
-      if (p) setDraft((d) => (d.title === p.title && d.body === p.body ? d : { ...d, title: p.title, body: p.body }));
+      if (p) {
+        setDraft((d) => (d.title === p.title && d.body === p.body ? d : { ...d, title: p.title, body: p.body }));
+        undo.reset({ title: p.title, body: p.body });
+        setUndoable({ canUndo: false, canRedo: false });
+      }
       snapped.current = false;
-    }, [id, getSnapshot]),
+    }, [id, getSnapshot, undo]),
   );
 
   const addTags = (raw: string[]) => {
@@ -146,8 +199,6 @@ function PromptEditor() {
     if (id && store.removeImage(id, imageId)) deleteLocalImage(imageId);
   };
 
-  const leave = () => (router.canGoBack() ? router.back() : router.replace('/'));
-
   const words = draft.body.trim() ? draft.body.trim().split(/\s+/).length : 0;
   const variables = extractVariables(draft.body);
 
@@ -174,35 +225,72 @@ function PromptEditor() {
               <Pressable hitSlop={8} accessibilityLabel="More" disabled={!id} onPress={() => setMenuOpen(true)}>
                 <Ionicons name="ellipsis-horizontal" size={22} color={id ? theme.text : theme.textMuted} />
               </Pressable>
+              <Pressable
+                hitSlop={8}
+                onPress={editing ? finishEditing : () => setEditing(true)}
+                accessibilityRole="button"
+                accessibilityLabel={editing ? 'Done editing' : 'Edit prompt'}
+                style={({ pressed }) => [styles.editBtn, { backgroundColor: editing ? theme.accent : theme.chip, opacity: pressed ? 0.75 : 1 }]}
+              >
+                {!editing && <Ionicons name="create-outline" size={16} color={theme.text} />}
+                <Text style={[styles.editText, { color: editing ? theme.accentText : theme.text }]}>{editing ? 'Done' : 'Edit'}</Text>
+              </Pressable>
             </View>
           ),
         }}
       />
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
-        <TextInput
-          value={draft.title}
-          onChangeText={(title) => change({ title })}
-          placeholder="Title"
-          placeholderTextColor={theme.textMuted}
-          style={[styles.title, { color: theme.text }]}
-          autoFocus={params.id === 'new'}
+      {editing && (
+        <FormatBar
+          theme={theme}
+          canUndo={undoable.canUndo}
+          canRedo={undoable.canRedo}
+          onUndo={() => stepBack(undo.undo())}
+          onRedo={() => stepBack(undo.redo())}
+          onFormat={format}
         />
+      )}
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-          <Chip label="No category" theme={theme} active={draft.folderId === null} onPress={() => change({ folderId: null })} />
-          {folders.map((f) => (
-            <Chip
-              key={f.id}
-              label={f.name}
-              color={f.color}
-              theme={theme}
-              active={draft.folderId === f.id}
-              onPress={() => change({ folderId: f.id })}
-            />
-          ))}
-          <Chip label="+ New category" variant="action" theme={theme} onPress={() => router.push({ pathname: '/categories', params: { new: '1' } })} />
-        </ScrollView>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
+        {editing ? (
+          <TextInput
+            value={draft.title}
+            onChangeText={(title) => type({ title })}
+            placeholder="Title"
+            placeholderTextColor={theme.textMuted}
+            style={[styles.title, { color: theme.text }]}
+            autoFocus={params.id === 'new'}
+          />
+        ) : (
+          <Text selectable accessibilityRole="header" style={[styles.title, { color: draft.title ? theme.text : theme.textMuted }]}>
+            {draft.title || 'Untitled'}
+          </Text>
+        )}
+
+        {!editing && folder && (
+          <View style={styles.row}>
+            <View style={[styles.tag, { backgroundColor: theme.chip }]}>
+              <View style={[styles.folderDot, { backgroundColor: folder.color }]} />
+              <Text style={{ color: theme.text, fontSize: font.footnote, fontWeight: '600' }}>{folder.name}</Text>
+            </View>
+          </View>
+        )}
+        {editing && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+            <Chip label="No category" theme={theme} active={draft.folderId === null} onPress={() => change({ folderId: null })} />
+            {folders.map((f) => (
+              <Chip
+                key={f.id}
+                label={f.name}
+                color={f.color}
+                theme={theme}
+                active={draft.folderId === f.id}
+                onPress={() => change({ folderId: f.id })}
+              />
+            ))}
+            <Chip label="+ New category" variant="action" theme={theme} onPress={() => router.push({ pathname: '/categories', params: { new: '1' } })} />
+          </ScrollView>
+        )}
 
         {launchApp && (
           <Pressable
@@ -226,40 +314,45 @@ function PromptEditor() {
           </Pressable>
         )}
 
-        <View style={[styles.row, styles.wrap]}>
-          {draft.tags.map((t) => (
-            <Pressable
-              key={t}
-              onPress={() => change({ tags: draft.tags.filter((x) => x !== t) })}
-              accessibilityLabel={`Remove tag ${t}`}
-              style={[styles.tag, { backgroundColor: theme.chip }]}
-            >
-              <Text style={{ color: theme.text, fontSize: font.footnote }}>#{t}</Text>
-              <Ionicons name="close" size={13} color={theme.textMuted} />
-            </Pressable>
-          ))}
-          <TextInput
-            value={tagInput}
-            onChangeText={onTagText}
-            onSubmitEditing={addTag}
-            onBlur={addTag}
-            placeholder="+ tag"
-            placeholderTextColor={theme.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            submitBehavior="submit"
-            style={[styles.tagInput, { color: theme.text }]}
-          />
-        </View>
+        {(editing || draft.tags.length > 0) && (
+          <View style={[styles.row, styles.wrap]}>
+            {draft.tags.map((t) => (
+              <Pressable
+                key={t}
+                disabled={!editing}
+                onPress={() => change({ tags: draft.tags.filter((x) => x !== t) })}
+                accessibilityLabel={editing ? `Remove tag ${t}` : `Tag ${t}`}
+                style={[styles.tag, { backgroundColor: theme.chip }]}
+              >
+                <Text style={{ color: theme.text, fontSize: font.footnote }}>#{t}</Text>
+                {editing && <Ionicons name="close" size={13} color={theme.textMuted} />}
+              </Pressable>
+            ))}
+            {editing && (
+              <TextInput
+                value={tagInput}
+                onChangeText={onTagText}
+                onSubmitEditing={addTag}
+                onBlur={addTag}
+                placeholder="+ tag"
+                placeholderTextColor={theme.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+                submitBehavior="submit"
+                style={[styles.tagInput, { color: theme.text }]}
+              />
+            )}
+          </View>
+        )}
 
-        {(images.length > 0 || imagesSupported) && (
+        {(images.length > 0 || (editing && imagesSupported)) && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
             {images.map((img) => (
               <Pressable key={img} onPress={() => setViewing(img)} accessibilityLabel="View image">
                 <ImageThumb id={img} theme={theme} size={76} radius={12} />
               </Pressable>
             ))}
-            {imagesSupported && (
+            {editing && imagesSupported && (
               <Pressable
                 onPress={attach}
                 disabled={attaching}
@@ -285,16 +378,28 @@ function PromptEditor() {
           </Text>
         )}
 
-        <TextInput
-          value={draft.body}
-          onChangeText={(body) => change({ body })}
-          placeholder={'Write your prompt…\n\nUse {{placeholders}} for parts you fill in later, or {{tone|friendly}} to give one a default.'}
-          placeholderTextColor={theme.textMuted}
-          style={[styles.body, { color: theme.text }]}
-          multiline
-          textAlignVertical="top"
-          scrollEnabled={false}
-        />
+        {editing ? (
+          <TextInput
+            ref={bodyRef}
+            value={draft.body}
+            onChangeText={(body) => type({ body })}
+            selection={selection}
+            onSelectionChange={(e) => {
+              selectionRef.current = e.nativeEvent.selection;
+              if (selection) setSelection(undefined);
+            }}
+            placeholder={'Write your prompt…\n\nUse {{placeholders}} for parts you fill in later, or {{tone|friendly}} to give one a default.'}
+            placeholderTextColor={theme.textMuted}
+            style={[styles.body, { color: theme.text }]}
+            multiline
+            textAlignVertical="top"
+            scrollEnabled={false}
+          />
+        ) : draft.body ? (
+          <PromptText body={draft.body} theme={theme} />
+        ) : (
+          <Text style={[styles.emptyBody, { color: theme.textMuted }]}>No text yet. Tap Edit to write this prompt.</Text>
+        )}
 
         {variables.length > 0 && (
           <View style={[styles.row, styles.wrap]}>
@@ -315,7 +420,7 @@ function PromptEditor() {
         </Text>
       </ScrollView>
 
-      <ImageViewer imageId={viewing} onClose={() => setViewing(null)} onRemove={removeImage} />
+      <ImageViewer imageId={viewing} onClose={() => setViewing(null)} onRemove={editing ? removeImage : undefined} />
 
       <ActionSheet
         visible={menuOpen}
@@ -363,6 +468,8 @@ function PromptEditor() {
 const styles = StyleSheet.create({
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 4 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 32, paddingHorizontal: 12, borderRadius: 16 },
+  editText: { fontSize: font.body, fontWeight: '700' },
   content: { paddingHorizontal: 20, paddingTop: 4, gap: 12 },
   title: { fontSize: font.largeTitle, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -385,5 +492,7 @@ const styles = StyleSheet.create({
   addImageText: { fontSize: font.caption, fontWeight: '600', textAlign: 'center' },
   hint: { fontSize: font.caption, marginTop: -4 },
   body: { fontSize: font.headline, lineHeight: 24, minHeight: 280, paddingVertical: 8 },
+  emptyBody: { fontSize: font.body, paddingVertical: 8, minHeight: 120 },
+  folderDot: { width: 8, height: 8, borderRadius: 4 },
   footer: { fontSize: font.caption, textAlign: 'right' },
 });
