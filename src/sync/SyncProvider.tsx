@@ -24,7 +24,8 @@ export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'w
 
 export type SyncProgress = { label: string; done: number; total: number };
 /** Cloud image usage: how many are stored, the limit, and how many are waiting on this phone because of it. */
-export type ImageUsage = { used: number; limit: number; waiting: number };
+/** Cloud images: how many are used, the limit, how many wait for room, and how many failed and will retry. */
+export type ImageUsage = { used: number; limit: number; waiting: number; failed: number };
 
 type SyncContext = {
   status: SyncStatus;
@@ -114,6 +115,7 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
   const remote = await listRemoteImages(client, userId);
   const uploaded: string[] = [];
   const waiting: string[] = [];
+  let failed = 0;
   const toUpload = pendingImageUploads.filter((id) => {
     if (remote.has(id)) {
       uploaded.push(id); // already in the cloud (e.g. re-queued after signing in again)
@@ -138,11 +140,13 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
         remote.add(id); // treat as full for the rest of this pass
         continue;
       }
-      throw e;
+      // Anything else (the network, or a problem on the server): keep it queued and try again next
+      // sync, so one image never holds back your prompts.
+      failed++;
     }
   }
   store.markImagesSynced({ uploaded, deleted: [] });
-  return { used: Math.min(remote.size, CLOUD_IMAGE_LIMIT), limit: CLOUD_IMAGE_LIMIT, waiting: waiting.length };
+  return { used: Math.min(remote.size, CLOUD_IMAGE_LIMIT), limit: CLOUD_IMAGE_LIMIT, waiting: waiting.length, failed };
 }
 
 /** Fetches attachments referenced by prompts that this device doesn't have a file for yet. */

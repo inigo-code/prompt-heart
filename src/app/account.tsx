@@ -330,6 +330,9 @@ function SignedIn({ theme }: { theme: Theme }) {
             {imageUsage.waiting
               ? `. ${imageUsage.waiting} more ${imageUsage.waiting === 1 ? 'is' : 'are'} saved on this phone only; remove some cloud images to sync them.`
               : ''}
+            {imageUsage.failed
+              ? `. ${imageUsage.failed} ${imageUsage.failed === 1 ? 'image' : 'images'} couldn’t upload and will try again next sync.`
+              : ''}
           </Text>
         )}
         <Button theme={theme} kind="secondary" label="Sync now" busy={status === 'syncing'} onPress={() => void syncNow()} />
