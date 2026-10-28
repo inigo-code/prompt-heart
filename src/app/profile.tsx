@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActionSheet } from '@/components/ActionSheet';
 import { Avatar } from '@/components/Avatar';
+import { InsightsSection } from '@/components/profile/InsightsSection';
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { Row, Section } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
@@ -13,7 +14,9 @@ import { greeting, useHour } from '@/lib/greeting';
 import { deleteLocalImage } from '@/lib/images';
 import type { Theme } from '@/lib/theme';
 import { font, useTheme } from '@/lib/theme';
-import { useProfile } from '@/profile/ProfileProvider';
+import { useActivity } from '@/profile/ActivityProvider';
+import { BIO_MAX, useProfile } from '@/profile/ProfileProvider';
+import { useHistory } from '@/store/HistoryProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import { useSync } from '@/sync/SyncProvider';
 
@@ -39,13 +42,18 @@ export default function ProfileScreen() {
   const store = usePromptStore();
   const signedIn = !!sync.user;
 
+  const activity = useActivity();
+  const history = useHistory();
   const [name, setName] = useState(profile.name);
-  const [syncedName, setSyncedName] = useState(profile.name);
-  // Pick up a name that arrives from the account (another device) while this screen is open.
-  if (profile.name !== syncedName) {
-    setSyncedName(profile.name);
-    setName(profile.name);
+  const [bio, setBio] = useState(profile.bio);
+  const [synced, setSynced] = useState({ name: profile.name, bio: profile.bio });
+  // Pick up a name or bio that arrives from the account (another device) while this screen is open.
+  if (profile.name !== synced.name || profile.bio !== synced.bio) {
+    if (profile.name !== synced.name) setName(profile.name);
+    if (profile.bio !== synced.bio) setBio(profile.bio);
+    setSynced({ name: profile.name, bio: profile.bio });
   }
+  const aboutChanged = name.trim() !== profile.name || bio.trim() !== profile.bio;
 
   const [editing, setEditing] = useState<'email' | 'password' | null>(null);
   const [photoMenu, setPhotoMenu] = useState(false);
@@ -65,11 +73,12 @@ export default function ProfileScreen() {
     }
   };
 
-  const saveName = () => {
-    if (name.trim() === profile.name) return;
+  const saveAbout = () => {
+    if (!aboutChanged) return;
     run('name', async () => {
-      await profile.setName(name);
-      return 'Name saved';
+      if (name.trim() !== profile.name) await profile.setName(name);
+      if (bio.trim() !== profile.bio) await profile.setBio(bio);
+      return 'Saved';
     });
   };
 
@@ -77,7 +86,11 @@ export default function ProfileScreen() {
     run('delete', async () => {
       await sync.deleteAccount();
       profile.clear();
-      if (eraseDevice) store.eraseAll().forEach(deleteLocalImage);
+      if (eraseDevice) {
+        store.eraseAll().forEach(deleteLocalImage);
+        history.clearAll();
+        activity.clear();
+      }
       router.replace('/');
       return eraseDevice ? 'Account deleted and this device erased' : 'Account deleted. Your prompts are still on this device.';
     });
@@ -98,32 +111,46 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
           <Text style={[styles.hello, { color: theme.text }]}>{greeting(hour, profile.displayName)}</Text>
+          {!!profile.bio && <Text style={[styles.bio, { color: theme.text }]}>{profile.bio}</Text>}
           {sync.user?.email && <Text style={[styles.email, { color: theme.textMuted }]}>{sync.user.email}</Text>}
         </View>
 
-        <Section theme={theme} title="Your name" footer="Used in your welcome message. Saved to your account when you're signed in.">
-          <View style={styles.inputRow}>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              onBlur={saveName}
-              onSubmitEditing={saveName}
-              placeholder="What should we call you?"
-              placeholderTextColor={theme.textMuted}
-              autoCapitalize="words"
-              autoComplete="name"
-              textContentType="name"
-              returnKeyType="done"
-              style={[styles.input, { color: theme.text }]}
-            />
+        <Section theme={theme} title="About you" footer="Your name is used in your welcome message. Both are saved to your account when you're signed in, so they follow you to your other phones.">
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            onSubmitEditing={saveAbout}
+            placeholder="What should we call you?"
+            placeholderTextColor={theme.textMuted}
+            autoCapitalize="words"
+            autoComplete="name"
+            textContentType="name"
+            returnKeyType="done"
+            accessibilityLabel="Your name"
+            style={[styles.input, { color: theme.text, borderBottomColor: theme.border }]}
+          />
+          <TextInput
+            value={bio}
+            onChangeText={(t) => setBio(t.slice(0, BIO_MAX))}
+            placeholder="A line about you, e.g. Writes prompts for a design studio"
+            placeholderTextColor={theme.textMuted}
+            multiline
+            maxLength={BIO_MAX}
+            accessibilityLabel="Your bio"
+            style={[styles.bioInput, { color: theme.text }]}
+          />
+          <View style={styles.aboutFoot}>
+            <Text style={[styles.count, { color: theme.textMuted }]}>
+              {bio.length} / {BIO_MAX}
+            </Text>
             {busy === 'name' ? (
               <ActivityIndicator color={theme.textMuted} />
             ) : (
-              name.trim() !== profile.name && (
+              aboutChanged && (
                 <Pressable
-                  onPress={saveName}
+                  onPress={saveAbout}
                   accessibilityRole="button"
-                  accessibilityLabel="Save name"
+                  accessibilityLabel="Save name and bio"
                   style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
                 >
                   <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
@@ -132,6 +159,8 @@ export default function ProfileScreen() {
             )}
           </View>
         </Section>
+
+        <InsightsSection theme={theme} />
 
         {signedIn ? (
           <Section theme={theme} title="Account">
@@ -307,8 +336,11 @@ const styles = StyleSheet.create({
   },
   hello: { fontSize: font.title, fontWeight: '800', marginTop: 8 },
   email: { fontSize: font.body },
-  inputRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, gap: 8 },
-  input: { flex: 1, fontSize: font.headline, height: 52 },
+  bio: { fontSize: font.body, lineHeight: 21, textAlign: 'center', maxWidth: 320 },
+  input: { fontSize: font.headline, height: 52, paddingHorizontal: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  bioInput: { fontSize: font.body, lineHeight: 21, minHeight: 72, paddingHorizontal: 16, paddingTop: 12, textAlignVertical: 'top' },
+  aboutFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44, paddingHorizontal: 16, paddingBottom: 10 },
+  count: { fontSize: font.caption },
   nameSave: { paddingHorizontal: 16, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   nameSaveText: { fontSize: font.body, fontWeight: '800' },
   form: { padding: 16, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },

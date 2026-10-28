@@ -14,6 +14,7 @@ import { useTheme } from '@/lib/theme';
 import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
 import { AppLockProvider } from '@/lock/AppLockProvider';
+import { ActivityProvider } from '@/profile/ActivityProvider';
 import { ProfileProvider } from '@/profile/ProfileProvider';
 import { SettingsProvider } from '@/settings/SettingsProvider';
 import { HistoryProvider } from '@/store/HistoryProvider';
@@ -39,6 +40,7 @@ export default function RootLayout() {
           <SyncProvider>
             <ProfileProvider>
             <HistoryProvider>
+            <ActivityProvider>
             <ToastProvider>
               <AppLockProvider>
                 <CopyPromptProvider>
@@ -46,6 +48,7 @@ export default function RootLayout() {
                 </CopyPromptProvider>
               </AppLockProvider>
             </ToastProvider>
+            </ActivityProvider>
             </HistoryProvider>
             </ProfileProvider>
           </SyncProvider>
@@ -89,6 +92,7 @@ function Navigator() {
         <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         <Stack.Screen name="about" options={{ title: 'About' }} />
         <Stack.Screen name="trash" options={{ title: 'Trash' }} />
+        <Stack.Screen name="import" options={{ title: 'Import prompts' }} />
         <Stack.Screen name="library" options={{ title: 'Prompt library' }} />
         <Stack.Screen name="share" options={{ title: 'Save prompt' }} />
       </Stack>

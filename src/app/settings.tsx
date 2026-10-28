@@ -10,7 +10,7 @@ import { ControlRow, Row, Section, Segmented, ToggleRow } from '@/components/Set
 import { useToast } from '@/components/Toast';
 import { AI_APPS } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
-import { exportBackup, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
+import { exportBackup, exportCsv, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
 import { LIBRARY_PROMPTS } from '@/library/prompts';
 import { useAppLock } from '@/lock/AppLockProvider';
@@ -43,9 +43,9 @@ export default function SettingsScreen() {
   const store = usePromptStore();
   const sync = useSync();
   const profile = useProfile();
-  const [busy, setBusy] = useState<'backup' | 'markdown' | 'import' | null>(null);
+  const [busy, setBusy] = useState<'backup' | 'markdown' | 'csv' | 'import' | null>(null);
 
-  const run = async (kind: 'backup' | 'markdown' | 'import', fn: () => Promise<string | null>) => {
+  const run = async (kind: 'backup' | 'markdown' | 'csv' | 'import', fn: () => Promise<string | null>) => {
     setBusy(kind);
     try {
       const msg = await fn();
@@ -248,7 +248,15 @@ export default function SettingsScreen() {
           busy={busy === 'markdown'}
           onPress={() => run('markdown', async () => (await exportMarkdown(store.prompts, store.folders), null))}
         />
+        <Row
+          theme={theme}
+          icon="grid-outline"
+          label="Export as spreadsheet (CSV)"
+          busy={busy === 'csv'}
+          onPress={() => run('csv', async () => (await exportCsv(store.prompts, store.folders), null))}
+        />
         <Row theme={theme} icon="push-outline" label="Import backup" busy={busy === 'import'} onPress={doImport} />
+        <Row theme={theme} icon="enter-outline" label="Import from other apps" onPress={() => router.push('/import')} />
         <Row
           theme={theme}
           icon="library-outline"

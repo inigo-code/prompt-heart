@@ -28,6 +28,8 @@ export type Settings = {
   appLock: boolean;
   /** How long the app can be in the background before it locks again, in seconds (0 = straight away). */
   lockAfter: 0 | 60 | 300;
+  /** The update whose "What's new" card was already shown. */
+  seenUpdate: string | null;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dismissedTips: [],
   appLock: false,
   lockAfter: 60,
+  seenUpdate: null,
 };
 
 type SettingsContext = {
@@ -80,8 +83,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings]);
 
   const update = useCallback((patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })), []);
-  // Resetting keeps the app lock as it is: turning a lock off should always be deliberate.
-  const reset = useCallback(() => setSettings((s) => ({ ...DEFAULT_SETTINGS, appLock: s.appLock, lockAfter: s.lockAfter })), []);
+  // Resetting keeps the app lock as it is (turning a lock off should always be deliberate) and doesn't
+  // bring back a What's new card that was already read.
+  const reset = useCallback(() => setSettings((s) => ({ ...DEFAULT_SETTINGS, appLock: s.appLock, lockAfter: s.lockAfter, seenUpdate: s.seenUpdate })), []);
 
   const value = useMemo(() => ({ settings, ready, update, reset }), [settings, ready, update, reset]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

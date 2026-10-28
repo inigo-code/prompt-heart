@@ -9,6 +9,7 @@ import { useToast } from '@/components/Toast';
 import type { AiApp } from '@/lib/ai';
 import { openAiApp } from '@/lib/launch';
 import { extractDefaults, extractVariables } from '@/lib/templates';
+import { useActivity } from '@/profile/ActivityProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
@@ -24,6 +25,7 @@ type Pending = { prompt: Prompt; variables: string[]; initialValues: Record<stri
 // prompts with {{placeholders}} open a fill-in sheet first.
 export function CopyPromptProvider({ children }: { children: ReactNode }) {
   const { recordCopy } = usePromptStore();
+  const { logCopy } = useActivity();
   const { settings } = useSettings();
   const toast = useToast();
   const [pending, setPending] = useState<Pending | null>(null);
@@ -38,6 +40,7 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
       }
       recordCopy(prompt.id);
       const app = options?.openIn;
+      logCopy(app?.key);
       if (app) {
         openAiApp(app, text)
           .then((how) =>
@@ -54,7 +57,7 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
         toast('Copied to clipboard');
       }
     },
-    [recordCopy, toast, settings.haptics],
+    [recordCopy, logCopy, toast, settings.haptics],
   );
 
   const copy = useCallback<CopyFn>(

@@ -16,6 +16,8 @@ type AppLockContext = {
   confirm: (reason: string) => Promise<AuthResult>;
   /** Treat the app as unlocked now, e.g. right after App lock is turned on. */
   markUnlocked: () => void;
+  /** True while the lock screen (or the cover before settings load) is showing. */
+  locked: boolean;
 };
 
 const Ctx = createContext<AppLockContext | null>(null);
@@ -68,9 +70,9 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     return () => sub.remove();
   }, [enabled, settings.lockAfter]);
 
-  const value = useMemo(() => ({ confirm, markUnlocked }), [confirm, markUnlocked]);
   // Until settings are loaded we don't know whether to lock, so cover the app rather than flash it open.
   const showLock = !ready || (enabled && !unlocked);
+  const value = useMemo(() => ({ confirm, markUnlocked, locked: showLock }), [confirm, markUnlocked, showLock]);
 
   return (
     <Ctx.Provider value={value}>

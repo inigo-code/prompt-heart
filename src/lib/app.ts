@@ -15,3 +15,18 @@ export const LINKS = {
   deleteAccount: 'https://inigo-code.github.io/prompt-heart-site/delete-account.html',
 };
 export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
+
+/**
+ * Shown once after an update installs. Change the id and the lines with each update worth telling
+ * people about; an update that leaves it alone shows nothing. A fresh install never shows it.
+ */
+export const WHATS_NEW = {
+  id: '2026-10-29',
+  items: [
+    'Your profile shows your prompting: the four you use most, a year of activity, streaks and achievements',
+    'Add a short bio; like your name and photo, it follows you to your other phones',
+    'Import prompts from other apps: spreadsheets, Notion, JSON, Markdown and text files',
+    'Export your prompts as a spreadsheet (CSV)',
+    'Prompts open read-only; tap Edit for formatting, undo and redo',
+  ],
+};

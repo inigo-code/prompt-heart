@@ -12,6 +12,8 @@ export type Version = { at: number; title: string; body: string };
 type History = Record<string, Version[]>;
 
 type HistoryContext = {
+  /** Every prompt's versions (for the profile's activity). */
+  all: History;
   /** Newest first. */
   versionsFor: (promptId: string) => Version[];
   /** Saves the prompt's current text as a version, unless it matches the newest one. */
@@ -82,7 +84,7 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
   const clearAll = useCallback(() => setHistory({}), []);
 
   const value = useMemo<HistoryContext>(
-    () => ({ versionsFor: (id) => history[id] ?? [], snapshot, restore, forget, clearAll }),
+    () => ({ all: history, versionsFor: (id) => history[id] ?? [], snapshot, restore, forget, clearAll }),
     [history, snapshot, restore, forget, clearAll],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

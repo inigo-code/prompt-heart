@@ -12,18 +12,21 @@ import { supabase } from '@/sync/supabase';
 const STORAGE_KEY = 'promptheart/profile';
 const AVATAR_SIZE = 512;
 
-// Saved on this device. When signed in, the name and a photo "version" also live in the account's
-// metadata (full_name, avatar_version), and the photo itself at <user id>/avatar.jpg in storage,
+// Saved on this device. When signed in, the name, the bio and a photo "version" also live in the
+// account's metadata (full_name, bio, avatar_version), and the photo itself at <user id>/avatar.jpg in storage,
 // so other devices pick them up.
 type LocalProfile = {
   name: string;
+  /** A line or two about you, shown under your name. */
+  bio: string;
   /** Photo version (a timestamp); the file is avatar-<version>.jpg. */
   avatarVersion: number | null;
   /** Account the current photo was last uploaded to or downloaded from. */
   avatarSyncedFor: string | null;
 };
 
-const EMPTY: LocalProfile = { name: '', avatarVersion: null, avatarSyncedFor: null };
+const EMPTY: LocalProfile = { name: '', bio: '', avatarVersion: null, avatarSyncedFor: null };
+export const BIO_MAX = 160;
 
 function profileDir() {
   const dir = new Directory(Paths.document, 'profile');
@@ -42,11 +45,13 @@ function deleteAvatarFiles(except?: number) {
 
 type ProfileContext = {
   name: string;
+  bio: string;
   /** Name to greet with: the profile name, else the part of the email before "@". */
   displayName: string;
   avatarUri: string | null;
   canChangePhoto: boolean;
   setName: (name: string) => Promise<void>;
+  setBio: (bio: string) => Promise<void>;
   /** Opens the photo library with a square crop; resolves false if cancelled. */
   pickAvatar: () => Promise<boolean>;
   removeAvatar: () => Promise<void>;
@@ -78,6 +83,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const userId = user?.id ?? null;
   const metaName = typeof user?.meta.full_name === 'string' ? user.meta.full_name : '';
+  const metaBio = typeof user?.meta.bio === 'string' ? user.meta.bio : null;
   const metaAvatar = typeof user?.meta.avatar_version === 'number' ? user.meta.avatar_version : null;
   const metaHasAvatarKey = !!user && 'avatar_version' in user.meta;
 
@@ -100,6 +106,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const client = supabase;
     // Name: the account's copy wins (see `effectiveName`); if it has none yet, give it ours.
     if (!metaName && profile.name) updateProfile({ full_name: profile.name }).catch(() => {});
+    // Bio: the same, except an empty bio on the account is a real choice (it was cleared elsewhere).
+    if (metaBio === null && profile.bio) updateProfile({ bio: profile.bio }).catch(() => {});
 
     if (!imagesSupported) return;
     const local = profile.avatarVersion;
@@ -124,13 +132,22 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         setProfile((p) => ({ ...p, avatarVersion: null, avatarSyncedFor: null }));
       });
     }
-  }, [ready, userId, metaName, metaAvatar, metaHasAvatarKey, profile.name, profile.avatarVersion, profile.avatarSyncedFor, updateProfile, uploadAvatar]);
+  }, [ready, userId, metaName, metaBio, profile.bio, metaAvatar, metaHasAvatarKey, profile.name, profile.avatarVersion, profile.avatarSyncedFor, updateProfile, uploadAvatar]);
 
   const setName = useCallback(
     async (name: string) => {
       const next = name.trim();
       setProfile((p) => ({ ...p, name: next }));
       if (userId) await updateProfile({ full_name: next });
+    },
+    [userId, updateProfile],
+  );
+
+  const setBio = useCallback(
+    async (bio: string) => {
+      const next = bio.trim().slice(0, BIO_MAX);
+      setProfile((p) => ({ ...p, bio: next }));
+      if (userId) await updateProfile({ bio: next });
     },
     [userId, updateProfile],
   );
@@ -165,6 +182,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const email = user?.email ?? null;
   // Signed in, the account's name wins, so a rename on another device shows up here.
   const effectiveName = userId && metaName ? metaName : profile.name;
+  const effectiveBio = userId && metaBio !== null ? metaBio : profile.bio;
 
   const value = useMemo<ProfileContext>(() => {
     const avatarUri = imagesSupported && profile.avatarVersion && avatarFile(profile.avatarVersion).exists ? avatarFile(profile.avatarVersion).uri : null;
@@ -172,15 +190,17 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const pretty = fromEmail ? fromEmail.charAt(0).toUpperCase() + fromEmail.slice(1).split(/[._+-]/)[0] : '';
     return {
       name: effectiveName,
+      bio: effectiveBio,
       displayName: effectiveName || pretty,
       avatarUri,
       canChangePhoto: imagesSupported,
       setName,
+      setBio,
       pickAvatar,
       removeAvatar,
       clear,
     };
-  }, [profile.avatarVersion, effectiveName, email, setName, pickAvatar, removeAvatar, clear]);
+  }, [profile.avatarVersion, effectiveName, effectiveBio, email, setName, setBio, pickAvatar, removeAvatar, clear]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

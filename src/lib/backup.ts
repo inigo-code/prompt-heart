@@ -5,6 +5,8 @@ import { Platform } from 'react-native';
 
 import { APP_NAME, APP_SLUG } from '@/lib/app';
 import { imageBase64, imagesSupported, writeImageBase64 } from '@/lib/images';
+import { parseImport, toCsv } from '@/lib/importFiles';
+import type { ParsedFile } from '@/lib/importFiles';
 import type { Folder, Prompt } from '@/store/types';
 
 const FORMAT = 'promptheart-backup';
@@ -68,6 +70,37 @@ export async function exportMarkdown(prompts: Prompt[], folders: Folder[]) {
     }
   }
   await share(`${APP_SLUG}-prompts-${stamp()}.md`, out.join('\n'), 'text/markdown');
+}
+
+/** Exports prompts as a spreadsheet (CSV), one row per prompt. It reads back in with "Import from other apps". */
+export async function exportCsv(prompts: Prompt[], folders: Folder[]) {
+  // The byte-order mark tells Excel the file is UTF-8, so accents and emoji survive.
+  await share(`${APP_SLUG}-prompts-${stamp()}.csv`, '﻿' + toCsv(prompts, folders), 'text/csv');
+}
+
+const readText = async (uri: string) => (Platform.OS === 'web' ? (await fetch(uri)).text() : new File(uri).text());
+
+/**
+ * Lets the user pick one or more files exported by other apps (CSV, JSON, Markdown or text) and reads
+ * the prompts in them. Returns null if cancelled; files that can't be read are listed in `errors`.
+ */
+export async function pickImportFiles(): Promise<{ files: ParsedFile[]; errors: string[] } | null> {
+  const res = await DocumentPicker.getDocumentAsync({
+    type: ['text/csv', 'text/comma-separated-values', 'application/json', 'text/markdown', 'text/plain', 'text/tab-separated-values', '*/*'],
+    copyToCacheDirectory: true,
+    multiple: true,
+  });
+  if (res.canceled || !res.assets?.length) return null;
+  const files: ParsedFile[] = [];
+  const errors: string[] = [];
+  for (const asset of res.assets) {
+    try {
+      files.push(parseImport(asset.name, await readText(asset.uri)));
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  return { files, errors };
 }
 
 /** Lets the user pick a backup file; returns null if cancelled. Throws on files that aren't backups. */
