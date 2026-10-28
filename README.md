@@ -6,7 +6,7 @@
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.6.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.7.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
   <img alt="Supabase" src="https://img.shields.io/badge/Sync-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
@@ -45,30 +45,44 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
   </tr>
   <tr>
     <td valign="top">
+      <h4>✍️ Read, then edit</h4>
+      Prompts open read-only, so a stray tap can't change them. <b>Edit</b> adds bold, lists, headings, code and <code>{{blanks}}</code>, with undo and redo.
+    </td>
+    <td valign="top">
       <h4>🗂️ Organise anything</h4>
       Categories, #tags, pins, search, grid or list, a Recently copied view, and <b>bulk select</b> to move, tag or delete many at once.
     </td>
     <td valign="top">
       <h4>🕘 Version history</h4>
-      Every editing session is saved. Preview, copy or restore any earlier version, so a good prompt is never lost.
-    </td>
-    <td valign="top">
-      <h4>☁️ Sync &amp; backup</h4>
-      Cloud sync across devices that works offline and stays light on data, plus JSON and Markdown export.
+      A version is kept each time you start editing. Preview, copy or restore any earlier one, so a good prompt is never lost.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>📥 Save from any app</h4>
-      Share text, links or screenshots to Prompt Heart from Chrome, ChatGPT or Photos.
+      <h4>🏆 Your prompting</h4>
+      Your profile shows the four prompts you use most, a year of activity, streaks, where your prompts go, and eleven achievements in five tiers.
     </td>
     <td valign="top">
-      <h4>🎨 Made to feel yours</h4>
-      Light and dark themes, five accent colours, and a smiling heart that greets you by name, morning to midnight.
+      <h4>🪪 Profile card</h4>
+      Share your profile as a story-sized card, in light or dark. Your name, photo and bio follow you to your other phones.
     </td>
     <td valign="top">
-      <h4>🔔 Always up to date</h4>
-      Improvements arrive automatically, and a friendly pop-up tells you when an update is ready.
+      <h4>📥 Bring your prompts</h4>
+      Import from spreadsheets, Notion, the awesome-chatgpt-prompts list, JSON, Markdown or text. Or share text, links and screenshots in from any app.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <h4>☁️ Sync &amp; backup</h4>
+      Cloud sync across devices that works offline and stays light on data, plus JSON, Markdown and spreadsheet (CSV) export.
+    </td>
+    <td valign="top">
+      <h4>🔒 App lock</h4>
+      Unlock with your fingerprint, face or screen lock, and keep your prompts hidden in the recent-apps screen.
+    </td>
+    <td valign="top">
+      <h4>✨ Always up to date</h4>
+      Improvements arrive by themselves, and after each update a short note shows what's new. Light and dark themes, five accents.
     </td>
   </tr>
   <tr>
@@ -82,7 +96,13 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 <br/>
 
 <p align="center">
-  <img src="docs/gallery.png" alt="Screens: home, templates, launch in AI app, bulk select, version history, AI apps" width="100%" />
+  <img src="docs/gallery.png" alt="Screens: home, filling in the blanks, a prompt with Copy and open in Claude, the prompt library, version history, bulk select" width="100%" />
+</p>
+
+### New in 1.7.0
+
+<p align="center">
+  <img src="docs/new-in-1.7.png" alt="Screens: the editor with its formatting bar, profile insights, achievements, the profile card, Import prompts, and App lock" width="100%" />
 </p>
 
 ## ⬇️ Install
@@ -119,8 +139,8 @@ Both ways install the same signed APK, so you can switch between them without lo
 ## 🔒 Your data
 
 - **Offline first.** Prompts, images and history live on your phone and work without a connection.
-- **Private sync.** With an account, your prompts, images, name and photo sync through Supabase. Row Level Security means every account can only read its own rows, and images sit in a private bucket under your own folder.
-- **Version history stays on your device**, so sync stays fast and light.
+- **Private sync.** With an account, your prompts, images, name, bio and photo sync through Supabase. Row Level Security means every account can only read its own rows, and images sit in a private bucket under your own folder.
+- **Version history and the copy log stay on your device**, so sync stays fast and light. The copy log only counts copies per day for your profile's activity graph.
 - **Light on the cloud.** Up to 20 images per account sync; any extras stay on your phone. Images are resized to about 100 KB.
 - **Optional App lock.** Unlock with your fingerprint, face or phone screen lock, and keep your prompts hidden in the recent-apps screen.
 - **You're in control.** Change your email or password, export everything, or delete your account and all of its cloud data from **Profile**.
@@ -132,7 +152,9 @@ Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/pr
 - [x] One-tap copy, templates, categories, tags, search
 - [x] Cloud sync, image attachments, save from other apps
 - [x] AI app folders and launching, bulk select, version history, update pop-up
-- [ ] Google Play release (sign-in emails, password reset, store listing)
+- [x] Prompt library, App lock, sign-in emails and password reset
+- [x] Read-only prompts with formatting and undo; profile insights, achievements and a profile card; import from other apps
+- [ ] Google Play release
 - [ ] Home-screen widget for pinned prompts
 - [ ] Shared libraries for teams
 
@@ -145,10 +167,10 @@ Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/pr
 
 ```
 src/
-  app/          Screens: home, editor, history, categories, settings, profile, account, about, trash, share
+  app/          Screens: home, editor, history, library, import, categories, settings, profile, profile card, account, about, trash, share
   components/   Cards, chips, sheets, avatar, brand title, update pop-up, settings building blocks
-  lib/          Theme, templates, AI apps, images, backups, greetings
-  profile/      Name and photo, synced to the account
+  lib/          Theme, templates, formatting, undo, AI apps, images, backups, importing, greetings
+  profile/      Name, bio and photo (synced to the account), the copy log, profile insights
   settings/     App settings (theme, accent, layout, AI apps…)
   store/        Prompts and categories, merge rules, version history, seed data
   sync/         Supabase client, sync engine, row mapping
