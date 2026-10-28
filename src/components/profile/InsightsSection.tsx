@@ -1,6 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -11,21 +10,14 @@ import { Section } from '@/components/SettingsUI';
 import { aiApp } from '@/lib/ai';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
-import { useActivity } from '@/profile/ActivityProvider';
-import { insights, isoDate } from '@/profile/insights';
-import { useHistory } from '@/store/HistoryProvider';
-import { usePromptStore } from '@/store/PromptStore';
+import { useInsights } from '@/profile/useInsights';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
 /** The profile's "how you use your prompts": numbers, your most-used four, a year of activity, badges. */
 export function InsightsSection({ theme }: { theme: Theme }) {
-  const { prompts, folders } = usePromptStore();
-  const history = useHistory();
-  const { days } = useActivity();
-  const today = isoDate(new Date());
-  const data = useMemo(() => insights(prompts, folders, history.all, days, today), [prompts, folders, history.all, days, today]);
+  const data = useInsights();
   const maxCategory = data.topCategories[0]?.count ?? 1;
   const maxOpens = data.opens[0]?.count ?? 1;
   const unlocked = data.achievements.filter((a) => a.tier).length;

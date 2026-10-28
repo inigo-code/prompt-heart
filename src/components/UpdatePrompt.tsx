@@ -18,13 +18,28 @@ const enabled = Updates.isEnabled && !__DEV__;
  * comes back to the foreground.
  */
 export function UpdatePrompt() {
-  if (!enabled) return null;
+  // Builds without over-the-air updates (dev, web) still show what's new after an APK upgrade.
+  if (!enabled) return <NewsGate pending={false} />;
   return <UpdatePromptInner />;
+}
+
+/**
+ * Shows What's new once after an update: over the air, or a newer APK installed over this one. A fresh
+ * install (no saved settings) marks it as seen, so the card only ever follows an update. It waits while
+ * the app is locked, and while a downloaded update is waiting for a restart (that one brings the news).
+ */
+function NewsGate({ pending }: { pending: boolean }) {
+  const { settings, ready, firstRun, update } = useSettings();
+  const { locked } = useAppLock();
+  useEffect(() => {
+    if (ready && firstRun && settings.seenUpdate !== WHATS_NEW.id) update({ seenUpdate: WHATS_NEW.id });
+  }, [ready, firstRun, settings.seenUpdate, update]);
+  if (!ready || locked || firstRun || pending || settings.seenUpdate === WHATS_NEW.id) return null;
+  return <WhatsNew onClose={() => update({ seenUpdate: WHATS_NEW.id })} />;
 }
 
 function UpdatePromptInner() {
   const theme = useTheme();
-  const { settings, ready, update } = useSettings();
   // Nothing pops up over the lock screen; the cards wait until the app is open.
   const { locked } = useAppLock();
   const { isUpdatePending, isUpdateAvailable, isDownloading } = Updates.useUpdates();
@@ -48,20 +63,11 @@ function UpdatePromptInner() {
     if (isUpdateAvailable && !isUpdatePending && !isDownloading) Updates.fetchUpdateAsync().catch(() => {});
   }, [isUpdateAvailable, isUpdatePending, isDownloading]);
 
-  // Just updated, with news not shown yet. A fresh install starts on the built-in version and marks the
-  // news as seen, so the card only ever follows an update.
-  const fresh = Updates.isEmbeddedLaunch;
-  useEffect(() => {
-    if (ready && fresh && settings.seenUpdate !== WHATS_NEW.id) update({ seenUpdate: WHATS_NEW.id });
-  }, [ready, fresh, settings.seenUpdate, update]);
-  const showNews = ready && !locked && !fresh && settings.seenUpdate !== WHATS_NEW.id && !isUpdatePending;
-  const seen = () => update({ seenUpdate: WHATS_NEW.id });
-
-  if (showNews) return <WhatsNew onClose={seen} />;
-
   const visible = isUpdatePending && !dismissed && !locked;
 
   return (
+    <>
+    <NewsGate pending={isUpdatePending} />
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setDismissed(true)}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -87,6 +93,7 @@ function UpdatePromptInner() {
         </View>
       </View>
     </Modal>
+    </>
   );
 }
 

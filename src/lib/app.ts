@@ -25,6 +25,7 @@ export const WHATS_NEW = {
   items: [
     'Your profile shows your prompting: the four you use most, a year of activity, streaks and achievements',
     'Add a short bio; like your name and photo, it follows you to your other phones',
+    'Share your profile as a story-sized card, in light or dark',
     'Import prompts from other apps: spreadsheets, Notion, JSON, Markdown and text files',
     'Export your prompts as a spreadsheet (CSV)',
     'Prompts open read-only; tap Edit for formatting, undo and redo',

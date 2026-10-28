@@ -113,6 +113,14 @@ export default function ProfileScreen() {
           <Text style={[styles.hello, { color: theme.text }]}>{greeting(hour, profile.displayName)}</Text>
           {!!profile.bio && <Text style={[styles.bio, { color: theme.text }]}>{profile.bio}</Text>}
           {sync.user?.email && <Text style={[styles.email, { color: theme.textMuted }]}>{sync.user.email}</Text>}
+          <Pressable
+            onPress={() => router.push('/profile-card')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.cardBtn, { backgroundColor: theme.chip, opacity: pressed ? 0.75 : 1 }]}
+          >
+            <Ionicons name="share-social-outline" size={16} color={theme.text} />
+            <Text style={[styles.cardBtnText, { color: theme.text }]}>Share my profile card</Text>
+          </Pressable>
         </View>
 
         <Section theme={theme} title="About you" footer="Your name is used in your welcome message. Both are saved to your account when you're signed in, so they follow you to your other phones.">
@@ -336,6 +344,8 @@ const styles = StyleSheet.create({
   },
   hello: { fontSize: font.title, fontWeight: '800', marginTop: 8 },
   email: { fontSize: font.body },
+  cardBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 16, borderRadius: 20, marginTop: 8 },
+  cardBtnText: { fontSize: font.body, fontWeight: '700' },
   bio: { fontSize: font.body, lineHeight: 21, textAlign: 'center', maxWidth: 320 },
   input: { fontSize: font.headline, height: 52, paddingHorizontal: 16, borderBottomWidth: StyleSheet.hairlineWidth },
   bioInput: { fontSize: font.body, lineHeight: 21, minHeight: 72, paddingHorizontal: 16, paddingTop: 12, textAlignVertical: 'top' },

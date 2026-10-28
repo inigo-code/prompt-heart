@@ -52,6 +52,8 @@ type SettingsContext = {
   settings: Settings;
   /** False until saved settings are loaded (so the app lock never flashes the app open first). */
   ready: boolean;
+  /** True when this phone had no saved settings: a fresh install (or cleared app data). */
+  firstRun: boolean;
   update: (patch: Partial<Settings>) => void;
   reset: () => void;
 };
@@ -62,11 +64,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const loaded = useRef(false);
   const [ready, setReady] = useState(false);
+  const [firstRun, setFirstRun] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (!raw) return;
+        if (!raw) {
+          setFirstRun(true);
+          return;
+        }
         const saved = JSON.parse(raw) as Partial<Settings>;
         // Merge per app so apps added in later versions get their default.
         setSettings({ ...DEFAULT_SETTINGS, ...saved, aiApps: { ...DEFAULT_SETTINGS.aiApps, ...saved.aiApps } });
@@ -87,7 +93,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   // bring back a What's new card that was already read.
   const reset = useCallback(() => setSettings((s) => ({ ...DEFAULT_SETTINGS, appLock: s.appLock, lockAfter: s.lockAfter, seenUpdate: s.seenUpdate })), []);
 
-  const value = useMemo(() => ({ settings, ready, update, reset }), [settings, ready, update, reset]);
+  const value = useMemo(() => ({ settings, ready, firstRun, update, reset }), [settings, ready, firstRun, update, reset]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
