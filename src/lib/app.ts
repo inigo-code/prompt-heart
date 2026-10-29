@@ -36,6 +36,7 @@ export const WHATS_NEW = {
     'Menus and sheets slide up smoothly; drag the handle down to close one',
     'About you shows your name and bio, with Edit to change them',
     'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
-    'Prompt Heart is one of the Heart Apps: find Watch Heart in Settings and About',
+    'Prompt Heart is one of the Heart Apps: find Watch Heart in About',
+    'Your account comes first in Settings, so signing in to sync is easy to find',
   ],
 };

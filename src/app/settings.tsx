@@ -91,15 +91,26 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
-      <Section theme={theme} title="Profile">
+      {/* The account comes first, so signing in to sync is easy to find. */}
+      <Section theme={theme} title="Account">
         <Row
           theme={theme}
           leading={<Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={40} />}
           label={profile.displayName || 'Set up your profile'}
-          value={sync.user?.email ?? (sync.status === 'unconfigured' ? undefined : 'Not signed in')}
+          value={sync.user?.email ?? undefined}
           onPress={() => router.push('/profile')}
-          last
+          last={sync.status === 'unconfigured'}
         />
+        {sync.status !== 'unconfigured' && (
+          <Row
+            theme={theme}
+            icon={sync.user ? 'cloud-done-outline' : 'log-in-outline'}
+            label={sync.user ? 'Cloud sync' : 'Sign in or create account'}
+            value={sync.user ? SYNC_LABEL[sync.status] : undefined}
+            onPress={() => router.push('/account')}
+            last
+          />
+        )}
       </Section>
 
       <Section theme={theme} title="Appearance">
@@ -228,7 +239,6 @@ export default function SettingsScreen() {
         title="Your data"
         footer="Backups include categories, tags and attached images. Importing merges into what you have; nothing is deleted."
       >
-        <Row theme={theme} icon="cloud-outline" label="Cloud sync" value={SYNC_LABEL[sync.status]} onPress={() => router.push('/account')} />
         <Row
           theme={theme}
           icon="download-outline"
@@ -268,12 +278,11 @@ export default function SettingsScreen() {
       </Section>
 
       <Section theme={theme} title="About">
-        <Row theme={theme} icon="information-circle-outline" label={`About ${APP_NAME}`} onPress={() => router.push('/about')} />
         <Row
           theme={theme}
           leading={<Image source={HEART_APPS_TILE} style={styles.heartApps} />}
-          label={HEART_APPS.name}
-          value="More apps"
+          label={`About ${APP_NAME}`}
+          value={HEART_APPS.name}
           onPress={() => router.push('/about')}
         />
         <Row
