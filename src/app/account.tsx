@@ -1,7 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { font, useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
@@ -16,7 +17,7 @@ export default function AccountScreen() {
   const sync = useSync();
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardSafe style={{ backgroundColor: theme.bg }}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {sync.status === 'unconfigured' ? (
           <Card theme={theme}>
@@ -32,7 +33,7 @@ export default function AccountScreen() {
           <SignedIn theme={theme} />
         )}
       </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardSafe>
   );
 }
 

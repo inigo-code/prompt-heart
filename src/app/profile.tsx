@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { ActionSheet } from '@/components/ActionSheet';
 import { Avatar } from '@/components/Avatar';
 import { InsightsSection } from '@/components/profile/InsightsSection';
@@ -96,7 +97,7 @@ export default function ProfileScreen() {
     });
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardSafe style={{ backgroundColor: theme.bg }}>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
         <View style={styles.hero}>
           <Pressable
@@ -257,7 +258,7 @@ export default function ProfileScreen() {
           { label: 'Delete account and erase this phone', icon: 'trash-outline', destructive: true, onPress: () => deleteAccount(true) },
         ]}
       />
-    </KeyboardAvoidingView>
+    </KeyboardSafe>
   );
 }
 

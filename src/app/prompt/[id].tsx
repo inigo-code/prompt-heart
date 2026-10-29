@@ -2,9 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
 import { Chip } from '@/components/Chip';
@@ -90,6 +91,11 @@ function PromptEditor() {
   // Where formatting applies: the body's last selection (the end of the text until it's focused).
   const selectionRef = useRef<Selection>({ start: draft.body.length, end: draft.body.length });
   const [selection, setSelection] = useState<Selection | undefined>();
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  // While typing at the end of a long prompt, keep the last line in view above the keyboard.
+  const followCaret = () => {
+    if (editing && bodyRef.current?.isFocused() && selectionRef.current.end >= draft.body.length) scrollRef.current?.scrollToEnd({ animated: false });
+  };
 
   // Images are edited straight in the store (they aren't typed), so read them from there.
   const prompt = id ? store.getPrompt(id) : undefined;
@@ -237,7 +243,7 @@ function PromptEditor() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardSafe style={{ backgroundColor: theme.bg }} onKeyboardShown={followCaret}>
       <Stack.Screen
         options={{
           headerRight: () => (
@@ -277,7 +283,12 @@ function PromptEditor() {
         />
       )}
 
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={followCaret}
+      >
         {editing ? (
           <TextInput
             value={draft.title}
@@ -487,7 +498,7 @@ function PromptEditor() {
           },
         ]}
       />
-    </KeyboardAvoidingView>
+    </KeyboardSafe>
   );
 }
 
