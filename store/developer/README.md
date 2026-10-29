@@ -1,6 +1,6 @@
 # Heart Apps brand
 
-The developer brand behind every Heart app: a grid of app tiles with one of them swapped for a heart, the apps you'd want on your phone, free. The grid stands for the whole collection rather than counting it, so the mark stays the same however many apps there are.
+The developer brand behind every Heart app: an app tile with a heart-shaped hole, and the heart that just popped out of it. Every app we make, free, has something you'll love jump out of it. The tile stands for any app rather than counting them, so the mark stays the same however many apps there are.
 
 The heart is an accent, never the whole picture. It's how both app icons use it (on Prompt Heart's card, in Watch Heart's reel), and it keeps the brand away from health apps, where one big red heart is the stock symbol. Regenerate everything here with `node scripts/make-brand.mjs store/developer`.
 
@@ -15,23 +15,23 @@ The header keeps the logo in the middle third, so it survives the crop on narrow
 
 ## Files
 
-- `mark.svg`, `mark-1024.png`: the grid on its own, for dark backgrounds
+- `mark.svg`, `mark-1024.png`: the tile and heart on their own, for dark backgrounds
 - `mark-light.svg`: deeper gold and pink for light backgrounds
 - `mark-white.svg`, `mark-black.svg`: one colour, for print, watermarks and monochrome icons
-- `lockup.svg` / `.png`, `lockup-light.svg` / `.png`: the grid with "Heart Apps" in Inter Display Bold (outlined, so no font is needed)
+- `lockup.svg` / `.png`, `lockup-light.svg` / `.png`: the mark with "Heart Apps" in Inter Display Bold (outlined, so no font is needed)
 
 ## Colours
 
 | | Dark backgrounds | Light backgrounds |
 | --- | --- | --- |
 | Background | `#121110` | `#F6F4EF` |
-| Tiles | `#F2B84B` | `#B87A12` |
+| Tile | `#F2B84B` | `#B87A12` |
 | Heart | `#FF4D6D` | `#E8395A` |
 | Wordmark | `#F6F4EF` | `#1C1A17` |
 
-Gold, pink and near-black come from the app icons. On light backgrounds the tiles and heart go deeper, because gold on cream is only 1.6:1.
+Gold, pink and near-black come from the app icons. On light backgrounds the tile and heart go deeper, because gold on cream is only 1.6:1.
 
-Keep clear space of at least half a tile around the mark. Don't recolour it, rotate it, move the heart to another cell, or add tiles.
+Keep clear space of at least the heart's width around the mark. The hole and the ring around the flying heart are cut out, not painted, so the mark works on any background. Don't recolour it, rotate it, fill the hole, or move the heart away from its corner.
 
 ## Adding an app
 
@@ -44,6 +44,6 @@ The developer mark never changes when an app is added, and the header names no a
 
 Because every icon is gold on near-black, apps tell apart by **silhouette**. Before settling on a new icon, look at it at 48 px beside the others: if two shapes are similar (two round objects, two cards), change the object, not the colour.
 
-Don't reuse the developer mark as an app icon, or build an app icon from the tile grid. Those belong to Heart Apps itself, and an app that wears them reads as the developer account.
+Don't reuse the developer mark as an app icon, or build an app icon from a heart popping out of something. Those belong to Heart Apps itself, and an app that wears them reads as the developer account.
 
 Keep the heart small inside its object, and avoid health cues around it: no plus signs, pulse lines, pills or red-on-white.

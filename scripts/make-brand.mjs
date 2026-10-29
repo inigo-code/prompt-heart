@@ -1,4 +1,4 @@
-// Renders the Heart Apps developer brand (a grid of app tiles, one of them a heart) to SVG and PNG with headless Chrome.
+// Renders the Heart Apps developer brand (an app tile with a heart popping out of it) to SVG and PNG with headless Chrome.
 // Usage (needs puppeteer-core and Chrome): node scripts/make-brand.mjs store/developer
 // Set CHROME to the browser's path if it is not the default Windows install.
 import { writeFileSync } from 'node:fs';
@@ -18,34 +18,35 @@ const heartPath = (cx, cy, h) => `M ${cx} ${cy + h * 0.8}
     C ${cx + h * 0.78} ${cy - h * 1.0}, ${cx + h * 1.3} ${cy - h * 0.05}, ${cx} ${cy + h * 0.8} Z`;
 
 /**
- * The mark, drawn in a 1024 box: four app tiles in a 2 x 2 grid, the top-right one swapped for a heart, as a favourite among them.
- * The heart is an accent among the apps, as it is in each app's own icon, not the whole picture: one big red heart reads as a health app.
- * Ink spans 240–784 both ways.
+ * The mark, drawn in a 1024 box: an app tile with a heart-shaped hole, and the heart that just popped out of it, turning as it jumps.
+ * The heart stays a small accent, as it is in each app's own icon: one big red heart is the stock symbol for health apps.
+ * A ring of background around the flying heart bites into the tile's corner, so the outline alone is its own shape.
  */
+let n = 0;
+// Measured ink of the tile and the flying heart together, centred in the box.
+const INK = { x: 234, y: 222, w: 555, h: 580 };
+const TILE = { y: 302, size: 500 };
 function mark({ tiles, heart }) {
-  const [size, gap, round] = [250, 44, 70];
-  const start = 512 - size - gap / 2;
-  // As wide as a tile and centred in its cell; it still looks a touch lighter, which keeps it an accent.
-  const heartH = size / 1.58;
-  return [0, 1, 2, 3]
-    .map((i) => {
-      const x = start + (i % 2) * (size + gap);
-      const y = start + Math.floor(i / 2) * (size + gap);
-      return i === 1
-        ? `<path d="${heartPath(x + size / 2, y + size / 2 - 0.1 * heartH, heartH)}" fill="${heart}"/>`
-        : `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${round}" fill="${tiles}"/>`;
-    })
-    .join('');
+  const id = `pop${n++}`;
+  const [x, y, size, round] = [234, TILE.y, TILE.size, 144];
+  const [h, ring, turn] = [130, 20, 14];
+  const [holeX, holeY] = [x + size * 0.68, y + size * 0.34];
+  const [outX, outY] = [holeX + 96, holeY - 150];
+  const flying = `<path d="${heartPath(outX, outY, h)}" transform="rotate(${turn} ${outX} ${outY})"`;
+  return `
+    <mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="white"/><path d="${heartPath(holeX, holeY, h)}" fill="black"/>${flying} fill="black" stroke="black" stroke-width="${ring * 2}" stroke-linejoin="round"/></mask>
+    <rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${round}" fill="${tiles}" mask="url(#${id})"/>
+    ${flying} fill="${heart}"/>`;
 }
 
 const svg = (w, h, body, bg) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bg ? `<rect width="${w}" height="${h}" fill="${bg}"/>` : ''}${body}</svg>`;
 
-/** Mark and wordmark side by side, drawn in a box of `width`; the cap height is centred on the mark, which stands about twice as tall. */
+/** Mark and wordmark side by side, drawn in a box of `width`; the cap height is centred on the tile, which stands about twice as tall. */
 function lockup(colors, width) {
-  const [markH, capH, space, pad] = [300, 150, 88, 40];
-  const k = markH / 544;
+  const [markH, capH, space, pad] = [340, 150, 88, 40];
+  const k = markH / INK.h;
   const t = capH / 145.5;
-  const textX = pad + markH + space;
+  const textX = pad + INK.w * k + space;
   const w = textX + 1020.2 * t + pad;
   const h = markH + pad * 2;
   const s = width / w;
@@ -53,8 +54,8 @@ function lockup(colors, width) {
     width: Math.round(w * s),
     height: Math.round(h * s),
     body: `<g transform="scale(${s})">
-      <g transform="translate(${pad - 240 * k} ${pad - 240 * k}) scale(${k})">${mark(colors)}</g>
-      <path d="${WORDMARK}" fill="${colors.text}" transform="translate(${textX - 10.8 * t} ${pad + markH / 2 + capH / 2}) scale(${t})"/>
+      <g transform="translate(${pad - INK.x * k} ${pad - INK.y * k}) scale(${k})">${mark(colors)}</g>
+      <path d="${WORDMARK}" fill="${colors.text}" transform="translate(${textX - 10.8 * t} ${pad + (TILE.y + TILE.size / 2 - INK.y) * k + capH / 2}) scale(${t})"/>
     </g>`,
   };
 }
