@@ -20,6 +20,7 @@ import { SettingsProvider } from '@/settings/SettingsProvider';
 import { HistoryProvider } from '@/store/HistoryProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
+import { useWidgetSync } from '@/widget/sync';
 
 // Keep the splash up until the title font is ready, so the home title never flashes in the fallback font.
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -63,6 +64,7 @@ function Navigator() {
   const pathname = usePathname();
   const { hasShareIntent } = useShareIntentContext();
   useEnsureAiFolders();
+  useWidgetSync();
 
   // On Android, shared content arrives through the native module rather than a deep link,
   // so open the Share screen whenever something has been shared and not yet handled.

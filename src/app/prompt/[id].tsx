@@ -48,7 +48,7 @@ export default function PromptEditorScreen() {
 }
 
 function PromptEditor() {
-  const params = useLocalSearchParams<{ id: string; folderId?: string }>();
+  const params = useLocalSearchParams<{ id: string; folderId?: string; copy?: string }>();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
@@ -102,6 +102,14 @@ function PromptEditor() {
   const images = prompt?.images ?? [];
   const launchApp = useLaunchApp(draft.folderId);
   const folder = folders.find((f) => f.id === draft.folderId);
+
+  // Opened from the home-screen widget to fill in a prompt's blanks: start the copy straight away, once.
+  const copyOnOpen = useRef(params.copy === '1');
+  useEffect(() => {
+    if (!copyOnOpen.current || !prompt) return;
+    copyOnOpen.current = false;
+    copy(prompt);
+  }, [prompt, copy]);
 
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/'));
 

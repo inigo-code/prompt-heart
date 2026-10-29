@@ -21,13 +21,10 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * people about; an update that leaves it alone shows nothing. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-10-29',
+  id: '2026-10-29-widget',
   items: [
-    'Your profile shows your prompting: the four you use most, a year of activity, streaks and achievements',
-    'Add a short bio; like your name and photo, it follows you to your other phones',
-    'Share your profile as a story-sized card, in light or dark',
-    'Import prompts from other apps: spreadsheets, Notion, JSON, Markdown and text files',
-    'Export your prompts as a spreadsheet (CSV)',
-    'Prompts open read-only; tap Edit for formatting, undo and redo',
+    'A home-screen widget: your pinned prompts, one tap to copy. Touch and hold your home screen, then Widgets',
+    'Prompts with blanks open their fill-in sheet straight from the widget',
+    'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
   ],
 };

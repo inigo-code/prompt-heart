@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { defaultAiApps } from '@/lib/ai';
 
 const STORAGE_KEY = 'promptheart/settings';
+export const SETTINGS_STORAGE_KEY = STORAGE_KEY;
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type AccentKey = 'amber' | 'blue' | 'green' | 'rose' | 'violet';

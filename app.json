@@ -3,7 +3,7 @@
     "name": "Prompt Heart",
     "slug": "prompt-notes",
     "owner": "inigojo",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -84,6 +84,24 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "Prompt Heart uses Face ID to unlock the app when App lock is on."
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Prompts",
+              "label": "Prompts",
+              "description": "Your pinned prompts. Tap one to copy it.",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "previewImage": "./assets/widget-preview.png"
+            }
+          ]
         }
       ]
     ],

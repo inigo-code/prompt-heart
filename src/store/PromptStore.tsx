@@ -12,6 +12,8 @@ import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
 
 // Kept from the app's first name so existing installs keep their data.
 const STORAGE_KEY = 'prompt-notes/v1';
+/** The home-screen widget reads prompts straight from here. */
+export const PROMPTS_STORAGE_KEY = STORAGE_KEY;
 
 /** Deleted prompts stay in Trash this long before they're hidden for good. */
 export const TRASH_DAYS = 30;
