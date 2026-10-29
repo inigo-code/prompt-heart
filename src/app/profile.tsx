@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KeyboardSafe } from '@/components/KeyboardSafe';
@@ -57,6 +57,8 @@ export default function ProfileScreen() {
   const aboutChanged = name.trim() !== profile.name || bio.trim() !== profile.bio;
 
   const [editing, setEditing] = useState<'email' | 'password' | null>(null);
+  // Name and bio show as text; Edit opens the fields, and Save or Cancel closes them again.
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
@@ -74,11 +76,21 @@ export default function ProfileScreen() {
     }
   };
 
+  const closeAbout = () => {
+    Keyboard.dismiss();
+    setAboutOpen(false);
+  };
+  const cancelAbout = () => {
+    setName(profile.name);
+    setBio(profile.bio);
+    closeAbout();
+  };
   const saveAbout = () => {
-    if (!aboutChanged) return;
+    if (!aboutChanged) return closeAbout();
     run('name', async () => {
       if (name.trim() !== profile.name) await profile.setName(name);
       if (bio.trim() !== profile.bio) await profile.setBio(bio);
+      closeAbout();
       return 'Saved';
     });
   };
@@ -125,48 +137,77 @@ export default function ProfileScreen() {
         </View>
 
         <Section theme={theme} title="About you" footer="Your name is used in your welcome message. Both are saved to your account when you're signed in, so they follow you to your other phones.">
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            onSubmitEditing={saveAbout}
-            placeholder="What should we call you?"
-            placeholderTextColor={theme.textMuted}
-            autoCapitalize="words"
-            autoComplete="name"
-            textContentType="name"
-            returnKeyType="done"
-            accessibilityLabel="Your name"
-            style={[styles.input, { color: theme.text, borderBottomColor: theme.border }]}
-          />
-          <TextInput
-            value={bio}
-            onChangeText={(t) => setBio(t.slice(0, BIO_MAX))}
-            placeholder="A line about you, e.g. Writes prompts for a design studio"
-            placeholderTextColor={theme.textMuted}
-            multiline
-            maxLength={BIO_MAX}
-            accessibilityLabel="Your bio"
-            style={[styles.bioInput, { color: theme.text }]}
-          />
-          <View style={styles.aboutFoot}>
-            <Text style={[styles.count, { color: theme.textMuted }]}>
-              {bio.length} / {BIO_MAX}
-            </Text>
-            {busy === 'name' ? (
-              <ActivityIndicator color={theme.textMuted} />
-            ) : (
-              aboutChanged && (
-                <Pressable
-                  onPress={saveAbout}
-                  accessibilityRole="button"
-                  accessibilityLabel="Save name and bio"
-                  style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
-                >
-                  <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
-                </Pressable>
-              )
-            )}
-          </View>
+          {aboutOpen ? (
+            <>
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                onSubmitEditing={saveAbout}
+                autoFocus
+                placeholder="What should we call you?"
+                placeholderTextColor={theme.textMuted}
+                autoCapitalize="words"
+                autoComplete="name"
+                textContentType="name"
+                returnKeyType="done"
+                accessibilityLabel="Your name"
+                style={[styles.input, { color: theme.text, borderBottomColor: theme.border }]}
+              />
+              <TextInput
+                value={bio}
+                onChangeText={(t) => setBio(t.slice(0, BIO_MAX))}
+                placeholder="A line about you, e.g. Writes prompts for a design studio"
+                placeholderTextColor={theme.textMuted}
+                multiline
+                maxLength={BIO_MAX}
+                accessibilityLabel="Your bio"
+                style={[styles.bioInput, { color: theme.text }]}
+              />
+              <View style={styles.aboutFoot}>
+                <Text style={[styles.count, { color: theme.textMuted }]}>
+                  {bio.length} / {BIO_MAX}
+                </Text>
+                {busy === 'name' ? (
+                  <ActivityIndicator color={theme.textMuted} />
+                ) : (
+                  <View style={styles.aboutActions}>
+                    <Pressable
+                      onPress={cancelAbout}
+                      accessibilityRole="button"
+                      accessibilityLabel="Cancel editing name and bio"
+                      style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.chip, opacity: pressed ? 0.8 : 1 }]}
+                    >
+                      <Text style={[styles.nameSaveText, { color: theme.text }]}>Cancel</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={saveAbout}
+                      accessibilityRole="button"
+                      accessibilityLabel="Save name and bio"
+                      style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                    >
+                      <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
+                    </Pressable>
+                  </View>
+                )}
+              </View>
+            </>
+          ) : (
+            <Pressable
+              onPress={() => setAboutOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Edit name and bio"
+              style={({ pressed }) => [styles.aboutView, { opacity: pressed ? 0.7 : 1 }]}
+            >
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={[styles.aboutName, { color: profile.name ? theme.text : theme.textMuted }]}>{profile.name || 'Add your name'}</Text>
+                <Text style={[styles.aboutBio, { color: profile.bio ? theme.text : theme.textMuted }]}>{profile.bio || 'Add a line about you'}</Text>
+              </View>
+              <View style={[styles.editChip, { backgroundColor: theme.chip }]}>
+                <Ionicons name="create-outline" size={16} color={theme.text} />
+                <Text style={[styles.editChipText, { color: theme.text }]}>Edit</Text>
+              </View>
+            </Pressable>
+          )}
         </Section>
 
         <InsightsSection theme={theme} />
@@ -354,6 +395,12 @@ const styles = StyleSheet.create({
   count: { fontSize: font.caption },
   nameSave: { paddingHorizontal: 16, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   nameSaveText: { fontSize: font.body, fontWeight: '800' },
+  aboutActions: { flexDirection: 'row', gap: 8 },
+  aboutView: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 16, paddingVertical: 14 },
+  aboutName: { fontSize: font.headline, fontWeight: '700' },
+  aboutBio: { fontSize: font.body, lineHeight: 21 },
+  editChip: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 32, paddingHorizontal: 12, borderRadius: 16 },
+  editChipText: { fontSize: font.body, fontWeight: '700' },
   form: { padding: 16, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   formInput: { fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
   save: { height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
