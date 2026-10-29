@@ -75,6 +75,8 @@ const header = lockup(DARK, 1900);
 const files = {
   // Masters, transparent.
   'mark.svg': svg(1024, 1024, mark(DARK)),
+  // Cropped close around the ink, for small places like a site header or a favicon, where the 1024 box's margin would waste a third of it.
+  'mark-tight.svg': svg(1024, 1024, mark(DARK)).replace('width="1024" height="1024" viewBox="0 0 1024 1024"', 'width="620" height="620" viewBox="202 202 620 620"'),
   'mark-light.svg': svg(1024, 1024, mark(LIGHT)),
   'mark-white.svg': svg(1024, 1024, mark(white)),
   'mark-black.svg': svg(1024, 1024, mark(black)),
@@ -84,10 +86,11 @@ const files = {
   'play-developer-icon-512.png': svg(1024, 1024, mark(DARK), DARK.bg),
   'play-developer-header-4096x2304.png': svg(4096, 2304, `<g transform="translate(${(4096 - header.width) / 2} ${(2304 - header.height) / 2})">${header.body}</g>`, DARK.bg),
   'mark-1024.png': svg(1024, 1024, mark(DARK)),
+  'apple-touch-icon-180.png': svg(1024, 1024, mark(DARK), DARK.bg),
   'lockup.png': svg(lockDark.width, lockDark.height, lockDark.body),
   'lockup-light.png': svg(lockLight.width, lockLight.height, lockLight.body),
 };
-const sizes = { 'play-developer-icon-512.png': [512, 512] };
+const sizes = { 'play-developer-icon-512.png': [512, 512], 'apple-touch-icon-180.png': [180, 180] };
 
 const browser = await puppeteer.launch({ executablePath: process.env.CHROME ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
 const page = await browser.newPage();

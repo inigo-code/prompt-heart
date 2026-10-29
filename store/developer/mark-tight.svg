@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="620" viewBox="202 202 620 620">
+    <mask id="pop4" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="white"/><path d="M 574 576
+    C 405 465.5, 472.6 342, 574 417.4
+    C 675.4 342, 743 465.5, 574 576 Z" fill="black"/><path d="M 670 426
+    C 501 315.5, 568.6 192, 670 267.4
+    C 771.4 192, 839 315.5, 670 426 Z" transform="rotate(14 670 322)" fill="black" stroke="black" stroke-width="40" stroke-linejoin="round"/><circle cx="392" cy="477.2" r="40" fill="black"/><path d="M 360 640 Q 490 760 620 640" fill="none" stroke="black" stroke-width="52" stroke-linecap="round"/></mask>
+    <rect x="234" y="302" width="500" height="500" rx="144" fill="#F2B84B" mask="url(#pop4)"/>
+    <path d="M 670 426
+    C 501 315.5, 568.6 192, 670 267.4
+    C 771.4 192, 839 315.5, 670 426 Z" transform="rotate(14 670 322)" fill="#FF4D6D"/></svg>

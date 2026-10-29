@@ -17,6 +17,8 @@ The header keeps the logo in the middle third, so it survives the crop on narrow
 
 - `mark.svg`, `mark-1024.png`: the tile and heart on their own, for dark backgrounds
 - `mark-light.svg`: deeper gold and pink for light backgrounds
+- `mark-tight.svg`: the same mark cropped close, for site headers and favicons
+- `apple-touch-icon-180.png`: the home-screen icon for the website
 - `mark-white.svg`, `mark-black.svg`: one colour, for print, watermarks and monochrome icons
 - `lockup.svg` / `.png`, `lockup-light.svg` / `.png`: the mark with "Heart Apps" in Inter Display Bold (outlined, so no font is needed)
 
