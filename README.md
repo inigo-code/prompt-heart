@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
+  <a href="../../releases/latest/download/promptheart.apk"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
   <img alt="Version" src="https://img.shields.io/badge/version-1.7.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
@@ -128,7 +128,7 @@ F-Droid checks the repository against this fingerprint, so you only ever get APK
 
 ### Direct download
 
-1. Open the **[latest release](../../releases/latest)** on your Android phone and download `promptheart-x.y.z.apk`.
+1. On your Android phone, tap **[Download APK](../../releases/latest/download/promptheart.apk)** (or open the [latest release](../../releases/latest)).
 2. Open the file. If Android asks, allow your browser to install apps. If Play Protect warns, choose **Install anyway**.
 3. That's it. New versions install over the old one and keep your prompts.
 
@@ -206,8 +206,10 @@ npx eas-cli@latest update --channel preview --environment preview --message "Wha
 
 # Native changes (modules, permissions, app name or icon): new build, then a GitHub release
 npx eas-cli@latest build --platform android --profile preview
-gh release create vX.Y.Z promptheart-X.Y.Z.apk
+gh release create vX.Y.Z promptheart.apk
 ```
+
+Attach the APK as `promptheart.apk`, whatever the version (rename the file EAS gives you). The websites link to `releases/latest/download/promptheart.apk`, so their download buttons always fetch the newest release, and a release without that file breaks them.
 
 The runtime version uses the `fingerprint` policy, so an update only reaches builds whose native code it matches.
 
