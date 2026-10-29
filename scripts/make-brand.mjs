@@ -66,17 +66,20 @@ function lockup(colors, width) {
   };
 }
 
+const tight = (body) => svg(1024, 1024, body).replace('width="1024" height="1024" viewBox="0 0 1024 1024"', 'width="620" height="620" viewBox="202 202 620 620"');
 const white = { tiles: '#FFFFFF', heart: '#FFFFFF' };
 const black = { tiles: '#000000', heart: '#000000' };
 const lockDark = lockup(DARK, 1600);
 const lockLight = lockup(LIGHT, 1600);
 const header = lockup(DARK, 1900);
+const preview = lockup(DARK, 820);
 
 const files = {
   // Masters, transparent.
   'mark.svg': svg(1024, 1024, mark(DARK)),
   // Cropped close around the ink, for small places like a site header or a favicon, where the 1024 box's margin would waste a third of it.
-  'mark-tight.svg': svg(1024, 1024, mark(DARK)).replace('width="1024" height="1024" viewBox="0 0 1024 1024"', 'width="620" height="620" viewBox="202 202 620 620"'),
+  'mark-tight.svg': tight(mark(DARK)),
+  'mark-light-tight.svg': tight(mark(LIGHT)),
   'mark-light.svg': svg(1024, 1024, mark(LIGHT)),
   'mark-white.svg': svg(1024, 1024, mark(white)),
   'mark-black.svg': svg(1024, 1024, mark(black)),
@@ -85,6 +88,8 @@ const files = {
   // Play Console: developer icon 512 x 512 and header image 4096 x 2304, each under 1 MB.
   'play-developer-icon-512.png': svg(1024, 1024, mark(DARK), DARK.bg),
   'play-developer-header-4096x2304.png': svg(4096, 2304, `<g transform="translate(${(4096 - header.width) / 2} ${(2304 - header.height) / 2})">${header.body}</g>`, DARK.bg),
+  // The link preview for the website, at the 1200 x 630 that Facebook, X, Slack and messaging apps all crop from.
+  'og-image-1200x630.png': svg(1200, 630, `<g transform="translate(${(1200 - preview.width) / 2} ${(630 - preview.height) / 2})">${preview.body}</g>`, DARK.bg),
   'mark-1024.png': svg(1024, 1024, mark(DARK)),
   'apple-touch-icon-180.png': svg(1024, 1024, mark(DARK), DARK.bg),
   'lockup.png': svg(lockDark.width, lockDark.height, lockDark.body),
