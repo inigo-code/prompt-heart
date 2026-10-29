@@ -40,14 +40,20 @@ ORGANISED YOUR WAY
 • Version history: go back to any earlier version of a prompt
 • Trash keeps deleted prompts for 30 days
 
+YOUR PROFILE
+• Your most-used four prompts, a year of activity and streaks
+• Eleven achievements to earn, from wood to platinum
+• A short bio, and a profile card to share as a story
+
 SAVE FROM ANYWHERE
 • Share text or images from any app straight into Prompt Heart
 • Attach reference images to a prompt. Only the text is copied, never the image.
+• Import prompts from spreadsheets, Notion, JSON or Markdown
 
 SYNC, OR DON'T
 • Works fully offline with no account
 • Optional free account syncs your prompts across devices
-• Export a backup or Markdown at any time
+• Export a backup, Markdown or a spreadsheet (CSV) at any time
 
 MAKE IT YOURS
 • Light, dark or system theme
@@ -80,3 +86,7 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 ## Release notes for the first Play release (500 max)
 
 Welcome to Prompt Heart on Google Play! Save your best AI prompts, fill in {{placeholders}}, copy in one tap, and open ChatGPT, Claude, Gemini and more. Sync is optional and private.
+
+## Release notes for 1.7.0 (500 max)
+
+New: a profile with your most-used prompts, a year of activity, streaks and eleven achievements. Add a short bio and share your profile as a story-sized card. Import prompts from spreadsheets, Notion, JSON or Markdown, and export them as CSV. Prompts now open read-only: tap Edit for formatting, with undo and redo. After each update, Prompt Heart shows what is new.
