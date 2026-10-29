@@ -85,7 +85,6 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
           onClose={() => setPending(null)}
           onCopy={(text, values) => {
             lastValues.current[pending.prompt.id] = values;
-            setPending(null);
             writeClipboard(pending.prompt, text, pending.options);
           }}
         />

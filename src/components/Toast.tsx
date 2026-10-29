@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Animated, Pressable, StyleSheet, Text } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { font, useTheme } from '@/lib/theme';
@@ -20,7 +20,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hide = useCallback(() => {
-    Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => setVisible(false));
+    Animated.timing(opacity, { toValue: 0, duration: 200, easing: Easing.bezier(0.23, 1, 0.32, 1), useNativeDriver: true }).start(() => setVisible(false));
   }, [opacity]);
 
   const show = useCallback<ShowToast>(
@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       setAction(act ?? null);
       setVisible(true);
       if (timer.current) clearTimeout(timer.current);
-      Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+      Animated.timing(opacity, { toValue: 1, duration: 180, easing: Easing.bezier(0.23, 1, 0.32, 1), useNativeDriver: true }).start();
       // Toasts with an action (Undo) stay up longer so there's time to tap it.
       timer.current = setTimeout(hide, act ? 4000 : 1400);
     },
@@ -42,7 +42,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {visible && (
         <Animated.View
           pointerEvents={action ? 'box-none' : 'none'}
-          style={[styles.toast, { bottom: insets.bottom + 96, backgroundColor: theme.toast, opacity }]}
+          style={[
+            styles.toast,
+            // It rises a few points as it fades in, and sinks back as it goes.
+            { bottom: insets.bottom + 96, backgroundColor: theme.toast, opacity, transform: [{ translateY: opacity.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }] },
+          ]}
         >
           <Text style={[styles.text, { color: theme.toastText }]}>{message}</Text>
           {action && (

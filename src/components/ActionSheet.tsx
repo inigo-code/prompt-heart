@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Sheet } from '@/components/Sheet';
 import { font, useTheme } from '@/lib/theme';
 
 export type SheetAction = {
@@ -39,76 +40,72 @@ export function ActionSheet({ visible, title, actions, quick, onClose }: Props) 
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <View
-          style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 8 }]}
-          onStartShouldSetResponder={() => true}
-        >
-          <View style={[styles.handle, { backgroundColor: theme.border }]} />
-          {title && (
-            <Text style={[styles.title, { color: theme.textMuted }]} numberOfLines={4}>
-              {title}
-            </Text>
-          )}
-          <ScrollView style={{ maxHeight: height * 0.7 }} bounces={false} showsVerticalScrollIndicator={false}>
-            {quick && quick.items.length > 0 && (
-              <View style={styles.quick}>
-                <Text style={[styles.quickLabel, { color: theme.textMuted }]}>{quick.label}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-                  {quick.items.map((q) => (
-                    <Pressable
-                      key={q.key}
-                      onPress={() => run(q.onPress)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${quick.label} ${q.label}`}
-                      style={({ pressed }) => [styles.quickItem, { backgroundColor: pressed ? theme.chip : theme.bg, borderColor: theme.border }]}
-                    >
-                      {q.leading}
-                      <Text style={[styles.quickText, { color: theme.text }]} numberOfLines={1}>
-                        {q.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-            {actions.map((a) => {
-              const color = a.destructive ? theme.danger : theme.text;
-              return (
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 8 }]}
+      handle={<View style={[styles.handle, { backgroundColor: theme.border }]} />}
+    >
+      {title && (
+        <Text style={[styles.title, { color: theme.textMuted }]} numberOfLines={4}>
+          {title}
+        </Text>
+      )}
+      <ScrollView style={{ maxHeight: height * 0.7 }} bounces={false} showsVerticalScrollIndicator={false}>
+        {quick && quick.items.length > 0 && (
+          <View style={styles.quick}>
+            <Text style={[styles.quickLabel, { color: theme.textMuted }]}>{quick.label}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
+              {quick.items.map((q) => (
                 <Pressable
-                  key={a.label}
-                  onPress={() => run(a.onPress)}
+                  key={q.key}
+                  onPress={() => run(q.onPress)}
                   accessibilityRole="button"
-                  style={({ pressed }) => [styles.row, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
+                  accessibilityLabel={`${quick.label} ${q.label}`}
+                  style={({ pressed }) => [styles.quickItem, { backgroundColor: pressed ? theme.chip : theme.bg, borderColor: theme.border }]}
                 >
-                  {a.leading ?? (
-                    <View style={[styles.icon, { backgroundColor: a.destructive ? theme.danger + '1F' : theme.chip }]}>
-                      <Ionicons name={a.icon ?? 'ellipse-outline'} size={17} color={color} />
-                    </View>
-                  )}
-                  <Text style={[styles.rowText, { color }]} numberOfLines={2}>
-                    {a.label}
+                  {q.leading}
+                  <Text style={[styles.quickText, { color: theme.text }]} numberOfLines={1}>
+                    {q.label}
                   </Text>
                 </Pressable>
-              );
-            })}
-          </ScrollView>
-          <Pressable
-            onPress={onClose}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.cancel, { backgroundColor: pressed ? theme.border : theme.chip }]}
-          >
-            <Text style={[styles.cancelText, { color: theme.text }]}>Cancel</Text>
-          </Pressable>
-        </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+        {actions.map((a) => {
+          const color = a.destructive ? theme.danger : theme.text;
+          return (
+            <Pressable
+              key={a.label}
+              onPress={() => run(a.onPress)}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.row, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
+            >
+              {a.leading ?? (
+                <View style={[styles.icon, { backgroundColor: a.destructive ? theme.danger + '1F' : theme.chip }]}>
+                  <Ionicons name={a.icon ?? 'ellipse-outline'} size={17} color={color} />
+                </View>
+              )}
+              <Text style={[styles.rowText, { color }]} numberOfLines={2}>
+                {a.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+      <Pressable
+        onPress={onClose}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.cancel, { backgroundColor: pressed ? theme.border : theme.chip }]}
+      >
+        <Text style={[styles.cancelText, { color: theme.text }]}>Cancel</Text>
       </Pressable>
-    </Modal>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 8, paddingHorizontal: 10 },
   handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
   title: { fontSize: font.footnote, fontWeight: '600', lineHeight: 18, paddingHorizontal: 12, paddingTop: 4, paddingBottom: 6 },

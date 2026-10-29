@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardSafe } from '@/components/KeyboardSafe';
+import { Sheet } from '@/components/Sheet';
 import { font, useTheme } from '@/lib/theme';
 import { normalizeTag } from '@/store/PromptStore';
 
@@ -29,61 +29,61 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardSafe>
-        <Pressable style={[styles.backdrop, { backgroundColor: theme.overlay }]} onPress={onClose} accessibilityLabel="Close" />
-        <View style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}>
-          <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
-          <View style={styles.inputRow}>
-            <TextInput
-              value={text}
-              onChangeText={setText}
-              onSubmitEditing={() => tag && add(tag)}
-              placeholder="New tag, e.g. email"
-              placeholderTextColor={theme.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoFocus
-              style={[styles.input, { color: theme.text, backgroundColor: theme.bg, borderColor: theme.border }]}
-            />
-            <Pressable
-              onPress={() => tag && add(tag)}
-              disabled={!tag}
-              accessibilityRole="button"
-              accessibilityLabel={tag ? `Add tag ${tag}` : 'Add tag'}
-              accessibilityState={{ disabled: !tag }}
-              style={[styles.addBtn, { backgroundColor: theme.accent, opacity: tag ? 1 : 0.5 }]}
-            >
-              <Text style={[styles.addText, { color: theme.accentText }]}>Add</Text>
-            </Pressable>
-          </View>
-          {existingTags.length > 0 && (
-            <>
-              <Text style={[styles.label, { color: theme.textMuted }]}>Or pick one</Text>
-              <ScrollView style={{ maxHeight: 160 }} contentContainerStyle={styles.tags}>
-                {existingTags.map((t) => (
-                  <Pressable
-                    key={t}
-                    onPress={() => add(t)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Add tag ${t}`}
-                    style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
-                  >
-                    <Text style={{ color: theme.text, fontSize: font.body, fontWeight: '600' }}>#{t}</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </>
-          )}
-        </View>
-      </KeyboardSafe>
-    </Modal>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}
+      handle={<View style={[styles.grabber, { backgroundColor: theme.border }]} />}
+    >
+      <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
+      <View style={styles.inputRow}>
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          onSubmitEditing={() => tag && add(tag)}
+          placeholder="New tag, e.g. email"
+          placeholderTextColor={theme.textMuted}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoFocus
+          style={[styles.input, { color: theme.text, backgroundColor: theme.bg, borderColor: theme.border }]}
+        />
+        <Pressable
+          onPress={() => tag && add(tag)}
+          disabled={!tag}
+          accessibilityRole="button"
+          accessibilityLabel={tag ? `Add tag ${tag}` : 'Add tag'}
+          accessibilityState={{ disabled: !tag }}
+          style={[styles.addBtn, { backgroundColor: theme.accent, opacity: tag ? 1 : 0.5 }]}
+        >
+          <Text style={[styles.addText, { color: theme.accentText }]}>Add</Text>
+        </Pressable>
+      </View>
+      {existingTags.length > 0 && (
+        <>
+          <Text style={[styles.label, { color: theme.textMuted }]}>Or pick one</Text>
+          <ScrollView style={{ maxHeight: 160 }} contentContainerStyle={styles.tags}>
+            {existingTags.map((t) => (
+              <Pressable
+                key={t}
+                onPress={() => add(t)}
+                accessibilityRole="button"
+                accessibilityLabel={`Add tag ${t}`}
+                style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+              >
+                <Text style={{ color: theme.text, fontSize: font.body, fontWeight: '600' }}>#{t}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </>
+      )}
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1 },
-  sheet: { flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, gap: 12 },
+  grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2 },
+  sheet: { flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, paddingTop: 8, gap: 12 },
   title: { fontSize: font.headline, fontWeight: '800' },
   inputRow: { flexDirection: 'row', gap: 8 },
   input: { flex: 1, fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },

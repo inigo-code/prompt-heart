@@ -394,6 +394,10 @@ export default function HomeScreen() {
         data={visible}
         numColumns={grid ? 2 : 1}
         keyExtractor={(p) => p.id}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+        removeClippedSubviews
         columnWrapperStyle={grid ? styles.gridRow : undefined}
         contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 110 }]}
         keyboardShouldPersistTaps="handled"

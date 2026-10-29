@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { KeyboardSafe } from '@/components/KeyboardSafe';
+import { Sheet } from '@/components/Sheet';
 import { fillTemplate } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
 import type { Prompt } from '@/store/types';
@@ -12,80 +12,90 @@ type Props = {
   variables: string[];
   initialValues: Record<string, string>;
   actionLabel?: string;
+  /** Called the moment Copy is tapped; the sheet then slides away. */
   onCopy: (text: string, values: Record<string, string>) => void;
+  /** Called once the sheet has slid away, after a copy or a cancel. */
   onClose: () => void;
 };
 
-// Mounted fresh for each copy, so its state always starts from initialValues.
+// Mounted fresh for each copy, so its state always starts from initialValues. It closes itself (so the
+// slide down can play) and tells the parent when it's gone.
 export function FillTemplateSheet({ prompt, variables, initialValues, actionLabel = 'Copy', onCopy, onClose }: Props) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [values, setValues] = useState(initialValues);
+  const [open, setOpen] = useState(true);
+  const close = () => setOpen(false);
 
   const filled = fillTemplate(prompt.body, values);
   const remaining = variables.filter((v) => !values[v]?.length).length;
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardSafe>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}>
-          <View style={[styles.grabber, { backgroundColor: theme.border }]} />
-          <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
-            {prompt.title || 'Untitled'}
-          </Text>
-          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then copy.</Text>
+    <Sheet
+      visible={open}
+      onClose={close}
+      onClosed={onClose}
+      style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}
+      handle={<View style={[styles.grabber, { backgroundColor: theme.border }]} />}
+    >
+      <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+        {prompt.title || 'Untitled'}
+      </Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then copy.</Text>
 
-          <ScrollView style={styles.fields} contentContainerStyle={styles.fieldsContent} keyboardShouldPersistTaps="handled">
-            {variables.map((name, i) => (
-              <View key={name} style={styles.field}>
-                <Text style={[styles.label, { color: theme.textMuted }]}>{name}</Text>
-                <TextInput
-                  value={values[name] ?? ''}
-                  onChangeText={(v) => setValues((prev) => ({ ...prev, [name]: v }))}
-                  placeholder={`Enter ${name}`}
-                  placeholderTextColor={theme.textMuted}
-                  autoFocus={i === 0}
-                  multiline
-                  style={[styles.input, { color: theme.text, backgroundColor: theme.bg, borderColor: theme.border }]}
-                />
-              </View>
-            ))}
-
-            <Text style={[styles.label, { color: theme.textMuted }]}>Preview</Text>
-            <Text style={[styles.preview, { color: theme.text, backgroundColor: theme.bg }]} numberOfLines={8}>
-              {filled}
-            </Text>
-          </ScrollView>
-
-          <View style={styles.actions}>
-            <Pressable
-              onPress={() => onCopy(prompt.body, values)}
-              style={[styles.btn, { backgroundColor: theme.chip }]}
-              accessibilityLabel="Copy template without filling"
-            >
-              <Text style={[styles.btnText, { color: theme.text }]}>Copy as-is</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => onCopy(filled, values)}
-              style={[styles.btn, styles.primary, { backgroundColor: theme.accent }]}
-              accessibilityLabel="Copy filled prompt"
-            >
-              <Text style={[styles.btnText, { color: theme.accentText }]}>
-                {remaining > 0 ? `${actionLabel} (${remaining} blank)` : actionLabel}
-              </Text>
-            </Pressable>
+      <ScrollView style={styles.fields} contentContainerStyle={styles.fieldsContent} keyboardShouldPersistTaps="handled">
+        {variables.map((name, i) => (
+          <View key={name} style={styles.field}>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{name}</Text>
+            <TextInput
+              value={values[name] ?? ''}
+              onChangeText={(v) => setValues((prev) => ({ ...prev, [name]: v }))}
+              placeholder={`Enter ${name}`}
+              placeholderTextColor={theme.textMuted}
+              autoFocus={i === 0}
+              multiline
+              style={[styles.input, { color: theme.text, backgroundColor: theme.bg, borderColor: theme.border }]}
+            />
           </View>
-        </View>
-      </KeyboardSafe>
-    </Modal>
+        ))}
+
+        <Text style={[styles.label, { color: theme.textMuted }]}>Preview</Text>
+        <Text style={[styles.preview, { color: theme.text, backgroundColor: theme.bg }]} numberOfLines={8}>
+          {filled}
+        </Text>
+      </ScrollView>
+
+      <View style={styles.actions}>
+        <Pressable
+          onPress={() => {
+            onCopy(prompt.body, values);
+            close();
+          }}
+          style={[styles.btn, { backgroundColor: theme.chip }]}
+          accessibilityLabel="Copy template without filling"
+        >
+          <Text style={[styles.btnText, { color: theme.text }]}>Copy as-is</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            onCopy(filled, values);
+            close();
+          }}
+          style={[styles.btn, styles.primary, { backgroundColor: theme.accent }]}
+          accessibilityLabel="Copy filled prompt"
+        >
+          <Text style={[styles.btnText, { color: theme.accentText }]}>
+            {remaining > 0 ? `${actionLabel} (${remaining} blank)` : actionLabel}
+          </Text>
+        </Pressable>
+      </View>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: { maxHeight: '85%', flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
-  grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 12 },
+  grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
   title: { fontSize: font.headline, fontWeight: '800' },
   subtitle: { fontSize: font.footnote, marginTop: 2, marginBottom: 12 },
   fields: { flexGrow: 0, flexShrink: 1 },

@@ -6,8 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AboutCard } from '@/components/AboutCard';
 import { BrandTitle } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
-import { APP_NAME, APP_TAGLINE, DEVELOPER, LINKS, SUPPORT_EMAIL } from '@/lib/app';
+import { APP_NAME, APP_TAGLINE, DEVELOPER, HEART_APPS, LINKS, SUPPORT_EMAIL } from '@/lib/app';
 import { font, useTheme } from '@/lib/theme';
+
+const HEART_APPS_TILE = require('../../assets/brand/heart-apps-tile.png');
+const WATCH_HEART_ICON = require('../../assets/brand/watch-heart.png');
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'copy-outline', text: 'One-tap copy from the home screen' },
@@ -28,6 +31,15 @@ export default function AboutScreen() {
         <Image source={require('../../assets/icon.png')} style={styles.icon} />
         <BrandTitle theme={theme} size={28} align="center" />
         <Text style={[styles.tagline, { color: theme.textMuted }]}>{APP_TAGLINE}</Text>
+        <Pressable
+          onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
+          accessibilityRole="link"
+          accessibilityLabel={`${APP_NAME} is a Heart App`}
+          style={({ pressed }) => [styles.family, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+        >
+          <Image source={HEART_APPS_TILE} style={styles.familyMark} />
+          <Text style={[styles.familyText, { color: theme.text }]}>A Heart App</Text>
+        </Pressable>
       </View>
 
       <AboutCard theme={theme} />
@@ -43,6 +55,39 @@ export default function AboutScreen() {
           </View>
         ))}
       </Section>
+
+      <View style={[styles.heartApps, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <View style={styles.heartAppsHead}>
+          <Image source={HEART_APPS_TILE} style={styles.heartAppsTile} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={[styles.heartAppsName, { color: theme.textMuted }]}>{HEART_APPS.name.toUpperCase()}</Text>
+            <Text style={[styles.heartAppsLine, { color: theme.text }]}>{HEART_APPS.line}</Text>
+          </View>
+        </View>
+        {HEART_APPS.others.map((app) => (
+          <Pressable
+            key={app.name}
+            onPress={() => WebBrowser.openBrowserAsync(app.url)}
+            accessibilityRole="link"
+            accessibilityLabel={`${app.name}: ${app.tagline}`}
+            style={({ pressed }) => [styles.otherApp, { backgroundColor: pressed ? theme.chip : 'transparent', borderTopColor: theme.border }]}
+          >
+            <Image source={WATCH_HEART_ICON} style={styles.otherIcon} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[styles.otherName, { color: theme.text }]}>{app.name}</Text>
+              <Text style={[styles.otherTagline, { color: theme.textMuted }]}>{app.tagline}</Text>
+            </View>
+            <Ionicons name="open-outline" size={17} color={theme.textMuted} />
+          </Pressable>
+        ))}
+        <Pressable
+          onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
+          accessibilityRole="link"
+          style={({ pressed }) => [styles.allApps, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+        >
+          <Text style={[styles.allAppsText, { color: theme.text }]}>All {HEART_APPS.name}</Text>
+        </Pressable>
+      </View>
 
       <Section theme={theme} title="Developer">
         <Row theme={theme} icon="person-outline" label={`Made by ${DEVELOPER.name}`} />
@@ -76,7 +121,7 @@ export default function AboutScreen() {
         style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
         <Text style={[styles.credit, { color: theme.textMuted }]}>
-          {APP_NAME} © {new Date().getFullYear()} {DEVELOPER.name}
+          {APP_NAME} © {new Date().getFullYear()} {DEVELOPER.name} · {HEART_APPS.name}
         </Text>
       </Pressable>
     </ScrollView>
@@ -88,6 +133,20 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
   icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
   tagline: { fontSize: font.body },
+  family: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, height: 36, paddingLeft: 8, paddingRight: 14, borderRadius: 18 },
+  familyMark: { width: 24, height: 24, borderRadius: 6 },
+  familyText: { fontSize: font.footnote, fontWeight: '700' },
+  heartApps: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
+  heartAppsHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  heartAppsTile: { width: 48, height: 48, borderRadius: 12 },
+  heartAppsName: { fontSize: font.caption, fontWeight: '800', letterSpacing: 0.5 },
+  heartAppsLine: { fontSize: font.body, lineHeight: 20 },
+  otherApp: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth, borderRadius: 10 },
+  otherIcon: { width: 40, height: 40, borderRadius: 10 },
+  otherName: { fontSize: font.body, fontWeight: '700' },
+  otherTagline: { fontSize: font.footnote },
+  allApps: { alignSelf: 'flex-start', height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: 'center' },
+  allAppsText: { fontSize: font.footnote, fontWeight: '700' },
   feature: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
   featureText: { flex: 1, fontSize: font.body, lineHeight: 19 },
   credit: { textAlign: 'center', fontSize: font.caption },
