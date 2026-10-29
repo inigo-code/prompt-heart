@@ -14,6 +14,14 @@ export const LINKS = {
   privacy: 'https://inigo-code.github.io/prompt-heart-site/privacy.html',
   deleteAccount: 'https://inigo-code.github.io/prompt-heart-site/delete-account.html',
 };
+
+/** Prompt Heart is one of the Heart Apps. Wording matches the Heart Apps site and Watch Heart (~/.claude/heart-apps.md). */
+export const HEART_APPS = {
+  name: 'Heart Apps',
+  line: 'Free Android apps by Inigo. No ads, no tracking, nothing to buy.',
+  home: 'https://inigo-code.github.io/',
+  others: [{ name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://inigo-code.github.io/watch-heart-site/' }],
+};
 export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
 
 /**
@@ -21,8 +29,9 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * people about; an update that leaves it alone shows nothing. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-10-29-fixes',
+  id: '2026-10-30-heart-apps',
   items: [
+    'Prompt Heart is one of the Heart Apps. Find Watch Heart, our film and anime diary, in About and Settings',
     'Long prompts stay above the keyboard while you type, so you can see the last line',
     'The fill-in sheet and tags stay above the keyboard too',
     'About you shows your name and bio, with Edit to change them; Save closes it again',

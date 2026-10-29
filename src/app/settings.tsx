@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBadge } from '@/components/AppBadge';
@@ -9,7 +9,7 @@ import { Avatar } from '@/components/Avatar';
 import { ControlRow, Row, Section, Segmented, ToggleRow } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
 import { AI_APPS } from '@/lib/ai';
-import { APP_NAME } from '@/lib/app';
+import { APP_NAME, HEART_APPS } from '@/lib/app';
 import { exportBackup, exportCsv, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
 import { ACCENTS, useTheme } from '@/lib/theme';
 import { LIBRARY_PROMPTS } from '@/library/prompts';
@@ -271,6 +271,13 @@ export default function SettingsScreen() {
         <Row theme={theme} icon="information-circle-outline" label={`About ${APP_NAME}`} onPress={() => router.push('/about')} />
         <Row
           theme={theme}
+          leading={<Image source={HEART_APPS_TILE} style={styles.heartApps} />}
+          label={HEART_APPS.name}
+          value="More apps"
+          onPress={() => router.push('/about')}
+        />
+        <Row
+          theme={theme}
           icon="refresh-outline"
           label="Reset settings"
           destructive
@@ -285,7 +292,10 @@ export default function SettingsScreen() {
   );
 }
 
+const HEART_APPS_TILE = require('../../assets/brand/heart-apps-tile.png');
+
 const styles = StyleSheet.create({
+  heartApps: { width: 30, height: 30, borderRadius: 8 },
   content: { padding: 16, gap: 24 },
   swatches: { flexDirection: 'row', gap: 10 },
   swatchRing: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
