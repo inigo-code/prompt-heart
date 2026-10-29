@@ -1,6 +1,6 @@
 # Heart Apps brand
 
-The developer brand behind every Heart app: an app tile with a heart-shaped hole, and the heart that just popped out of it. Every app we make, free, has something you'll love jump out of it. The tile stands for any app rather than counting them, so the mark stays the same however many apps there are.
+The developer brand behind every Heart app: a smiling app tile whose heart-shaped eye has just popped out, love-struck. Every app we make, free, is meant to get that reaction. The face is what keeps the mark readable at 32px, where the hole alone is only a few pixels. The tile stands for any app rather than counting them, so the mark stays the same however many apps there are.
 
 The heart is an accent, never the whole picture. It's how both app icons use it (on Prompt Heart's card, in Watch Heart's reel), and it keeps the brand away from health apps, where one big red heart is the stock symbol. Regenerate everything here with `node scripts/make-brand.mjs store/developer`.
 
@@ -31,7 +31,9 @@ The header keeps the logo in the middle third, so it survives the crop on narrow
 
 Gold, pink and near-black come from the app icons. On light backgrounds the tile and heart go deeper, because gold on cream is only 1.6:1.
 
-Keep clear space of at least the heart's width around the mark. The hole and the ring around the flying heart are cut out, not painted, so the mark works on any background. Don't recolour it, rotate it, fill the hole, or move the heart away from its corner.
+Keep clear space of at least the heart's width around the mark. The eyes, the smile and the ring around the flying heart are cut out, not painted, so the mark works on any background. Don't recolour it, rotate it, fill the hole, or move the heart away from its corner.
+
+The face echoes Prompt Heart's on purpose (an eye, a heart, a smile), but on an upright tile instead of a tilted stack of cards, so the two still tell apart at 48px. New app icons shouldn't use a face with a heart eye, or the family blurs.
 
 ## Adding an app
 

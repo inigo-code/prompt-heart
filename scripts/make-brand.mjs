@@ -21,6 +21,8 @@ const heartPath = (cx, cy, h) => `M ${cx} ${cy + h * 0.8}
  * The mark, drawn in a 1024 box: an app tile with a heart-shaped hole, and the heart that just popped out of it, turning as it jumps.
  * The heart stays a small accent, as it is in each app's own icon: one big red heart is the stock symbol for health apps.
  * A ring of background around the flying heart bites into the tile's corner, so the outline alone is its own shape.
+ * A dot eye and a smile, cut out like the hole, turn the tile into a face with the heart for its other eye, love-struck enough
+ * that it popped. The face is what still reads at 32px, where the hole is only a few pixels.
  */
 let n = 0;
 // Measured ink of the tile and the flying heart together, centred in the box.
@@ -33,8 +35,12 @@ function mark({ tiles, heart }) {
   const [holeX, holeY] = [x + size * 0.68, y + size * 0.34];
   const [outX, outY] = [holeX + 96, holeY - 150];
   const flying = `<path d="${heartPath(outX, outY, h)}" transform="rotate(${turn} ${outX} ${outY})"`;
+  // The eye sits level with the hole's middle; the smile is centred under the two.
+  const eye = `<circle cx="${x + 158}" cy="${holeY + 0.04 * h}" r="40" fill="black"/>`;
+  const [smileL, smileR, smileY, dip] = [x + 126, x + 386, y + 338, 120];
+  const smile = `<path d="M ${smileL} ${smileY} Q ${(smileL + smileR) / 2} ${smileY + dip} ${smileR} ${smileY}" fill="none" stroke="black" stroke-width="52" stroke-linecap="round"/>`;
   return `
-    <mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="white"/><path d="${heartPath(holeX, holeY, h)}" fill="black"/>${flying} fill="black" stroke="black" stroke-width="${ring * 2}" stroke-linejoin="round"/></mask>
+    <mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="white"/><path d="${heartPath(holeX, holeY, h)}" fill="black"/>${flying} fill="black" stroke="black" stroke-width="${ring * 2}" stroke-linejoin="round"/>${eye}${smile}</mask>
     <rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${round}" fill="${tiles}" mask="url(#${id})"/>
     ${flying} fill="${heart}"/>`;
 }
