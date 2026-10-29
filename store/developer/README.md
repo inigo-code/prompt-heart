@@ -1,6 +1,6 @@
 # Heart Apps brand
 
-The developer brand behind Prompt Heart and Watch Heart: two app tiles leaning into one heart. Regenerate everything here with `node scripts/make-brand.mjs store/developer`.
+The developer brand behind every Heart app: two app tiles leaning into one heart. The two tiles are the heart's two halves, not a count of apps, so the mark stays the same however many apps there are. Regenerate everything here with `node scripts/make-brand.mjs store/developer`.
 
 ## Play Console → Developer page
 
@@ -27,6 +27,19 @@ The header keeps the logo in the middle third, so it survives the crop on narrow
 | Back tile | `#FF4D6D` | `#E8395A` |
 | Wordmark | `#F6F4EF` | `#1C1A17` |
 
-Gold, pink and near-black are the colours already in both app icons. On light backgrounds both tiles go deeper, because gold on cream is only 1.6:1.
+Gold, pink and near-black come from the app icons. On light backgrounds both tiles go deeper, because gold on cream is only 1.6:1.
 
 Keep clear space of at least the heart's lobe width around the mark, and don't recolour, rotate or separate the two tiles.
+
+## Adding an app
+
+The developer mark never changes when an app is added, and the header names no apps, so neither needs regenerating. What keeps a new app in the family is its icon, which follows the rules Prompt Heart and Watch Heart already share:
+
+- Near-black background (`#121110`), full bleed.
+- One bold, flat object that says what the app does (a note card, a film reel), in gold `#F2B84B`.
+- A heart built into that object, not stuck beside it: on the card, in the reel's hub. Use pink `#FF4D6D` for it, so the heart is the one accent across every icon.
+- No text, and no gradients beyond a faint background glow.
+
+Because every icon is gold on near-black, apps tell apart by **silhouette**. Before settling on a new icon, look at it at 48 px beside the others: if two shapes are similar (two round objects, two cards), change the object, not the colour.
+
+Don't reuse the developer mark as an app icon, or build an app icon from the two leaning tiles. Those belong to Heart Apps itself, and an app that wears them reads as the developer account.
