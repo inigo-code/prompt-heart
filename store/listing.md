@@ -2,6 +2,8 @@
 
 Paste these into Play Console → Grow users → Store presence → Main store listing.
 
+Default language: **English (India), en-IN**. Release notes go between `<en-IN>` and `</en-IN>`.
+
 ## App name (30 max)
 
 Prompt Heart: AI Prompt Notes
@@ -37,6 +39,7 @@ A LIBRARY OF 100 GREAT PROMPTS
 ORGANISED YOUR WAY
 • Categories with colours, tags and pins
 • Bulk select to move, tag, pin or delete many prompts at once
+• Prompts open read-only, so a stray tap can’t change them. Tap Edit for bold, lists, headings, undo and redo
 • Version history: go back to any earlier version of a prompt
 • Trash keeps deleted prompts for 30 days
 
