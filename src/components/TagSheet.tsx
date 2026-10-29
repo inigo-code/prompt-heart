@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { font, useTheme } from '@/lib/theme';
 import { normalizeTag } from '@/store/PromptStore';
 
@@ -29,7 +30,7 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardSafe>
         <Pressable style={[styles.backdrop, { backgroundColor: theme.overlay }]} onPress={onClose} accessibilityLabel="Close" />
         <View style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}>
           <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
@@ -75,14 +76,14 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
             </>
           )}
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardSafe>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1 },
-  sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, gap: 12 },
+  sheet: { flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, gap: 12 },
   title: { fontSize: font.headline, fontWeight: '800' },
   inputRow: { flexDirection: 'row', gap: 8 },
   input: { flex: 1, fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },

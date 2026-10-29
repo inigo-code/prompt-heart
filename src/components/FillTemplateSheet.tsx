@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { fillTemplate } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
 import type { Prompt } from '@/store/types';
@@ -26,7 +27,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardSafe>
         <Pressable style={styles.backdrop} onPress={onClose} />
         <View style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}>
           <View style={[styles.grabber, { backgroundColor: theme.border }]} />
@@ -76,19 +77,18 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardSafe>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
-  sheet: { maxHeight: '85%', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
+  sheet: { maxHeight: '85%', flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
   grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 12 },
   title: { fontSize: font.headline, fontWeight: '800' },
   subtitle: { fontSize: font.footnote, marginTop: 2, marginBottom: 12 },
-  fields: { flexGrow: 0 },
+  fields: { flexGrow: 0, flexShrink: 1 },
   fieldsContent: { gap: 12, paddingBottom: 12 },
   field: { gap: 6 },
   label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
