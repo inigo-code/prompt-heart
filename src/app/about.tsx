@@ -24,6 +24,10 @@ const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
 export default function AboutScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // The Heart Apps chip is gold in both looks; on light paper its text is a deeper gold so it stays readable (5.6:1).
+  const gold = theme.dark
+    ? { border: '#F2B84B', fill: 'rgba(242, 184, 75, 0.14)', text: '#F2B84B' }
+    : { border: '#D99A1E', fill: 'rgba(242, 184, 75, 0.14)', text: '#7A4F00' };
 
   return (
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
@@ -34,11 +38,11 @@ export default function AboutScreen() {
         <Pressable
           onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
           accessibilityRole="link"
-          accessibilityLabel={`${APP_NAME} is a Heart App`}
-          style={({ pressed }) => [styles.family, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+          accessibilityLabel="A Heart App. Open the Heart Apps website"
+          style={({ pressed }) => [styles.family, { borderColor: gold.border, backgroundColor: gold.fill, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Image source={HEART_APPS_TILE} style={styles.familyMark} />
-          <Text style={[styles.familyText, { color: theme.text }]}>A Heart App</Text>
+          <Text style={[styles.familyText, { color: gold.text }]}>A HEART APP</Text>
         </Pressable>
       </View>
 
@@ -133,9 +137,9 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
   icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
   tagline: { fontSize: font.body },
-  family: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, height: 36, paddingLeft: 8, paddingRight: 14, borderRadius: 18 },
-  familyMark: { width: 24, height: 24, borderRadius: 6 },
-  familyText: { fontSize: font.footnote, fontWeight: '700' },
+  family: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, height: 30, paddingLeft: 5, paddingRight: 12, borderRadius: 15, borderWidth: 1 },
+  familyMark: { width: 20, height: 20, borderRadius: 5 },
+  familyText: { fontSize: font.caption, fontWeight: '800', letterSpacing: 1.5 },
   heartApps: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   heartAppsHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   heartAppsTile: { width: 48, height: 48, borderRadius: 12 },

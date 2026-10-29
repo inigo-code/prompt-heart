@@ -29,12 +29,11 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * people about; an update that leaves it alone shows nothing. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-10-30-heart-apps',
+  id: '2026-10-30-settings',
   items: [
-    'Prompt Heart is one of the Heart Apps. Find Watch Heart, our film and anime diary, in About and Settings',
-    'Long prompts stay above the keyboard while you type, so you can see the last line',
-    'The fill-in sheet and tags stay above the keyboard too',
+    'Your account comes first in Settings, so signing in to sync is easy to find',
+    'Prompt Heart is a Heart App: tap the gold chip in About to see Watch Heart and the rest',
+    'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
     'About you shows your name and bio, with Edit to change them; Save closes it again',
-    'New in 1.7.0, if you missed it: your profile, imports from other apps, CSV export, and Edit for formatting',
   ],
 };
