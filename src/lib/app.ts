@@ -38,5 +38,6 @@ export const WHATS_NEW = {
     'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
     'Prompt Heart is one of the Heart Apps: find Watch Heart in About',
     'Your account comes first in Settings, so signing in to sync is easy to find',
+    'The app opens cleanly, without the dark strip near the bottom of the screen',
   ],
 };
