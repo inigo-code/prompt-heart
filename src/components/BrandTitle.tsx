@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
+import { Text } from '@/components/AppText';
 import type { Theme } from '@/lib/theme';
 
 // Loaded in the root layout; until it's ready the title falls back to the system font.

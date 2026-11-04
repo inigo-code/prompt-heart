@@ -1,7 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { memo, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 
+import { Text } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
@@ -47,6 +49,19 @@ export const PromptCard = memo(function PromptCard({
   const grid = variant === 'grid';
   const vars = extractVariables(prompt.body).length;
   const extraImages = prompt.images.length - 1;
+  // A plain prompt copies straight away, so its button confirms with a tick; one with blanks opens its sheet.
+  const [copied, setCopied] = useState(false);
+  const tick = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (tick.current) clearTimeout(tick.current);
+  }, []);
+  const copy = () => {
+    onCopy(prompt);
+    if (vars > 0) return;
+    setCopied(true);
+    if (tick.current) clearTimeout(tick.current);
+    tick.current = setTimeout(() => setCopied(false), 1200);
+  };
 
   return (
     <Pressable
@@ -93,13 +108,19 @@ export const PromptCard = memo(function PromptCard({
           </View>
         ) : (
         <Pressable
-          onPress={() => onCopy(prompt)}
+          onPress={copy}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Copy ${prompt.title || 'prompt'}`}
           style={({ pressed }) => [styles.copyBtn, { backgroundColor: pressed ? theme.accent : theme.accentSoft }]}
         >
-          <Ionicons name="copy-outline" size={17} color={theme.text} />
+          {copied ? (
+            <Animated.View entering={ZoomIn.duration(140)}>
+              <Ionicons name="checkmark" size={18} color={theme.text} />
+            </Animated.View>
+          ) : (
+            <Ionicons name="copy-outline" size={17} color={theme.text} />
+          )}
         </Pressable>
         )}
       </View>

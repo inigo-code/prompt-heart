@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
+import { Onboarding } from '@/components/Onboarding';
 import { ToastProvider } from '@/components/Toast';
 import { UpdatePrompt } from '@/components/UpdatePrompt';
 import { useTheme } from '@/lib/theme';
@@ -16,7 +17,7 @@ import { CopyPromptProvider } from '@/lib/useCopyPrompt';
 import { AppLockProvider } from '@/lock/AppLockProvider';
 import { ActivityProvider } from '@/profile/ActivityProvider';
 import { ProfileProvider } from '@/profile/ProfileProvider';
-import { SettingsProvider } from '@/settings/SettingsProvider';
+import { SettingsProvider, useSettings } from '@/settings/SettingsProvider';
 import { HistoryProvider } from '@/store/HistoryProvider';
 import { PromptStoreProvider } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
@@ -65,6 +66,9 @@ function Navigator() {
   const { hasShareIntent } = useShareIntentContext();
   useEnsureAiFolders();
   useWidgetSync();
+  const { settings, ready } = useSettings();
+  // Over the home screen only, so a link or a shared item that opened the app isn't covered.
+  const welcome = ready && !settings.onboarded && pathname === '/';
 
   // On Android, shared content arrives through the native module rather than a deep link,
   // so open the Share screen whenever something has been shared and not yet handled.
@@ -78,6 +82,7 @@ function Navigator() {
       <UpdatePrompt />
       <Stack
         screenOptions={{
+          animation: 'ios_from_right',
           headerStyle: { backgroundColor: theme.bg },
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' },
@@ -99,6 +104,7 @@ function Navigator() {
         <Stack.Screen name="library" options={{ title: 'Prompt library' }} />
         <Stack.Screen name="share" options={{ title: 'Save prompt' }} />
       </Stack>
+      {welcome && <Onboarding />}
     </>
   );
 }

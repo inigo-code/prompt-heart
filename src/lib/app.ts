@@ -34,6 +34,7 @@ export const WHATS_NEW = {
     'A home-screen widget: your pinned prompts, one tap to copy. Touch and hold your home screen, then Widgets',
     'Prompts with blanks open their fill-in sheet straight from the widget',
     'Menus and sheets slide up smoothly; drag the handle down to close one',
+    'Smoother moves between screens, and buttons that respond under your finger',
     'About you shows your name and bio, with Edit to change them',
     'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
     'Prompt Heart is one of the Heart Apps: find Watch Heart in About',

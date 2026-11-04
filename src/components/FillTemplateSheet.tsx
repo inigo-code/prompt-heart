@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Text, TextInput } from '@/components/AppText';
 import { Sheet } from '@/components/Sheet';
+import { Tap } from '@/components/Tap';
 import { fillTemplate } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
 import type { Prompt } from '@/store/types';
@@ -66,7 +68,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
       </ScrollView>
 
       <View style={styles.actions}>
-        <Pressable
+        <Tap
           onPress={() => {
             onCopy(prompt.body, values);
             close();
@@ -75,8 +77,8 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
           accessibilityLabel="Copy template without filling"
         >
           <Text style={[styles.btnText, { color: theme.text }]}>Copy as-is</Text>
-        </Pressable>
-        <Pressable
+        </Tap>
+        <Tap
           onPress={() => {
             onCopy(filled, values);
             close();
@@ -87,7 +89,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
           <Text style={[styles.btnText, { color: theme.accentText }]}>
             {remaining > 0 ? `${actionLabel} (${remaining} blank)` : actionLabel}
           </Text>
-        </Pressable>
+        </Tap>
       </View>
     </Sheet>
   );

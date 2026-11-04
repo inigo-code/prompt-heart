@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from '@/components/AppText';
 import type { AiApp } from '@/lib/ai';
 
 /** Round brand-coloured chip with the app's short name, e.g. "Cl" for Claude. */

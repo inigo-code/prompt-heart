@@ -1,7 +1,8 @@
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from '@/components/AppText';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 

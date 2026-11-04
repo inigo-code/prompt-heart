@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { AppState, Image, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Image, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
 
+import { Text } from '@/components/AppText';
 import { font, useTheme } from '@/lib/theme';
 import { useSettings } from '@/settings/SettingsProvider';
 

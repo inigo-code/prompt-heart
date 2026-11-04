@@ -2,9 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, BackHandler, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, BackHandler, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Text, TextInput } from '@/components/AppText';
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
 import { Avatar } from '@/components/Avatar';
@@ -12,6 +13,7 @@ import { BrandTitle, HeartMark } from '@/components/BrandTitle';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
 import { TagSheet } from '@/components/TagSheet';
+import { Tap } from '@/components/Tap';
 import { TipCard } from '@/components/TipCard';
 import { useToast } from '@/components/Toast';
 import { aiAppForFolder } from '@/lib/ai';
@@ -483,19 +485,17 @@ export default function HomeScreen() {
       />
 
       {!selecting && (
-      <Pressable
+      <Tap
+        scale={0.92}
         accessibilityLabel="New prompt"
         onPress={() => {
           const folderId = filter.kind === 'folder' ? filter.id : undefined;
           router.push({ pathname: '/prompt/[id]', params: { id: 'new', ...(folderId ? { folderId } : {}) } });
         }}
-        style={({ pressed }) => [
-          styles.fab,
-          { backgroundColor: theme.accent, bottom: insets.bottom + 24, transform: [{ scale: pressed ? 0.94 : 1 }] },
-        ]}
+        style={[styles.fab, { backgroundColor: theme.accent, bottom: insets.bottom + 24 }]}
       >
         <Ionicons name="add" size={30} color={theme.accentText} />
-      </Pressable>
+      </Tap>
       )}
 
       {selecting && (

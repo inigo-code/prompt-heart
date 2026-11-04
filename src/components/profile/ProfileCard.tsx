@@ -1,7 +1,8 @@
 import { forwardRef } from 'react';
 import type { ComponentRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { BRAND_FONT, HeartMark } from '@/components/BrandTitle';
 import type { Theme } from '@/lib/theme';

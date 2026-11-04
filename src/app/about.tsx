@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as WebBrowser from 'expo-web-browser';
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Text } from '@/components/AppText';
 import { AboutCard } from '@/components/AboutCard';
 import { BrandTitle } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
@@ -18,6 +19,9 @@ const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'folder-open-outline', text: 'Categories, tags, pins and search' },
   { icon: 'image-outline', text: 'Reference images that never get copied' },
   { icon: 'share-outline', text: `Share text or images into ${APP_NAME} from any app` },
+  { icon: 'apps-outline', text: 'A home-screen widget: one tap to copy' },
+  { icon: 'person-outline', text: 'Your profile: most-used prompts, streaks and achievements' },
+  { icon: 'download-outline', text: 'Import from spreadsheets, Notion, JSON and Markdown' },
   { icon: 'cloud-done-outline', text: 'Cloud sync across devices, works offline' },
 ];
 
