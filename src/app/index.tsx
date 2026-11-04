@@ -256,7 +256,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/profile')}
               hitSlop={6}
               accessibilityLabel={`Profile and sync (${SYNC_LABEL[syncStatus]})`}
-              style={({ pressed }) => [styles.avatarBtn, { opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.avatarBtn, { transform: [{ scale: pressed ? 0.97 : 1 }] }]}
             >
               <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={36} dot={syncDot(syncStatus, theme)} dotRing={syncStatus === 'waiting'} />
             </Pressable>
@@ -309,7 +309,7 @@ export default function HomeScreen() {
               key={app.key}
               onPress={() => openAiApp(app).catch(() => toast(`Couldn't open ${app.label}`))}
               accessibilityLabel={`Open ${app.label}`}
-              style={({ pressed }) => [styles.aiPill, { backgroundColor: theme.card, borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.aiPill, { backgroundColor: theme.card, borderColor: theme.border, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
             >
               <AppBadge app={app} size={22} />
               <Text style={[styles.aiPillText, { color: theme.text }]}>{app.label}</Text>
@@ -375,7 +375,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/categories')}
             accessibilityRole="button"
             accessibilityLabel="Manage categories"
-            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.accentSoft, opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.accentSoft, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
           >
             <Ionicons name="folder-open-outline" size={15} color={theme.text} />
             <Text style={[styles.manageText, { color: theme.text }]}>Categories</Text>
@@ -417,13 +417,11 @@ export default function HomeScreen() {
             <TipCard
               theme={theme}
               icon={<HeartMark theme={theme} size={22} />}
-              title="Launch prompts in your AI apps"
+              title="Open prompts in your AI apps"
               onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'ai-launch'] })}
               action={{ label: 'Choose apps', onPress: () => router.push('/settings') }}
             >
-              Each AI app has its own category. Put a prompt in one (for example Claude) and it gets an{' '}
-              <Text style={{ fontWeight: '800' }}>Open in Claude</Text> button that copies it and opens the app. Tap an app in the{' '}
-              <Text style={{ fontWeight: '800' }}>Open</Text> bar above to jump straight to it.
+              Tap an app in the Open bar to jump straight to it.
             </TipCard>
           ) : !settings.dismissedTips.includes('library') ? (
             <TipCard
@@ -433,8 +431,7 @@ export default function HomeScreen() {
               onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'library'] })}
               action={{ label: 'Browse prompts', onPress: () => router.push('/library') }}
             >
-              {LIBRARY_PROMPTS.length} ready-made prompts for image generation, productivity, business, marketing, writing, coding and
-              more. Copy one as it is, or save it to make it your own.
+              {LIBRARY_PROMPTS.length} ready-made prompts to copy or save.
             </TipCard>
           ) : undefined
         }
@@ -445,7 +442,6 @@ export default function HomeScreen() {
             theme={theme}
             variant={settings.layout}
             previewLines={grid ? Math.min(settings.previewLines, 4) : settings.previewLines}
-            showTokens={settings.showTokens && !grid}
             launchApp={launchAppFor(item.folderId)}
             onLaunch={launch}
             selecting={selecting}
@@ -473,7 +469,7 @@ export default function HomeScreen() {
                 <Pressable
                   onPress={() => router.push('/library')}
                   accessibilityRole="button"
-                  style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                  style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
                 >
                   <Ionicons name="library-outline" size={16} color={theme.accentText} />
                   <Text style={[styles.emptyBtnText, { color: theme.accentText }]}>Browse the prompt library</Text>

@@ -187,7 +187,6 @@ export default function SettingsScreen() {
       <Section
         theme={theme}
         title="Security"
-        footer="App lock uses your fingerprint, face or phone screen lock, and hides your prompts in the recent-apps screen. Prompt Heart never sees your fingerprint or PIN."
       >
         <ToggleRow
           theme={theme}
@@ -212,7 +211,6 @@ export default function SettingsScreen() {
       <Section
         theme={theme}
         title="AI apps"
-        footer={`Each app you turn on gets its own category. Prompts saved there get a button that copies the prompt and opens the app, ready to paste. Turning an app off hides it everywhere, including its category; its prompts stay under All.`}
       >
         <ToggleRow
           theme={theme}
@@ -237,7 +235,6 @@ export default function SettingsScreen() {
       <Section
         theme={theme}
         title="Your data"
-        footer="Backups include categories, tags and attached images. Importing merges into what you have; nothing is deleted."
       >
         <Row
           theme={theme}
@@ -280,7 +277,7 @@ export default function SettingsScreen() {
       <Section theme={theme} title="About">
         <Row
           theme={theme}
-          leading={<Image source={HEART_APPS_TILE} style={styles.heartApps} />}
+          leading={<Image source={APP_ICON} style={styles.appIcon} />}
           label={`About ${APP_NAME}`}
           value={HEART_APPS.name}
           onPress={() => router.push('/about')}
@@ -301,10 +298,10 @@ export default function SettingsScreen() {
   );
 }
 
-const HEART_APPS_TILE = require('../../assets/brand/heart-apps-tile.png');
+const APP_ICON = require('../../assets/widget-icon.png');
 
 const styles = StyleSheet.create({
-  heartApps: { width: 30, height: 30, borderRadius: 8 },
+  appIcon: { width: 30, height: 30, borderRadius: 8 },
   content: { padding: 16, gap: 24 },
   swatches: { flexDirection: 'row', gap: 10 },
   swatchRing: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },

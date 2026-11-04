@@ -67,7 +67,7 @@ export default function ImportScreen() {
         onPress={choose}
         disabled={busy}
         accessibilityRole="button"
-        style={({ pressed }) => [styles.choose, { backgroundColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}
+        style={({ pressed }) => [styles.choose, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
       >
         {busy ? <ActivityIndicator color={theme.accentText} /> : <Ionicons name="folder-open-outline" size={20} color={theme.accentText} />}
         <Text style={[styles.chooseText, { color: theme.accentText }]}>{files.length ? 'Choose other files' : 'Choose files'}</Text>

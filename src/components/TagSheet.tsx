@@ -70,7 +70,7 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
                 onPress={() => add(t)}
                 accessibilityRole="button"
                 accessibilityLabel={`Add tag ${t}`}
-                style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+                style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
               >
                 <Text style={{ color: theme.text, fontSize: font.body, fontWeight: '600' }}>#{t}</Text>
               </Pressable>

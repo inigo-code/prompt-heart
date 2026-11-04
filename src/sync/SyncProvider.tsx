@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState } from 'react-native';
 
-import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
+import { IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
 import { promptVersion } from '@/store/merge';
@@ -23,9 +23,8 @@ const PULL_OVERLAP_MS = 10_000;
 export type SyncStatus = 'unconfigured' | 'signed-out' | 'idle' | 'syncing' | 'waiting' | 'synced' | 'error';
 
 export type SyncProgress = { label: string; done: number; total: number };
-/** Cloud image usage: how many are stored, the limit, and how many are waiting on this phone because of it. */
-/** Cloud images: how many are used, the limit, how many wait for room, and how many failed and will retry. */
-export type ImageUsage = { used: number; limit: number; waiting: number; failed: number };
+/** Cloud images: how many are stored, and how many failed and will try again next sync. */
+export type ImageUsage = { used: number; failed: number };
 
 type SyncContext = {
   status: SyncStatus;
@@ -33,7 +32,7 @@ type SyncContext = {
   lastSyncedAt: number | null;
   email: string | null;
   pendingCount: number;
-  /** Changes queued for the next sync, not counting images held back by the cloud image limit. */
+  /** Changes queued for the next sync. */
   unsentCount: number;
   /** When the next automatic sync is planned (ms timestamp), or null. */
   nextSyncAt: number | null;
@@ -102,10 +101,7 @@ async function push(client: SupabaseClient, userId: string, store: SyncStoreApi)
 /** Uploads new attachments before the prompt rows that reference them, and removes deleted ones. */
 type OnProgress = (p: SyncProgress | null) => void;
 
-/**
- * Removes deleted attachments, then uploads new ones while there's room under CLOUD_IMAGE_LIMIT.
- * Images over the limit stay queued on this phone and upload automatically once a slot frees up.
- */
+/** Removes deleted attachments, then uploads new ones. An image that fails stays queued for the next sync. */
 async function pushImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress): Promise<ImageUsage | null> {
   if (!imagesSupported) return null;
   const { pendingImageUploads, pendingImageDeletes } = store.getSnapshot().sync;
@@ -114,7 +110,6 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
 
   const remote = await listRemoteImages(client, userId);
   const uploaded: string[] = [];
-  const waiting: string[] = [];
   let failed = 0;
   const toUpload = pendingImageUploads.filter((id) => {
     if (remote.has(id)) {
@@ -124,36 +119,26 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
     return true;
   });
   for (const [i, id] of toUpload.entries()) {
-    if (remote.size >= CLOUD_IMAGE_LIMIT) {
-      waiting.push(id);
-      continue;
-    }
     onProgress({ label: 'Uploading images', done: i, total: toUpload.length });
     try {
       // A missing file can't be uploaded from here (another device has it); drop it from the queue.
       if ((await uploadImage(client, userId, id)) === 'done') remote.add(id);
       uploaded.push(id);
-    } catch (e) {
-      // The server refuses uploads over the limit (row-level security); keep the rest waiting.
-      if (/row-level security|policy/i.test(e instanceof Error ? e.message : String((e as { message?: string })?.message))) {
-        waiting.push(id);
-        remote.add(id); // treat as full for the rest of this pass
-        continue;
-      }
-      // Anything else (the network, or a problem on the server): keep it queued and try again next
+    } catch {
+      // The network, or a problem on the server: keep it queued and try again next
       // sync, so one image never holds back your prompts.
       failed++;
     }
   }
   store.markImagesSynced({ uploaded, deleted: [] });
-  return { used: Math.min(remote.size, CLOUD_IMAGE_LIMIT), limit: CLOUD_IMAGE_LIMIT, waiting: waiting.length, failed };
+  return { used: remote.size, failed };
 }
 
 /** Fetches attachments referenced by prompts that this device doesn't have a file for yet. */
-async function pullImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress): Promise<number> {
+async function pullImages(client: SupabaseClient, userId: string, store: SyncStoreApi, onProgress: OnProgress, onImage: () => void): Promise<number> {
   if (!imagesSupported) return 0;
   const ids = [...new Set(store.getSnapshot().prompts.filter((p) => p.deletedAt === null || p.body || p.title).flatMap((p) => p.images))];
-  return downloadMissingImages(client, userId, ids, (done, total) => onProgress({ label: 'Downloading images', done, total }));
+  return downloadMissingImages(client, userId, ids, (done, total) => onProgress({ label: 'Downloading images', done, total }), onImage);
 }
 
 async function pullTable<R extends { server_updated_at?: string }>(
@@ -259,7 +244,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         setProgress(null);
         await push(supabase, userId, storeRef.current);
         await pull(supabase, userId, storeRef.current);
-        if ((await pullImages(supabase, userId, storeRef.current, setProgress)) > 0) setImagesVersion((v) => v + 1);
+        // Each image shows as soon as it lands, so a new phone fills in while the rest download.
+        await pullImages(supabase, userId, storeRef.current, setProgress, () => setImagesVersion((v) => v + 1));
         setProgress(null);
       } while (again.current);
       setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
@@ -414,12 +400,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setState({ status: 'idle', error: null, lastSyncedAt: null });
   }, []);
 
-  const heldBackImages = imageUsage?.waiting ?? 0;
-  const unsentCount =
-    meta.pendingPrompts.length +
-    meta.pendingFolders.length +
-    meta.pendingImageDeletes.length +
-    Math.max(0, meta.pendingImageUploads.length - heldBackImages);
+  const unsentCount = meta.pendingPrompts.length + meta.pendingFolders.length + meta.pendingImageDeletes.length + meta.pendingImageUploads.length;
 
   const value = useMemo<SyncContext>(
     () => ({

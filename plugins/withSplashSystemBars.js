@@ -7,6 +7,8 @@ const { withAndroidStyles } = require('expo/config-plugins');
 
 const SPLASH_THEME = 'Theme.App.SplashScreen';
 const ITEMS = {
+  // From Android 15 the bar colours are ignored and the window draws behind the bars, so the window needs the colour too.
+  'android:windowBackground': '@color/splashscreen_background',
   'android:navigationBarColor': '@color/splashscreen_background',
   'android:statusBarColor': '@color/splashscreen_background',
   'android:enforceNavigationBarContrast': 'false',
@@ -16,6 +18,11 @@ const ITEMS = {
 module.exports = function withSplashSystemBars(config) {
   return withAndroidStyles(config, (cfg) => {
     const styles = (cfg.modResults.resources.style ??= []);
+    // The app theme takes over from the splash; matching it stops a dark or light flash between the two.
+    const app = styles.find((s) => s.$.name === 'AppTheme');
+    if (app && !app.item.some((i) => i.$.name === 'android:windowBackground')) {
+      app.item.push({ $: { name: 'android:windowBackground' }, _: '@color/splashscreen_background' });
+    }
     let theme = styles.find((s) => s.$.name === SPLASH_THEME);
     if (!theme) {
       theme = { $: { name: SPLASH_THEME, parent: 'Theme.SplashScreen' }, item: [] };

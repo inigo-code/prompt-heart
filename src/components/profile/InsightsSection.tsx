@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Text } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
@@ -32,6 +33,7 @@ export function InsightsSection({ theme }: { theme: Theme }) {
         <Figure theme={theme} value={data.currentStreak} label="day streak" accent />
       </View>
 
+      <Animated.View entering={FadeInDown.duration(260).delay(0)}>
       <Section theme={theme} title="Your most-used four">
         {data.topFour.length ? (
           <View style={styles.four}>
@@ -41,7 +43,7 @@ export function InsightsSection({ theme }: { theme: Theme }) {
                 onPress={() => router.push({ pathname: '/prompt/[id]', params: { id: p.id } })}
                 accessibilityRole="button"
                 accessibilityLabel={`${p.title}, copied ${plural(p.copies, 'time')}`}
-                style={({ pressed }) => [styles.fourItem, { backgroundColor: i === 0 ? theme.accentSoft : theme.bg, opacity: pressed ? 0.75 : 1 }]}
+                style={({ pressed }) => [styles.fourItem, { backgroundColor: i === 0 ? theme.accentSoft : theme.bg, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
               >
                 <Text style={[styles.fourCount, { color: theme.text }]}>{p.copies}×</Text>
                 <Text style={[styles.fourTitle, { color: theme.text }]} numberOfLines={2}>
@@ -54,19 +56,22 @@ export function InsightsSection({ theme }: { theme: Theme }) {
           <Text style={[styles.empty, { color: theme.textMuted }]}>Copy a prompt and it shows up here. The four you copy most stay on top.</Text>
         )}
       </Section>
+      </Animated.View>
 
+      <Animated.View entering={FadeInDown.duration(260).delay(50)}>
       <Section
         theme={theme}
         title="A year of prompting"
         footer={`${plural(data.activeDays, 'active day')} · longest streak ${plural(data.longestStreak, 'day')}${
           data.busiestMonth ? ` · busiest month ${MONTH_NAMES[Number(data.busiestMonth.key.slice(5, 7)) - 1]}` : ''
-        }. Saving, editing and copying all count.`}
+        }.`}
       >
         <View style={styles.graph}>
           <ActivityGraph weeks={data.weeks} theme={theme} />
           <ActivityKey theme={theme} />
         </View>
       </Section>
+      </Animated.View>
 
       {data.topCategories.length > 0 && (
         <Section theme={theme} title="Top categories">
@@ -79,7 +84,7 @@ export function InsightsSection({ theme }: { theme: Theme }) {
       )}
 
       {data.opens.length > 0 && (
-        <Section theme={theme} title="Where your prompts go" footer="Each “Copy & open” from this phone, counted from this version on.">
+        <Section theme={theme} title="Where your prompts go">
           <View style={styles.bars}>
             {data.opens.map((o) => {
               const app = aiApp(o.key);
@@ -89,11 +94,13 @@ export function InsightsSection({ theme }: { theme: Theme }) {
         </Section>
       )}
 
+      <Animated.View entering={FadeInDown.duration(260).delay(100)}>
       <Section theme={theme} title={`Achievements · ${unlocked} of ${data.achievements.length}`}>
         <View style={styles.badges}>
           <Achievements list={data.achievements} theme={theme} />
         </View>
       </Section>
+      </Animated.View>
     </>
   );
 }

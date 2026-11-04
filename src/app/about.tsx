@@ -45,7 +45,6 @@ export default function AboutScreen() {
           accessibilityLabel="A Heart App. Open the Heart Apps website"
           style={({ pressed }) => [styles.family, { borderColor: gold.border, backgroundColor: gold.fill, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
-          <Image source={HEART_APPS_TILE} style={styles.familyMark} />
           <Text style={[styles.familyText, { color: gold.text }]}>A HEART APP</Text>
         </Pressable>
       </View>
@@ -141,8 +140,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
   icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
   tagline: { fontSize: font.body },
-  family: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, height: 30, paddingLeft: 5, paddingRight: 12, borderRadius: 15, borderWidth: 1 },
-  familyMark: { width: 20, height: 20, borderRadius: 5 },
+  family: { flexDirection: 'row', alignItems: 'center', marginTop: 6, height: 30, paddingHorizontal: 14, borderRadius: 15, borderWidth: 1 },
   familyText: { fontSize: font.caption, fontWeight: '800', letterSpacing: 1.5 },
   heartApps: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   heartAppsHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },

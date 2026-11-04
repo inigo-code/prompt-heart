@@ -52,13 +52,13 @@ export type Theme = typeof light;
  * a new number. (Sizes computed from a component's own size, like avatar initials, stay computed.)
  */
 export const font = {
-  caption: 12,
-  footnote: 13,
-  body: 15,
-  headline: 17,
-  title: 20,
-  title2: 24,
-  largeTitle: 28,
+  caption: 13,
+  footnote: 14,
+  body: 16,
+  headline: 18,
+  title: 22,
+  title2: 26,
+  largeTitle: 30,
 } as const;
 
 /** Elevation, as boxShadow strings in a warm tint that matches the backgrounds. */

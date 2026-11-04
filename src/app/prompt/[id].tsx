@@ -25,7 +25,6 @@ import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
-import { useSync } from '@/sync/SyncProvider';
 import { useHistory } from '@/store/HistoryProvider';
 import { normalizeTag, usePromptStore } from '@/store/PromptStore';
 import type { PromptDraft } from '@/store/types';
@@ -57,8 +56,6 @@ function PromptEditor() {
   const store = usePromptStore();
   const copy = useCopyPrompt();
   const history = useHistory();
-  const { imageUsage } = useSync();
-  const cloudFull = !!imageUsage && imageUsage.used >= imageUsage.limit;
   // One version is saved per editing session, right before the first change to the text.
   const snapped = useRef(false);
   const aiApps = useEnabledAiApps();
@@ -271,7 +268,7 @@ function PromptEditor() {
                 onPress={editing ? finishEditing : () => setEditing(true)}
                 accessibilityRole="button"
                 accessibilityLabel={editing ? 'Done editing' : 'Edit prompt'}
-                style={({ pressed }) => [styles.editBtn, { backgroundColor: editing ? theme.accent : theme.chip, opacity: pressed ? 0.75 : 1 }]}
+                style={({ pressed }) => [styles.editBtn, { backgroundColor: editing ? theme.accent : theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
               >
                 {!editing && <Ionicons name="create-outline" size={16} color={theme.text} />}
                 <Text style={[styles.editText, { color: editing ? theme.accentText : theme.text }]}>{editing ? 'Done' : 'Edit'}</Text>
@@ -417,12 +414,6 @@ function PromptEditor() {
             )}
           </ScrollView>
         )}
-        {images.length > 0 && (
-          <Text style={[styles.hint, { color: theme.textMuted }]}>
-            Images are for reference — copying only copies the text.
-            {cloudFull ? ` Cloud image limit reached (${imageUsage?.limit}); new images stay on this phone.` : ''}
-          </Text>
-        )}
 
         {editing ? (
           <TextInput
@@ -536,7 +527,6 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   addImageText: { fontSize: font.caption, fontWeight: '600', textAlign: 'center' },
-  hint: { fontSize: font.caption, marginTop: -4 },
   body: { fontSize: font.headline, lineHeight: 24, minHeight: 280, paddingVertical: 8 },
   emptyBody: { fontSize: font.body, paddingVertical: 8, minHeight: 120 },
   folderDot: { width: 8, height: 8, borderRadius: 4 },

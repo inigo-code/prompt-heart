@@ -90,7 +90,7 @@ export default function TrashScreen() {
             <Pressable
               onPress={() => router.back()}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
             >
               <Text style={[styles.emptyBtnText, { color: theme.text }]}>Back to prompts</Text>
             </Pressable>

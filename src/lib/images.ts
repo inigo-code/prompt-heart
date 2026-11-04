@@ -9,12 +9,6 @@ import { newId } from '@/lib/id';
 // Attachments are stored on the device as <id>.jpg in the app's documents folder,
 // and in the private "prompt-images" bucket as <user id>/<id>.jpg.
 export const IMAGE_BUCKET = 'prompt-images';
-/**
- * Images each account can keep in the cloud (the profile photo doesn't count). Keeps the free
- * Supabase plan sustainable; extra images stay on the phone. Enforced on the server too
- * (supabase/image_quota.sql). Keep the two in sync.
- */
-export const CLOUD_IMAGE_LIMIT = 20;
 // Sized for phone screens; about 80–120 KB each, which keeps cloud storage and downloads small.
 const MAX_WIDTH = 1024;
 const JPEG_QUALITY = 0.65;
@@ -110,26 +104,42 @@ export async function deleteRemoteImages(client: SupabaseClient, userId: string,
   if (error) throw error;
 }
 
-/** Downloads images this device doesn't have yet. Missing remote files are skipped, not errors. */
+/** How many images download at once, so a new phone fills in quickly without flooding the connection. */
+const DOWNLOADS_AT_ONCE = 4;
+
+/**
+ * Downloads images this device doesn't have yet, a few at a time, so a first sign-in brings every
+ * image over. Missing remote files are skipped, not errors. onImage fires as each one lands.
+ */
 export async function downloadMissingImages(
   client: SupabaseClient,
   userId: string,
   ids: string[],
   onProgress?: (done: number, total: number) => void,
+  onImage?: () => void,
 ): Promise<number> {
   const missing = ids.filter((id) => !imageFile(id).exists);
+  let next = 0;
+  let finished = 0;
   let downloaded = 0;
-  for (const [i, id] of missing.entries()) {
-    onProgress?.(i, missing.length);
-    const { data, error } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remotePath(userId, id), 60);
-    if (error || !data?.signedUrl) continue;
-    try {
-      await File.downloadFileAsync(data.signedUrl, imageFile(id));
-      downloaded++;
-    } catch {
-      // The upload may not have finished on the other device yet; the next sync retries.
+  const worker = async () => {
+    while (next < missing.length) {
+      const id = missing[next++];
+      onProgress?.(finished, missing.length);
+      const { data, error } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remotePath(userId, id), 60);
+      if (!error && data?.signedUrl) {
+        try {
+          await File.downloadFileAsync(data.signedUrl, imageFile(id));
+          downloaded++;
+          onImage?.();
+        } catch {
+          // The upload may not have finished on the other device yet; the next sync retries.
+        }
+      }
+      finished++;
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(DOWNLOADS_AT_ONCE, missing.length) }, worker));
   if (missing.length) onProgress?.(missing.length, missing.length);
   return downloaded;
 }

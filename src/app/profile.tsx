@@ -2,17 +2,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Keyboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, TextInput } from '@/components/AppText';
 import { KeyboardSafe } from '@/components/KeyboardSafe';
+import { Tap } from '@/components/Tap';
 import { ActionSheet } from '@/components/ActionSheet';
 import { Avatar } from '@/components/Avatar';
 import { InsightsSection } from '@/components/profile/InsightsSection';
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { Row, Section } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
-import { greeting, useHour } from '@/lib/greeting';
 import { deleteLocalImage } from '@/lib/images';
 import type { Theme } from '@/lib/theme';
 import { font, useTheme } from '@/lib/theme';
@@ -38,7 +39,6 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const hour = useHour();
   const profile = useProfile();
   const sync = useSync();
   const store = usePromptStore();
@@ -124,28 +124,14 @@ export default function ProfileScreen() {
               {busy === 'photo' ? <ActivityIndicator size="small" color={theme.accentText} /> : <Ionicons name="camera" size={16} color={theme.accentText} />}
             </View>
           </Pressable>
-          <Text style={[styles.hello, { color: theme.text }]}>{greeting(hour, profile.displayName)}</Text>
-          {!!profile.bio && <Text style={[styles.bio, { color: theme.text }]}>{profile.bio}</Text>}
-          {sync.user?.email && <Text style={[styles.email, { color: theme.textMuted }]}>{sync.user.email}</Text>}
-          <Pressable
-            onPress={() => router.push('/profile-card')}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.cardBtn, { backgroundColor: theme.chip, opacity: pressed ? 0.75 : 1 }]}
-          >
-            <Ionicons name="share-social-outline" size={16} color={theme.text} />
-            <Text style={[styles.cardBtnText, { color: theme.text }]}>Share my profile card</Text>
-          </Pressable>
-        </View>
-
-        <Section theme={theme} title="About you" footer="Your name is used in your welcome message. Both are saved to your account when you're signed in, so they follow you to your other phones.">
           {aboutOpen ? (
-            <>
+            <Animated.View entering={FadeInDown.duration(220)} style={[styles.editor, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <TextInput
                 value={name}
                 onChangeText={setName}
                 onSubmitEditing={saveAbout}
                 autoFocus
-                placeholder="What should we call you?"
+                placeholder="Your name"
                 placeholderTextColor={theme.textMuted}
                 autoCapitalize="words"
                 autoComplete="name"
@@ -157,7 +143,7 @@ export default function ProfileScreen() {
               <TextInput
                 value={bio}
                 onChangeText={(t) => setBio(t.slice(0, BIO_MAX))}
-                placeholder="A line about you, e.g. Writes prompts for a design studio"
+                placeholder="A line about you"
                 placeholderTextColor={theme.textMuted}
                 multiline
                 maxLength={BIO_MAX}
@@ -172,44 +158,43 @@ export default function ProfileScreen() {
                   <ActivityIndicator color={theme.textMuted} />
                 ) : (
                   <View style={styles.aboutActions}>
-                    <Pressable
+                    <Tap
                       onPress={cancelAbout}
                       accessibilityRole="button"
                       accessibilityLabel="Cancel editing name and bio"
-                      style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.chip, opacity: pressed ? 0.8 : 1 }]}
+                      style={[styles.nameSave, { backgroundColor: theme.chip }]}
                     >
                       <Text style={[styles.nameSaveText, { color: theme.text }]}>Cancel</Text>
-                    </Pressable>
-                    <Pressable
+                    </Tap>
+                    <Tap
                       onPress={saveAbout}
                       accessibilityRole="button"
                       accessibilityLabel="Save name and bio"
-                      style={({ pressed }) => [styles.nameSave, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                      style={[styles.nameSave, { backgroundColor: theme.accent }]}
                     >
                       <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
-                    </Pressable>
+                    </Tap>
                   </View>
                 )}
               </View>
-            </>
+            </Animated.View>
           ) : (
-            <Pressable
-              onPress={() => setAboutOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Edit name and bio"
-              style={({ pressed }) => [styles.aboutView, { opacity: pressed ? 0.7 : 1 }]}
-            >
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={[styles.aboutName, { color: profile.name ? theme.text : theme.textMuted }]}>{profile.name || 'Add your name'}</Text>
-                <Text style={[styles.aboutBio, { color: profile.bio ? theme.text : theme.textMuted }]}>{profile.bio || 'Add a line about you'}</Text>
-              </View>
-              <View style={[styles.editChip, { backgroundColor: theme.chip }]}>
-                <Ionicons name="create-outline" size={16} color={theme.text} />
+            <Animated.View entering={FadeIn.duration(200)} style={styles.who}>
+              <Text style={[styles.hello, { color: profile.name ? theme.text : theme.textMuted }]}>{profile.name || 'Add your name'}</Text>
+              {!!profile.bio && <Text style={[styles.bio, { color: theme.text }]}>{profile.bio}</Text>}
+              {sync.user?.email && <Text style={[styles.email, { color: theme.textMuted }]}>{sync.user.email}</Text>}
+              <Tap
+                onPress={() => setAboutOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Edit name and bio"
+                style={[styles.editChip, { backgroundColor: theme.chip }]}
+              >
+                <Ionicons name="create-outline" size={17} color={theme.text} />
                 <Text style={[styles.editChipText, { color: theme.text }]}>Edit</Text>
-              </View>
-            </Pressable>
+              </Tap>
+            </Animated.View>
           )}
-        </Section>
+        </View>
 
         <InsightsSection theme={theme} />
 
@@ -397,10 +382,9 @@ const styles = StyleSheet.create({
   nameSave: { paddingHorizontal: 16, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   nameSaveText: { fontSize: font.body, fontWeight: '800' },
   aboutActions: { flexDirection: 'row', gap: 8 },
-  aboutView: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 16, paddingVertical: 14 },
-  aboutName: { fontSize: font.headline, fontWeight: '700' },
-  aboutBio: { fontSize: font.body, lineHeight: 21 },
-  editChip: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 32, paddingHorizontal: 12, borderRadius: 16 },
+  who: { alignItems: 'center', gap: 4 },
+  editor: { alignSelf: 'stretch', borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden', marginTop: 8 },
+  editChip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 16, borderRadius: 20, marginTop: 10 },
   editChipText: { fontSize: font.body, fontWeight: '700' },
   form: { padding: 16, gap: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   formInput: { fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },

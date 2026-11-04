@@ -87,7 +87,7 @@ export default function ShareScreen() {
         <Pressable
           onPress={() => router.replace('/')}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Text style={[styles.btnText, { color: theme.text }]}>Go to prompts</Text>
         </Pressable>
@@ -138,7 +138,7 @@ export default function ShareScreen() {
           <Pressable
             onPress={done}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
           >
             <Text style={[styles.btnText, { color: theme.text }]}>Cancel</Text>
           </Pressable>

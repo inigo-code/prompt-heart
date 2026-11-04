@@ -327,11 +327,8 @@ function SignedIn({ theme }: { theme: Theme }) {
         )}
         {status === 'error' && error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
         {imageUsage && (
-          <Text style={[styles.p, { color: imageUsage.waiting ? theme.text : theme.textMuted }]}>
-            Images in cloud: {imageUsage.used} of {imageUsage.limit}
-            {imageUsage.waiting
-              ? `. ${imageUsage.waiting} more ${imageUsage.waiting === 1 ? 'is' : 'are'} saved on this phone only; remove some cloud images to sync them.`
-              : ''}
+          <Text style={[styles.p, { color: theme.textMuted }]}>
+            Images in cloud: {imageUsage.used}
             {imageUsage.failed
               ? `. ${imageUsage.failed} ${imageUsage.failed === 1 ? 'image' : 'images'} couldn’t upload and will try again next sync.`
               : ''}

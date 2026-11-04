@@ -89,7 +89,7 @@ export default function HistoryScreen() {
                     toast('Copied this version');
                   }}
                   accessibilityRole="button"
-                  style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+                  style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
                 >
                   <Ionicons name="copy-outline" size={16} color={theme.text} />
                   <Text style={[styles.btnText, { color: theme.text }]}>Copy</Text>
@@ -97,7 +97,7 @@ export default function HistoryScreen() {
                 <Pressable
                   onPress={() => restore(item)}
                   accessibilityRole="button"
-                  style={({ pressed }) => [styles.btn, styles.primary, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+                  style={({ pressed }) => [styles.btn, styles.primary, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
                 >
                   <Ionicons name="arrow-undo-outline" size={16} color={theme.accentText} />
                   <Text style={[styles.btnText, { color: theme.accentText }]}>Restore this version</Text>

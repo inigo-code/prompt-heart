@@ -203,7 +203,7 @@ const LibraryCard = memo(function LibraryCard({
           onPress={() => onCopy(item)}
           accessibilityRole="button"
           accessibilityLabel={`Copy ${item.title}`}
-          style={({ pressed }) => [styles.btn, { backgroundColor: theme.accent, opacity: pressed ? 0.8 : 1 }]}
+          style={({ pressed }) => [styles.btn, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Ionicons name="copy-outline" size={15} color={theme.accentText} />
           <Text style={[styles.btnText, { color: theme.accentText }]}>Copy</Text>
@@ -217,7 +217,7 @@ const LibraryCard = memo(function LibraryCard({
           style={({ pressed }) => [
             styles.btn,
             styles.btnOutline,
-            { borderColor: saved ? theme.border : theme.accent, opacity: pressed ? 0.7 : 1 },
+            { borderColor: saved ? theme.border : theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] },
           ]}
         >
           <Ionicons name={saved ? 'checkmark-circle' : 'bookmark-outline'} size={15} color={saved ? theme.textMuted : theme.text} />

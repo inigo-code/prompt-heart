@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, AppState, Modal, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Text } from '@/components/AppText';
 import { HeartMark } from '@/components/BrandTitle';
@@ -104,7 +105,7 @@ export function WhatsNew({ onClose }: { onClose: () => void }) {
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]} accessibilityViewIsModal>
+        <Animated.View entering={FadeInDown.duration(280)} style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]} accessibilityViewIsModal>
           <View style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
             <Ionicons name="sparkles" size={26} color={theme.accent} />
           </View>
@@ -121,12 +122,12 @@ export function WhatsNew({ onClose }: { onClose: () => void }) {
           </View>
           <Pressable
             onPress={onClose}
-            style={({ pressed }) => [styles.primary, { backgroundColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}
+            style={({ pressed }) => [styles.primary, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
             accessibilityRole="button"
           >
             <Text style={[styles.primaryText, { color: theme.accentText }]}>Got it</Text>
           </Pressable>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

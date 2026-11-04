@@ -58,7 +58,7 @@ export function AboutCard({ theme }: { theme: Theme }) {
           accessibilityRole="button"
           accessibilityLabel="Check for updates"
           accessibilityState={{ busy }}
-          style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [styles.btn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           {busy ? <ActivityIndicator color={theme.text} /> : <Text style={[styles.btnText, { color: theme.text }]}>Check for updates</Text>}
         </Pressable>
