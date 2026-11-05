@@ -197,7 +197,7 @@ export default function SettingsScreen() {
           last={!settings.appLock}
         />
         {settings.appLock && (
-          <ControlRow theme={theme} label="Lock after leaving the app" last>
+          <ControlRow theme={theme} label="Lock after leaving the app">
             <Segmented
               theme={theme}
               value={settings.lockAfter}
@@ -205,6 +205,16 @@ export default function SettingsScreen() {
               options={LOCK_AFTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
             />
           </ControlRow>
+        )}
+        {settings.appLock && (
+          <ToggleRow
+            theme={theme}
+            icon="apps-outline"
+            label="Show prompts in the widget"
+            value={settings.widgetWhileLocked}
+            onChange={(widgetWhileLocked) => update({ widgetWhileLocked })}
+            last
+          />
         )}
       </Section>
 

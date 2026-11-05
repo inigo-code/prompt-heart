@@ -51,7 +51,7 @@ export function widgetPrompts(prompts: Prompt[], folders: Folder[]): WidgetPromp
 }
 
 export function widgetData(prompts: Prompt[], folders: Folder[], settings: Settings): WidgetData {
-  return { appLock: settings.appLock, themeMode: settings.themeMode, accent: settings.accent, prompts: widgetPrompts(prompts, folders) };
+  return { appLock: settings.appLock && !settings.widgetWhileLocked, themeMode: settings.themeMode, accent: settings.accent, prompts: widgetPrompts(prompts, folders) };
 }
 
 /** What the widget shows when the app isn't running: read straight from the app's storage. */

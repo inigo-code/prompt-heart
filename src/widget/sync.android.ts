@@ -14,7 +14,7 @@ export function useWidgetSync() {
   const { ready, prompts, folders, recordCopy } = usePromptStore();
   const { settings, ready: settingsReady } = useSettings();
   const { logCopy } = useActivity();
-  const { appLock, themeMode, accent } = settings;
+  const { appLock, widgetWhileLocked, themeMode, accent } = settings;
 
   useEffect(() => {
     if (!ready || !settingsReady) return;
@@ -25,7 +25,7 @@ export function useWidgetSync() {
     return () => clearTimeout(t);
     // Only what the widget shows; other settings changes don't need a redraw.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, settingsReady, prompts, folders, appLock, themeMode, accent]);
+  }, [ready, settingsReady, prompts, folders, appLock, widgetWhileLocked, themeMode, accent]);
 
   useEffect(() => {
     if (!ready) return;

@@ -63,8 +63,8 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
       Your profile shows the four prompts you use most, a year of activity, streaks, where your prompts go, and eleven achievements in five tiers.
     </td>
     <td valign="top">
-      <h4>🪪 Profile card</h4>
-      Share your profile as a story-sized card, in light or dark. Your name, photo and bio follow you to your other phones.
+      <h4>📌 Home-screen widget</h4>
+      Your pinned prompts on your home screen, one tap to copy. Your name, photo and bio follow you to your other phones.
     </td>
     <td valign="top">
       <h4>📥 Bring your prompts</h4>
@@ -153,7 +153,7 @@ Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/pr
 - [x] Cloud sync, image attachments, save from other apps
 - [x] AI app folders and launching, bulk select, version history, update pop-up
 - [x] Prompt library, App lock, sign-in emails and password reset
-- [x] Read-only prompts with formatting and undo; profile insights, achievements and a profile card; import from other apps
+- [x] Read-only prompts with formatting and undo; profile insights and achievements; import from other apps
 - [ ] Google Play release
 - [ ] Home-screen widget for pinned prompts
 - [ ] Shared libraries for teams
@@ -167,7 +167,7 @@ Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/pr
 
 ```
 src/
-  app/          Screens: home, editor, history, library, import, categories, settings, profile, profile card, account, about, trash, share
+  app/          Screens: home, editor, history, library, import, categories, settings, profile, account, about, trash, share
   components/   Cards, chips, sheets, avatar, brand title, update pop-up, settings building blocks
   lib/          Theme, templates, formatting, undo, AI apps, images, backups, importing, greetings
   profile/      Name, bio and photo (synced to the account), the copy log, profile insights

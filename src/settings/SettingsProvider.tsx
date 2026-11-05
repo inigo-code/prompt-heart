@@ -33,6 +33,8 @@ export type Settings = {
   seenUpdate: string | null;
   /** The first-run welcome was finished or skipped. */
   onboarded: boolean;
+  /** With App lock on, the home-screen widget still shows prompts. */
+  widgetWhileLocked: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -50,6 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lockAfter: 60,
   seenUpdate: null,
   onboarded: false,
+  widgetWhileLocked: false,
 };
 
 type SettingsContext = {

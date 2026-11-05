@@ -46,7 +46,11 @@ ORGANISED YOUR WAY
 YOUR PROFILE
 • Your most-used four prompts, a year of activity and streaks
 • Eleven achievements to earn, from wood to platinum
-• A short bio, and a profile card to share as a story
+• A short bio under your name
+
+HOME-SCREEN WIDGET
+• Your pinned prompts right on your home screen
+• One tap copies a prompt; prompts with blanks open to be filled in
 
 SAVE FROM ANYWHERE
 • Share text or images from any app straight into Prompt Heart
@@ -90,6 +94,10 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 
 Welcome to Prompt Heart on Google Play! Save your best AI prompts, fill in {{placeholders}}, copy in one tap, and open ChatGPT, Claude, Gemini and more. Sync is optional and private.
 
+## Release notes for 1.8.0 (500 max)
+
+New: a home-screen widget with your pinned prompts, one tap to copy. Prompt cards are smaller, text is easier to read, and every prompt shows its date and time. Sheets slide smoothly and buttons respond under your finger. Your account now comes first in Settings. New to the app? A short welcome shows you around.
+
 ## Release notes for 1.7.0 (500 max)
 
-New: a profile with your most-used prompts, a year of activity, streaks and eleven achievements. Add a short bio and share your profile as a story-sized card. Import prompts from spreadsheets, Notion, JSON or Markdown, and export them as CSV. Prompts now open read-only: tap Edit for formatting, with undo and redo. After each update, Prompt Heart shows what is new.
+New: a profile with your most-used prompts, a year of activity, streaks and eleven achievements. Add a short bio. Import prompts from spreadsheets, Notion, JSON or Markdown, and export them as CSV. Prompts now open read-only: tap Edit for formatting, with undo and redo. After each update, Prompt Heart shows what is new.
