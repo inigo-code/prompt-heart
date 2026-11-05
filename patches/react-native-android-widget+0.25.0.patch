@@ -1,3 +1,15 @@
+diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java
+index a68fef1..d5b6505 100644
+--- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java
++++ b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java
+@@ -65,6 +65,7 @@ public class RNWidget {
+ 
+         ReadableMap configClone = Arguments.makeNativeMap(light.toHashMap());
+         RemoteViews remoteWidgetView = new RemoteViews(appContext.getPackageName(), R.layout.rn_widget);
++        remoteWidgetView.setViewVisibility(R.id.rn_widget_placeholder, View.GONE);
+ 
+         WidgetWithViews widgetWithViews = WidgetFactory.buildWidgetFromRoot(
+             appContext,
 diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java
 index 983ff91..dbb5c7b 100644
 --- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java
@@ -78,3 +90,54 @@ index fb19f26..72a137c 100644
      }
  
      static boolean correct(Context context, int id, Intent intent) {
+diff --git a/node_modules/react-native-android-widget/android/src/main/res/drawable/rn_widget_placeholder.xml b/node_modules/react-native-android-widget/android/src/main/res/drawable/rn_widget_placeholder.xml
+new file mode 100644
+index 0000000..d1e4d96
+--- /dev/null
++++ b/node_modules/react-native-android-widget/android/src/main/res/drawable/rn_widget_placeholder.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
++    <solid android:color="#1C1B19" />
++    <corners android:radius="24dp" />
++</shape>
+diff --git a/node_modules/react-native-android-widget/android/src/main/res/layout-night/rn_widget.xml b/node_modules/react-native-android-widget/android/src/main/res/layout-night/rn_widget.xml
+index 9c9a2b0..7acba4c 100644
+--- a/node_modules/react-native-android-widget/android/src/main/res/layout-night/rn_widget.xml
++++ b/node_modules/react-native-android-widget/android/src/main/res/layout-night/rn_widget.xml
+@@ -28,4 +28,15 @@
+         android:id="@+id/rn_widget_collection_container"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent" />
++
++    <TextView
++        android:id="@+id/rn_widget_placeholder"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:background="@drawable/rn_widget_placeholder"
++        android:gravity="center"
++        android:padding="16dp"
++        android:text="Open the app to load this widget"
++        android:textColor="#F2EFEA"
++        android:textSize="15sp" />
+ </FrameLayout>
+diff --git a/node_modules/react-native-android-widget/android/src/main/res/layout/rn_widget.xml b/node_modules/react-native-android-widget/android/src/main/res/layout/rn_widget.xml
+index cf3927a..340655f 100644
+--- a/node_modules/react-native-android-widget/android/src/main/res/layout/rn_widget.xml
++++ b/node_modules/react-native-android-widget/android/src/main/res/layout/rn_widget.xml
+@@ -28,4 +28,15 @@
+         android:id="@+id/rn_widget_collection_container"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent" />
++
++    <TextView
++        android:id="@+id/rn_widget_placeholder"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:background="@drawable/rn_widget_placeholder"
++        android:gravity="center"
++        android:padding="16dp"
++        android:text="Open the app to load this widget"
++        android:textColor="#F2EFEA"
++        android:textSize="15sp" />
+ </FrameLayout>

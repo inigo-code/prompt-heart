@@ -29,10 +29,11 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-1.8.1',
+  id: '2026-11-05-1.8.1-widget-card',
   items: [
     'The home-screen widget now follows its size: make it taller to see more prompts',
     'Widget buttons keep working after you resize it',
+    'A new widget shows a card straight away instead of an empty space',
     'Your images download straight away on a new phone',
     'Copies from the widget always count, on the day you made them',
     'An open prompt now picks up changes from your other devices',
