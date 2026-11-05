@@ -12,6 +12,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetAction, widgetInfo } = props;
   if (widgetAction === 'WIDGET_DELETED') return;
   const entry = { at: Date.now(), action: widgetAction, height: widgetInfo.height };
+  await logWidgetRun({ ...entry, action: `${widgetAction} started` });
   try {
     await draw(props);
     await logWidgetRun(entry);

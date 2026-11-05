@@ -1,10 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { extractVariables } from '@/lib/templates';
-import { DEFAULT_SETTINGS, SETTINGS_STORAGE_KEY } from '@/settings/SettingsProvider';
+import { PROMPTS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/lib/storageKeys';
 import type { Settings } from '@/settings/SettingsProvider';
 import { migrate } from '@/store/merge';
-import { PROMPTS_STORAGE_KEY } from '@/store/PromptStore';
 import type { Folder, Prompt } from '@/store/types';
 
 /** Must match the widget's `name` in app.json. */
@@ -52,7 +51,10 @@ export function widgetPrompts(prompts: Prompt[], folders: Folder[]): WidgetPromp
   });
 }
 
-export function widgetData(prompts: Prompt[], folders: Folder[], settings: Settings): WidgetData {
+type WidgetSettings = Pick<Settings, 'appLock' | 'widgetWhileLocked' | 'themeMode' | 'accent'>;
+const WIDGET_DEFAULTS: WidgetSettings = { appLock: false, widgetWhileLocked: false, themeMode: 'system', accent: 'amber' };
+
+export function widgetData(prompts: Prompt[], folders: Folder[], settings: WidgetSettings): WidgetData {
   return { appLock: settings.appLock && !settings.widgetWhileLocked, themeMode: settings.themeMode, accent: settings.accent, prompts: widgetPrompts(prompts, folders) };
 }
 
@@ -62,9 +64,9 @@ export async function readWidgetData(): Promise<WidgetData> {
     AsyncStorage.getItem(PROMPTS_STORAGE_KEY).catch(() => null),
     AsyncStorage.getItem(SETTINGS_STORAGE_KEY).catch(() => null),
   ]);
-  let settings: Settings = DEFAULT_SETTINGS;
+  let settings = WIDGET_DEFAULTS;
   try {
-    if (rawSettings) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(rawSettings) };
+    if (rawSettings) settings = { ...WIDGET_DEFAULTS, ...JSON.parse(rawSettings) };
   } catch {}
   try {
     const store = rawStore ? migrate(JSON.parse(rawStore)) : null;
@@ -76,6 +78,7 @@ export async function readWidgetData(): Promise<WidgetData> {
 
 /** The last few background runs, shown under About in test builds. */
 const WIDGET_LOG_KEY = 'promptheart/widget-log';
+export const WIDGET_BOOT_KEY = 'promptheart/widget-boot';
 export type WidgetLogEntry = { at: number; action: string; height: number; error?: string };
 
 export async function logWidgetRun(entry: WidgetLogEntry) {
@@ -85,6 +88,12 @@ export async function logWidgetRun(entry: WidgetLogEntry) {
     list = raw ? JSON.parse(raw) : [];
   } catch {}
   await AsyncStorage.setItem(WIDGET_LOG_KEY, JSON.stringify([entry, ...list].slice(0, 6))).catch(() => {});
+}
+
+/** When the app's code last started without the app on screen, set by trace.ts. */
+export async function readWidgetBoot(): Promise<number | null> {
+  const raw = await AsyncStorage.getItem(WIDGET_BOOT_KEY).catch(() => null);
+  return raw ? Number(raw) : null;
 }
 
 export async function readWidgetLog(): Promise<WidgetLogEntry[]> {

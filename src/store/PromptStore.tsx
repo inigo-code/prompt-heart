@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { newId } from '@/lib/id';
 import { deleteLocalImage } from '@/lib/images';
+import { PROMPTS_STORAGE_KEY } from '@/lib/storageKeys';
 
 import { clearPending, emptySyncMeta, mergeBackup, mergePrompts, mergeRecords, migrate, promptVersion } from './merge';
 import type { ImportResult } from './merge';
@@ -12,9 +13,8 @@ import { seedData } from './seed';
 import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
 
 // Kept from the app's first name so existing installs keep their data.
-const STORAGE_KEY = 'prompt-notes/v1';
+const STORAGE_KEY = PROMPTS_STORAGE_KEY;
 /** The home-screen widget reads prompts straight from here. */
-export const PROMPTS_STORAGE_KEY = STORAGE_KEY;
 const UNREADABLE_KEY = 'prompt-notes/unreadable';
 
 /** Deleted prompts stay in Trash this long before they're hidden for good. */
