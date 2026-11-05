@@ -100,6 +100,7 @@
               "targetCellWidth": 4,
               "targetCellHeight": 2,
               "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 3600000,
               "previewImage": "./assets/widget-preview.png"
             }
           ]

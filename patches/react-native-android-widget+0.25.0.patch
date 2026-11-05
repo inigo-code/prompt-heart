@@ -1,0 +1,80 @@
+diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java
+index 983ff91..dbb5c7b 100644
+--- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java
++++ b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetProvider.java
+@@ -18,10 +18,10 @@ public class RNWidgetProvider extends AppWidgetProvider {
+     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+ 
+-        if (RNWidgetSizing.updateStoredSize(context, appWidgetId)) {
+-            Data data = RNWidgetJsCommunication.buildData(context, getClass().getSimpleName(), appWidgetId, "WIDGET_RESIZED");
+-            RNWidgetJsCommunication.startBackgroundTask(context, data);
+-        }
++        // Always redraw: tap areas carry the options they were drawn with, even when the size is unchanged.
++        RNWidgetSizing.updateStoredSize(context, appWidgetId);
++        Data data = RNWidgetJsCommunication.buildData(context, getClass().getSimpleName(), appWidgetId, "WIDGET_RESIZED");
++        RNWidgetJsCommunication.startBackgroundTask(context, data);
+     }
+ 
+     @Override
+@@ -55,8 +55,14 @@ public class RNWidgetProvider extends AppWidgetProvider {
+             // instead of executing a potentially unintended custom or native action.
+             return;
+         }
+-        // A second tap can arrive before the corrective render replaces the old overlays.
+-        if (RNWidgetSizing.hasOutdatedSize(context, widgetId, incomingIntent)) return;
++        // A second tap can arrive before the corrective render replaces the old overlays. These areas no
++        // longer match the picture, so don't act on it, but do redraw so the widget can't stay dead.
++        if (RNWidgetSizing.hasOutdatedSize(context, widgetId, incomingIntent)) {
++            RNWidgetSizing.updateStoredSize(context, widgetId);
++            Data redraw = RNWidgetJsCommunication.buildData(context, getClass().getSimpleName(), widgetId, "WIDGET_RESIZED");
++            RNWidgetJsCommunication.startBackgroundTask(context, redraw);
++            return;
++        }
+         String clickAction = incomingIntent.getStringExtra("clickAction");
+         if (clickAction != null) {
+             switch (clickAction) {
+diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetSizing.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetSizing.java
+index fb19f26..72a137c 100644
+--- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetSizing.java
++++ b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidgetSizing.java
+@@ -79,8 +79,11 @@ public final class RNWidgetSizing {
+                 }
+             }
+             // Keep the pair together, including launchers that provide only one size.
+-            if (selected != null) return new Point(Math.max(1, Math.round(selected.getWidth())),
+-                Math.max(1, Math.round(selected.getHeight())));
++            // Some launchers update MIN/MAX on a resize but leave this list behind, so fall through then.
++            if (selected != null && !isStale(selected, options, landscape)) {
++                return new Point(Math.max(1, Math.round(selected.getWidth())),
++                    Math.max(1, Math.round(selected.getHeight())));
++            }
+         }
+         return new Point(options.getInt(landscape ? AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+                 : AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
+@@ -88,6 +91,13 @@ public final class RNWidgetSizing {
+                 : AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT));
+     }
+ 
++    private static boolean isStale(SizeF selected, Bundle options, boolean landscape) {
++        int current = options.getInt(landscape ? AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
++            : AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
++        float listed = landscape ? selected.getWidth() : selected.getHeight();
++        return current > 0 && Math.abs(listed - current) > 1;
++    }
++
+     private static boolean valid(float value) {
+         return value > 0 && !Float.isInfinite(value) && !Float.isNaN(value);
+     }
+@@ -99,9 +109,9 @@ public final class RNWidgetSizing {
+     }
+ 
+     static boolean hasOutdatedSize(Context context, int id, Intent intent) {
++        // Only a different size moves the tap areas; a changed profile with the same size leaves them right.
+         Point renderedSize = intent.getParcelableExtra(RENDERED_SIZE);
+-        return renderedSize != null && (!profile(context, id).equals(intent.getStringExtra(PROFILE))
+-            || !renderedSize.equals(getSize(context, id)));
++        return renderedSize != null && !renderedSize.equals(getSize(context, id));
+     }
+ 
+     static boolean correct(Context context, int id, Intent intent) {
