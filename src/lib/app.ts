@@ -29,15 +29,10 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-10-29-1.8.0',
+  id: '2026-11-05-dates',
   items: [
-    'A home-screen widget: your pinned prompts, one tap to copy. Touch and hold your home screen, then Widgets',
-    'Menus and sheets slide up smoothly; drag the handle down to close one',
-    'Smoother moves between screens, and buttons that respond under your finger',
-    'Prompt cards are smaller, so more fit on the screen, and text is easier to read',
     'Every prompt shows its date and time',
+    'Sync whenever you like, with no wait between syncs',
     'A new phone brings your images over faster',
-    'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
-    'Your account comes first in Settings, so signing in to sync is easy to find',
   ],
 };
