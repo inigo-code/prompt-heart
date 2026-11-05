@@ -20,7 +20,7 @@ export function ImageThumb({ id, theme, size = 56, style, radius = 10 }: Props) 
         {status === 'syncing' ? (
           <ActivityIndicator size="small" color={theme.textMuted} />
         ) : (
-          <Ionicons name="image-outline" size={size * 0.4} color={theme.textMuted} />
+          <Ionicons name="image-outline" size={Math.min(size * 0.4, 32)} color={theme.textMuted} />
         )}
       </View>
     );

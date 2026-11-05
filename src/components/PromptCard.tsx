@@ -64,6 +64,39 @@ export const PromptCard = memo(function PromptCard({
     tick.current = setTimeout(() => setCopied(false), 1200);
   };
 
+  const actions = selecting ? (
+    <View
+      accessibilityLabel={selected ? 'Selected' : 'Not selected'}
+      style={[styles.check, { borderColor: selected ? theme.accent : theme.textMuted, backgroundColor: selected ? theme.accent : 'transparent' }]}
+    >
+      {selected && <Ionicons name="checkmark" size={18} color={theme.accentText} />}
+    </View>
+  ) : (
+    <View style={styles.actions}>
+      {launchApp && onLaunch && (
+        <Tap scale={0.9} onPress={() => onLaunch(prompt, launchApp)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Copy and open in ${launchApp.label}`}>
+          <AppBadge app={launchApp} size={36} />
+        </Tap>
+      )}
+      <Tap
+        scale={0.9}
+        onPress={copy}
+        hitSlop={6}
+        accessibilityRole="button"
+        accessibilityLabel={`Copy ${prompt.title || 'prompt'}`}
+        style={[styles.copyBtn, { backgroundColor: copied ? theme.accent : theme.accentSoft }]}
+      >
+        {copied ? (
+          <Animated.View entering={ZoomIn.duration(140)}>
+            <Ionicons name="checkmark" size={20} color={theme.accentText} />
+          </Animated.View>
+        ) : (
+          <Ionicons name="copy-outline" size={18} color={theme.text} />
+        )}
+      </Tap>
+    </View>
+  );
+
   return (
     <Pressable
       onPress={() => onOpen(prompt)}
@@ -81,8 +114,8 @@ export const PromptCard = memo(function PromptCard({
       ]}
     >
       {grid && prompt.images.length > 0 && (
-        <View style={styles.gridImage}>
-          <ImageThumb id={prompt.images[0]} theme={theme} size={1000} radius={10} style={styles.gridImageInner} />
+        <View>
+          <ImageThumb id={prompt.images[0]} theme={theme} size={1000} radius={10} style={styles.gridImage} />
           {extraImages > 0 && (
             <View style={[styles.moreBadge, { backgroundColor: theme.overlay }]}>
               <Text style={styles.moreText}>+{extraImages}</Text>
@@ -92,92 +125,73 @@ export const PromptCard = memo(function PromptCard({
       )}
 
       <View style={styles.row}>
-        {!grid && prompt.images.length > 0 && <ImageThumb id={prompt.images[0]} theme={theme} size={48} radius={10} />}
+        {!grid && prompt.images.length > 0 && (
+          <View>
+            <ImageThumb id={prompt.images[0]} theme={theme} size={72} radius={12} />
+            {extraImages > 0 && (
+              <View style={[styles.moreBadge, { backgroundColor: theme.overlay }]}>
+                <Text style={styles.moreText}>+{extraImages}</Text>
+              </View>
+            )}
+          </View>
+        )}
 
         <View style={styles.text}>
           <View style={styles.titleRow}>
-            {prompt.pinned && <Ionicons name="pin" size={14} color={theme.accent} />}
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+            {prompt.pinned && <Ionicons name="pin" size={14} color={theme.accent} style={styles.pin} />}
+            <Text style={[styles.title, { color: theme.text }]} numberOfLines={grid ? 6 : 4}>
               {prompt.title || 'Untitled'}
             </Text>
           </View>
+          <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
+            {formatStamp(prompt.updatedAt)}
+          </Text>
           {!!prompt.body && (
             <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={lines}>
               {stripMarkdown(prompt.body)}
             </Text>
           )}
-          <View style={styles.meta}>
-            {folder && (
-              <View style={styles.metaItem}>
-                <View style={[styles.dot, { backgroundColor: folder.color }]} />
-                <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
-                  {folder.name}
+          {(folder || vars > 0) && (
+            <View style={styles.meta}>
+              {folder && (
+                <View style={styles.metaItem}>
+                  <View style={[styles.dot, { backgroundColor: folder.color }]} />
+                  <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
+                    {folder.name}
+                  </Text>
+                </View>
+              )}
+              {vars > 0 && (
+                <Text style={[styles.metaText, { color: theme.textMuted }]}>
+                  {vars} {vars === 1 ? 'blank' : 'blanks'}
                 </Text>
-              </View>
-            )}
-            {vars > 0 && (
-              <Text style={[styles.metaText, { color: theme.textMuted }]}>
-                {vars} {vars === 1 ? 'blank' : 'blanks'}
-              </Text>
-            )}
-            <Text style={[styles.metaText, styles.stamp, { color: theme.textMuted }]} numberOfLines={1}>
-              {formatStamp(prompt.updatedAt)}
-            </Text>
-          </View>
+              )}
+            </View>
+          )}
         </View>
 
-        {selecting ? (
-          <View
-            accessibilityLabel={selected ? 'Selected' : 'Not selected'}
-            style={[styles.check, { borderColor: selected ? theme.accent : theme.textMuted, backgroundColor: selected ? theme.accent : 'transparent' }]}
-          >
-            {selected && <Ionicons name="checkmark" size={18} color={theme.accentText} />}
-          </View>
-        ) : (
-          <View style={styles.actions}>
-            {launchApp && onLaunch && (
-              <Tap scale={0.9} onPress={() => onLaunch(prompt, launchApp)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Copy and open in ${launchApp.label}`}>
-                <AppBadge app={launchApp} size={36} />
-              </Tap>
-            )}
-            <Tap
-              scale={0.9}
-              onPress={copy}
-              hitSlop={6}
-              accessibilityRole="button"
-              accessibilityLabel={`Copy ${prompt.title || 'prompt'}`}
-              style={[styles.copyBtn, { backgroundColor: copied ? theme.accent : theme.accentSoft }]}
-            >
-              {copied ? (
-                <Animated.View entering={ZoomIn.duration(140)}>
-                  <Ionicons name="checkmark" size={20} color={theme.accentText} />
-                </Animated.View>
-              ) : (
-                <Ionicons name="copy-outline" size={18} color={theme.text} />
-              )}
-            </Tap>
-          </View>
-        )}
+        {!grid && actions}
       </View>
+      {grid && <View style={styles.gridActions}>{actions}</View>}
     </Pressable>
   );
 });
 
 const styles = StyleSheet.create({
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 12, paddingLeft: 14, gap: 8, overflow: 'hidden' },
-  gridCard: { flex: 1 },
-  gridImage: { height: 96 },
-  gridImageInner: { width: '100%', height: 96 },
+  gridCard: { flex: 1, maxWidth: '48.5%' },
+  gridImage: { width: '100%', height: 128 },
+  gridActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 'auto' },
   moreBadge: { position: 'absolute', right: 6, bottom: 6, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
   moreText: { color: '#fff', fontSize: font.caption, fontWeight: '800' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   text: { flex: 1, gap: 3 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 5 },
+  pin: { marginTop: 4 },
   title: { flex: 1, fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
   body: { fontSize: font.body, lineHeight: 22 },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 },
+  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 12, rowGap: 2, marginTop: 2 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
-  stamp: { marginLeft: 'auto', fontWeight: '500' },
   dot: { width: 8, height: 8, borderRadius: 4 },
   metaText: { fontSize: font.footnote, fontWeight: '600', flexShrink: 1 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },

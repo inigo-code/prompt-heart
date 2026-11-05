@@ -29,6 +29,10 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-widget-lock',
-  items: ['With App lock on, you can now show prompts in the widget: Settings, Security'],
+  id: '2026-11-05-cards',
+  items: [
+    'Prompt titles show in full, with the date and time right below',
+    'Bigger image thumbnails, in both list and grid',
+    'With App lock on, you can now show prompts in the widget: Settings, Security',
+  ],
 };
