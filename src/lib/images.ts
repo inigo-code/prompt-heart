@@ -9,6 +9,12 @@ import { newId } from '@/lib/id';
 // Attachments are stored on the device as <id>.jpg in the app's documents folder,
 // and in the private "prompt-images" bucket as <user id>/<id>.jpg.
 export const IMAGE_BUCKET = 'prompt-images';
+/**
+ * Images each account can keep in the cloud (the profile photo doesn't count). Keeps the free
+ * Supabase plan sustainable; extra images stay on the phone. Enforced on the server too
+ * (supabase/image_quota.sql). Keep the two in sync.
+ */
+export const CLOUD_IMAGE_LIMIT = 20;
 // Sized for phone screens; about 80–120 KB each, which keeps cloud storage and downloads small.
 const MAX_WIDTH = 1024;
 const JPEG_QUALITY = 0.65;
