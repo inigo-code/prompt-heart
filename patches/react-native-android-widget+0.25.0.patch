@@ -1,3 +1,16 @@
+diff --git a/node_modules/react-native-android-widget/android/build.gradle b/node_modules/react-native-android-widget/android/build.gradle
+index 442320e..c397123 100644
+--- a/node_modules/react-native-android-widget/android/build.gradle
++++ b/node_modules/react-native-android-widget/android/build.gradle
+@@ -107,7 +107,7 @@ dependencies {
+   implementation "com.facebook.react:react-native:+"
+   // From node_modules
+   implementation 'androidx.concurrent:concurrent-futures:1.1.0'
+-  implementation 'androidx.work:work-runtime:2.8.1'
++  implementation 'androidx.work:work-runtime:2.10.5'
+   implementation 'com.caverock:androidsvg-aar:1.4'
+ }
+ 
 diff --git a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java b/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java
 index a68fef1..d5b6505 100644
 --- a/node_modules/react-native-android-widget/android/src/main/java/com/reactnativeandroidwidget/RNWidget.java

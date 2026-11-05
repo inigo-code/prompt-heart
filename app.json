@@ -99,6 +99,7 @@
               "minHeight": "110dp",
               "targetCellWidth": 4,
               "targetCellHeight": 2,
+              "maxResizeHeight": "650dp",
               "resizeMode": "horizontal|vertical",
               "updatePeriodMillis": 3600000,
               "previewImage": "./assets/widget-preview.png"
