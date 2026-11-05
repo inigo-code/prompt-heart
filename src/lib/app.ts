@@ -29,12 +29,9 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-text-fixes',
+  id: '2026-11-05-widget-fit',
   items: [
-    'Long titles now show in full, everywhere',
-    'Selected text and the cursor use your accent colour',
-    'Cleaner highlights: colour now marks only what you chose',
-    'Card previews read as plain sentences',
-    'Dates and times look the same on every screen',
+    'The home-screen widget now fits its space, with its header and every row in place',
+    'Tap the widget once if it still looks off, and it redraws to the right size',
   ],
 };

@@ -1,4 +1,4 @@
-import { FlexWidget, ImageWidget, ListWidget, TextWidget } from 'react-native-android-widget';
+import { FlexWidget, ImageWidget, TextWidget } from 'react-native-android-widget';
 import type { ColorProp, WidgetRepresentation } from 'react-native-android-widget';
 
 import { buildTheme } from '@/lib/theme';
@@ -10,9 +10,17 @@ const NEW_PROMPT = 'promptnotes://prompt/new';
 const fillUri = (id: string) => `promptnotes://prompt/${id}?copy=1`;
 const hex = (c: string) => c as ColorProp;
 
-type Props = { data: WidgetData; dark: boolean; copiedId?: string };
+// In dp: a row with its gap, and the header and padding around the rows.
+const ROW = 64;
+const FRAME = 62;
 
-function Row({ prompt, theme, copied }: { prompt: WidgetPrompt; theme: ReturnType<typeof buildTheme>; copied: boolean }) {
+// The rows are part of the card rather than a scrolling ListWidget. A list is placed separately over the card,
+// so it slides over the header on launchers where the widget's slot is taller than the size they report.
+const rowsThatFit = (height: number) => Math.max(1, Math.floor((height - FRAME) / ROW));
+
+type Props = { data: WidgetData; height: number; dark: boolean; copiedId?: string };
+
+function Row({ prompt, theme, copied, stretch, last }: { prompt: WidgetPrompt; theme: ReturnType<typeof buildTheme>; copied: boolean; stretch: boolean; last: boolean }) {
   const action = prompt.blanks
     ? { clickAction: 'OPEN_URI', clickActionData: { uri: fillUri(prompt.id) } }
     : { clickAction: 'COPY', clickActionData: { id: prompt.id } };
@@ -22,9 +30,10 @@ function Row({ prompt, theme, copied }: { prompt: WidgetPrompt; theme: ReturnTyp
       accessibilityLabel={prompt.blanks ? `Fill in and copy ${prompt.title}` : `Copy ${prompt.title}`}
       style={{
         width: 'match_parent',
+        ...(stretch ? { flex: 1 } : {}),
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 6,
+        marginBottom: last ? 0 : 6,
         paddingVertical: 10,
         paddingHorizontal: 14,
         borderRadius: 16,
@@ -59,11 +68,15 @@ function Message({ title, line, theme }: { title: string; line: string; theme: R
 }
 
 /** The Prompts widget: pinned prompts first, one tap to copy. Hides everything while App lock is on. */
-export function PromptsWidget({ data, dark, copiedId }: Props) {
+export function PromptsWidget({ data, height, dark, copiedId }: Props) {
   const theme = buildTheme(dark, data.accent);
   const locked = data.appLock;
+  const fit = rowsThatFit(height);
+  const shown = data.prompts.slice(0, fit);
   return (
     <FlexWidget
+      clickAction="OPEN_APP"
+      accessibilityLabel="Open Prompt Heart"
       style={{ height: 'match_parent', width: 'match_parent', flexDirection: 'column', padding: 12, borderRadius: 24, backgroundColor: hex(theme.card) }}
     >
       <FlexWidget style={{ width: 'match_parent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingLeft: 4 }}>
@@ -87,19 +100,20 @@ export function PromptsWidget({ data, dark, copiedId }: Props) {
       ) : data.prompts.length === 0 ? (
         <Message title="No prompts yet" line="Tap + to write your first" theme={theme} />
       ) : (
-        <ListWidget style={{ height: 'match_parent', width: 'match_parent' }}>
-          {data.prompts.map((p) => (
-            <Row key={p.id} prompt={p} theme={theme} copied={p.id === copiedId} />
+        <FlexWidget style={{ flex: 1, width: 'match_parent', flexDirection: 'column' }}>
+          {shown.map((p, i) => (
+            <Row key={p.id} prompt={p} theme={theme} copied={p.id === copiedId} stretch={shown.length === fit} last={i === shown.length - 1} />
           ))}
-        </ListWidget>
+        </FlexWidget>
       )}
     </FlexWidget>
   );
 }
 
 /** Light and dark versions when the app follows the system, otherwise the app's own look. */
-export function promptsWidget(data: WidgetData, copiedId?: string): WidgetRepresentation {
-  if (data.themeMode === 'light') return <PromptsWidget data={data} dark={false} copiedId={copiedId} />;
-  if (data.themeMode === 'dark') return <PromptsWidget data={data} dark copiedId={copiedId} />;
-  return { light: <PromptsWidget data={data} dark={false} copiedId={copiedId} />, dark: <PromptsWidget data={data} dark copiedId={copiedId} /> };
+export function promptsWidget(data: WidgetData, height: number, copiedId?: string): WidgetRepresentation {
+  const shared = { data, height, copiedId };
+  if (data.themeMode === 'light') return <PromptsWidget {...shared} dark={false} />;
+  if (data.themeMode === 'dark') return <PromptsWidget {...shared} dark />;
+  return { light: <PromptsWidget {...shared} dark={false} />, dark: <PromptsWidget {...shared} dark /> };
 }

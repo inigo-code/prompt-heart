@@ -20,7 +20,7 @@ export function useWidgetSync() {
     if (!ready || !settingsReady) return;
     const data = widgetData(prompts, folders, settings);
     const t = setTimeout(() => {
-      requestWidgetUpdate({ widgetName: WIDGET_NAME, renderWidget: () => promptsWidget(data) }).catch(() => {});
+      requestWidgetUpdate({ widgetName: WIDGET_NAME, renderWidget: (info) => promptsWidget(data, info.height) }).catch(() => {});
     }, 800);
     return () => clearTimeout(t);
     // Only what the widget shows; other settings changes don't need a redraw.

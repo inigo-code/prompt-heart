@@ -11,7 +11,7 @@ import type { Folder, Prompt } from '@/store/types';
 export const WIDGET_NAME = 'Prompts';
 /** Copies made from the widget while the app was closed, counted when the app next opens. */
 export const WIDGET_COPIES_KEY = 'promptheart/widget-copies';
-/** More than any widget size can show; the list scrolls. */
+/** Enough for the tallest widget; each widget shows as many as fit its height. */
 const MAX_ROWS = 12;
 
 export type WidgetPrompt = {
