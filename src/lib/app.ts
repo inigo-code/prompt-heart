@@ -29,13 +29,12 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-1.8.0',
+  id: '2026-11-05-text-fixes',
   items: [
-    'A home-screen widget: your pinned prompts, one tap to copy. Touch and hold your home screen, then Widgets',
-    'Smaller cards with full titles, each with its date and time',
-    'Larger text, and clearer screens with fewer explanations',
-    'Sheets slide smoothly, and buttons respond under your finger',
-    'Sync whenever you like, with no wait between syncs',
-    'Your account comes first in Settings, so signing in is easy to find',
+    'Long titles now show in full, everywhere',
+    'Selected text and the cursor use your accent colour',
+    'Cleaner highlights: colour now marks only what you chose',
+    'Card previews read as plain sentences',
+    'Dates and times look the same on every screen',
   ],
 };
