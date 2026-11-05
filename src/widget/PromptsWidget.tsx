@@ -4,6 +4,7 @@ import type { ColorProp, WidgetRepresentation } from 'react-native-android-widge
 import { buildTheme } from '@/lib/theme';
 
 import type { WidgetData, WidgetPrompt } from './data';
+import { WIDGET_LOGO } from './logo';
 
 const NEW_PROMPT = 'promptnotes://prompt/new';
 // A prompt with blanks opens its fill-in sheet in the app; the rest copy right from the widget.
@@ -81,7 +82,7 @@ export function PromptsWidget({ data, height, dark, copiedId }: Props) {
     >
       <FlexWidget style={{ width: 'match_parent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingLeft: 4 }}>
         <FlexWidget clickAction="OPEN_APP" accessibilityLabel="Open Prompt Heart" style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <ImageWidget image={require('../../assets/widget-icon.png')} imageWidth={24} imageHeight={24} radius={7} />
+          <ImageWidget image={WIDGET_LOGO as `data:image${string}`} imageWidth={24} imageHeight={24} radius={7} />
           <TextWidget text="Prompt Heart" style={{ fontSize: 15, fontWeight: '700', marginLeft: 8, color: hex(theme.text) }} />
         </FlexWidget>
         {locked ? null : (
