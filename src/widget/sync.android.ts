@@ -19,10 +19,17 @@ export function useWidgetSync() {
   useEffect(() => {
     if (!ready || !settingsReady) return;
     const data = widgetData(prompts, folders, settings);
-    const t = setTimeout(() => {
+    const draw = () => {
       requestWidgetUpdate({ widgetName: WIDGET_NAME, renderWidget: (info) => promptsWidget(data, info.height) }).catch(() => {});
-    }, 800);
-    return () => clearTimeout(t);
+    };
+    const t = setTimeout(draw, 800);
+    // A resize can leave the widget's tap areas out of date without telling us, and the library then drops
+    // every tap. Drawing again when the app opens refreshes them.
+    const sub = AppState.addEventListener('change', (state) => state === 'active' && draw());
+    return () => {
+      clearTimeout(t);
+      sub.remove();
+    };
     // Only what the widget shows; other settings changes don't need a redraw.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, settingsReady, prompts, folders, appLock, widgetWhileLocked, themeMode, accent]);
