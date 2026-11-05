@@ -115,7 +115,8 @@ const DOWNLOADS_AT_ONCE = 4;
 
 /**
  * Downloads images this device doesn't have yet, a few at a time, so a first sign-in brings every
- * image over. Missing remote files are skipped, not errors. onImage fires as each one lands.
+ * image over. onImage fires as each one lands. Images that aren't in the cloud (like those over the
+ * limit, kept on another phone) are skipped. Returns how many failed and are worth trying again.
  */
 export async function downloadMissingImages(
   client: SupabaseClient,
@@ -127,25 +128,29 @@ export async function downloadMissingImages(
   const missing = ids.filter((id) => !imageFile(id).exists);
   let next = 0;
   let finished = 0;
-  let downloaded = 0;
+  let failed = 0;
   const worker = async () => {
     while (next < missing.length) {
       const id = missing[next++];
       onProgress?.(finished, missing.length);
-      const { data, error } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remotePath(userId, id), 60);
-      if (!error && data?.signedUrl) {
-        try {
+      try {
+        const { data, error } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remotePath(userId, id), 60);
+        if (data?.signedUrl) {
           await File.downloadFileAsync(data.signedUrl, imageFile(id));
-          downloaded++;
           onImage?.();
-        } catch {
-          // The upload may not have finished on the other device yet; the next sync retries.
+        } else if (error && !/not found/i.test(error.message)) {
+          failed++;
         }
+      } catch {
+        // A half-finished file would count as downloaded next time.
+        const part = imageFile(id);
+        if (part.exists) part.delete();
+        failed++;
       }
       finished++;
     }
   };
   await Promise.all(Array.from({ length: Math.min(DOWNLOADS_AT_ONCE, missing.length) }, worker));
   if (missing.length) onProgress?.(missing.length, missing.length);
-  return downloaded;
+  return failed;
 }

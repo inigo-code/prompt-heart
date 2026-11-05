@@ -10,7 +10,9 @@ import type { Folder, Prompt } from '@/store/types';
 /** Must match the widget's `name` in app.json. */
 export const WIDGET_NAME = 'Prompts';
 /** Copies made from the widget while the app was closed, counted when the app next opens. */
-export const WIDGET_COPIES_KEY = 'promptheart/widget-copies';
+const WIDGET_COPY_PREFIX = 'promptheart/widget-copy/';
+/** The single list 1.8.0 kept them in, read once so nothing queued before this update is lost. */
+const WIDGET_COPIES_KEY = 'promptheart/widget-copies';
 /** Enough for the tallest widget; each widget shows as many as fit its height. */
 const MAX_ROWS = 12;
 
@@ -74,23 +76,33 @@ export async function readWidgetData(): Promise<WidgetData> {
 
 export type WidgetCopy = { id: string; at: number };
 
+/** One key per copy, so two quick taps can't overwrite each other. */
 export async function queueWidgetCopy(id: string) {
-  const raw = await AsyncStorage.getItem(WIDGET_COPIES_KEY).catch(() => null);
-  let list: WidgetCopy[] = [];
-  try {
-    list = raw ? JSON.parse(raw) : [];
-  } catch {}
-  list.push({ id, at: Date.now() });
-  await AsyncStorage.setItem(WIDGET_COPIES_KEY, JSON.stringify(list.slice(-200)));
+  const at = Date.now();
+  await AsyncStorage.setItem(`${WIDGET_COPY_PREFIX}${at}/${id}`, JSON.stringify({ id, at }));
 }
 
-/** Takes the widget's copies out of storage so the app can count them once. */
-export async function takeWidgetCopies(): Promise<WidgetCopy[]> {
-  const raw = await AsyncStorage.getItem(WIDGET_COPIES_KEY).catch(() => null);
-  if (!raw) return [];
-  await AsyncStorage.removeItem(WIDGET_COPIES_KEY).catch(() => {});
+const validCopy = (c: Partial<WidgetCopy> | null): c is WidgetCopy => typeof c?.id === 'string' && typeof c.at === 'number';
+
+function parseCopies(raw: string | null): WidgetCopy[] {
   try {
-    return JSON.parse(raw);
+    return raw ? [JSON.parse(raw)].flat().filter(validCopy) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Takes the widget's copies out of storage so the app can count them once. Only the keys it read are
+ * removed, so a copy made meanwhile waits for next time. If removing fails nothing is counted yet.
+ */
+export async function takeWidgetCopies(): Promise<WidgetCopy[]> {
+  try {
+    const keys = (await AsyncStorage.getAllKeys()).filter((k) => k === WIDGET_COPIES_KEY || k.startsWith(WIDGET_COPY_PREFIX));
+    if (!keys.length) return [];
+    const entries = await AsyncStorage.multiGet(keys);
+    await AsyncStorage.multiRemove(keys);
+    return entries.flatMap(([, raw]) => parseCopies(raw)).sort((a, b) => a.at - b.at);
   } catch {
     return [];
   }

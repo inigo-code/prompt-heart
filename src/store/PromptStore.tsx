@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppState } from 'react-native';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
@@ -14,6 +15,7 @@ import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
 const STORAGE_KEY = 'prompt-notes/v1';
 /** The home-screen widget reads prompts straight from here. */
 export const PROMPTS_STORAGE_KEY = STORAGE_KEY;
+const UNREADABLE_KEY = 'prompt-notes/unreadable';
 
 /** Deleted prompts stay in Trash this long before they're hidden for good. */
 export const TRASH_DAYS = 30;
@@ -84,7 +86,8 @@ type PromptStore = {
   emptyTrash: () => string[];
   duplicatePrompt: (id: string) => Prompt | undefined;
   togglePin: (id: string) => void;
-  recordCopy: (id: string) => void;
+  /** `at` is when the copy happened, for copies made from the widget while the app was closed. */
+  recordCopy: (id: string, at?: number) => void;
   createFolder: (name: string, color?: string) => Folder;
   updateFolder: (id: string, patch: Partial<Pick<Folder, 'name' | 'color'>>) => void;
   deleteFolder: (id: string) => void;
@@ -127,7 +130,15 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => setData(raw ? migrate(JSON.parse(raw)) : seedData))
+      .then(async (raw) => {
+        try {
+          setData(raw ? migrate(JSON.parse(raw)) : seedData);
+        } catch {
+          // Unreadable: start from the samples, but keep the original so the next save can't destroy it.
+          if (raw) await AsyncStorage.setItem(UNREADABLE_KEY, raw).catch(() => {});
+          setData(seedData);
+        }
+      })
       .catch(() => setData(seedData))
       .finally(() => {
         loaded.current = true;
@@ -140,13 +151,28 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     snapshot.current = data;
   }, [data]);
 
+  const unsaved = useRef(false);
+  const save = useCallback(() => {
+    unsaved.current = false;
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot.current)).catch(() => {});
+  }, []);
+
   // Persist shortly after changes settle (the editor saves on every keystroke),
   // and never overwrite storage before the first load finishes.
   useEffect(() => {
     if (!loaded.current) return;
-    const t = setTimeout(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {}), 300);
+    unsaved.current = true;
+    const t = setTimeout(save, 300);
     return () => clearTimeout(t);
-  }, [data]);
+  }, [data, save]);
+
+  // Android can end the app any time after it leaves the screen, so don't leave the last edit on a timer.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active' && unsaved.current) save();
+    });
+    return () => sub.remove();
+  }, [save]);
 
   const commitLocal = useCallback((fn: (d: StoreData) => StoreData) => {
     setData(fn);
@@ -287,14 +313,13 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const restorePrompts = useCallback((ids: string[]) => mutateMany(ids, () => ({ deletedAt: null })), [mutateMany]);
 
   const recordCopy = useCallback(
-    (id: string) => {
+    (id: string, at: number = Date.now()) => {
       // Prompts copied straight from the library aren't saved, so there's nothing to count (or sync).
       if (!snapshot.current.prompts.some((p) => p.id === id)) return;
       // A copy isn't an edit: modifiedAt stays, so this can never win over newer text from another
       // device. The server only raises the copy stats (supabase/copy_stats.sql).
-      const now = Date.now();
       commitLocal((d) =>
-        local(d, { folders: d.folders, prompts: d.prompts.map((p) => (p.id === id ? { ...p, copyCount: p.copyCount + 1, lastCopiedAt: now } : p)) }, [id]),
+        local(d, { folders: d.folders, prompts: d.prompts.map((p) => (p.id === id ? { ...p, copyCount: p.copyCount + 1, lastCopiedAt: Math.max(p.lastCopiedAt ?? 0, at) } : p)) }, [id]),
       );
     },
     [commitLocal],
@@ -381,7 +406,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const getSnapshot = useCallback(() => snapshot.current, []);
 
   const applyRemote = useCallback<SyncStoreApi['applyRemote']>((remote, lastPulledAt) => {
-    setData((d) =>
+    const apply = (d: StoreData): StoreData =>
       remote.prompts.length === 0 && remote.folders.length === 0 && lastPulledAt === d.sync.lastPulledAt
         ? d
         : {
@@ -389,8 +414,11 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
             prompts: mergePrompts(d.prompts, remote.prompts),
             folders: mergeRecords(d.folders, remote.folders),
             sync: { ...d.sync, lastPulledAt },
-          },
-    );
+          };
+    // The sync engine reads the snapshot straight after this to find images to download, before
+    // React has rendered. Without this, a new phone sees none of its pulled images on the first sync.
+    snapshot.current = apply(snapshot.current);
+    setData(apply);
   }, []);
 
   const markPushed = useCallback<SyncStoreApi['markPushed']>((sent) => {

@@ -69,6 +69,7 @@ const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
           ? theme.danger
           : undefined;
 
+const ALL: Filter = { kind: 'all' };
 const sameFilter = (a: Filter, b: Filter) => JSON.stringify(a) === JSON.stringify(b);
 
 export default function HomeScreen() {
@@ -97,7 +98,12 @@ export default function HomeScreen() {
   const visibleFolder = useCallback((id: string | null) => folders.find((f) => f.id === id), [folders]);
 
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<Filter>({ kind: 'all' });
+  const [chosenFilter, setFilter] = useState<Filter>(ALL);
+  // A category or tag that's been deleted can't stay selected, or the list looks empty with no way to tell why.
+  const filterGone =
+    (chosenFilter.kind === 'folder' && !folders.some((f) => f.id === chosenFilter.id)) ||
+    (chosenFilter.kind === 'tag' && !allTags.includes(chosenFilter.tag));
+  const filter = filterGone ? ALL : chosenFilter;
   const [menuFor, setMenuFor] = useState<Prompt | null>(null);
   // Multi-select: null when off, otherwise the selected prompt ids.
   const [selected, setSelected] = useState<string[] | null>(null);

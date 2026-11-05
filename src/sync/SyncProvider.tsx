@@ -178,11 +178,13 @@ function hasUnsentChanges(store: SyncStoreApi) {
 
 /** True when a live change carries a version this phone already has (or a newer one), such as our own upload. */
 function alreadyHave(store: SyncStoreApi, table: 'prompts' | 'folders', row: unknown) {
-  const r = row as { id?: unknown; modified_at?: unknown } | null | undefined;
+  const r = row as { id?: unknown; modified_at?: unknown; copy_count?: unknown } | null | undefined;
   if (typeof r?.id !== 'string' || r.modified_at == null) return false;
   const d = store.getSnapshot();
   const local = (table === 'prompts' ? d.prompts : d.folders).find((x) => x.id === r.id);
-  return local !== undefined && Number(r.modified_at) <= local.modifiedAt;
+  if (local === undefined || Number(r.modified_at) > local.modifiedAt) return false;
+  // Copying doesn't change modified_at, so a copy on another device only shows in the count.
+  return !('copyCount' in local) || Number(r.copy_count ?? 0) <= local.copyCount;
 }
 
 async function pull(client: SupabaseClient, userId: string, store: SyncStoreApi) {
@@ -248,6 +250,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     running.current = true;
     autoSync.started();
     setState((s) => ({ ...s, status: 'syncing' }));
+    let imagesToRetry = 0;
     try {
       do {
         again.current = false;
@@ -257,7 +260,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         await push(supabase, userId, storeRef.current);
         await pull(supabase, userId, storeRef.current);
         // Each image shows as soon as it lands, so a new phone fills in while the rest download.
-        await pullImages(supabase, userId, storeRef.current, setProgress, () => setImagesVersion((v) => v + 1));
+        imagesToRetry = await pullImages(supabase, userId, storeRef.current, setProgress, () => setImagesVersion((v) => v + 1));
         setProgress(null);
       } while (again.current);
       setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
@@ -268,6 +271,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     } finally {
       running.current = false;
       autoSync.finished();
+      if (imagesToRetry > 0) autoSync.request(RETRY_MS);
     }
   }, [userId, autoSync]);
 

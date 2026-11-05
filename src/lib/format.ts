@@ -1,3 +1,5 @@
+import { plainBlanks } from '@/lib/templates';
+
 // Markdown formatting for the prompt editor. Prompts stay plain text (that's what gets copied, and AI
 // apps read Markdown), so formatting just inserts or removes the markers around the selection.
 
@@ -103,11 +105,9 @@ export function stripMarkdown(text: string): string {
 export function previewText(text: string): string {
   // Headings are labels like "Role"; run into the sentence after them they read as a mistake.
   const body = text.replace(/^#{1,6} .*$/gm, '');
-  return stripMarkdown(body.trim() ? body : text)
+  return plainBlanks(stripMarkdown(body.trim() ? body : text))
     .replace(/\[([^\]\n]+)\]\([^)\n]+\)/g, '$1')
     .replace(/^\s*(?:[-*]|\d+\.) /gm, '')
-    .replace(/\{\{[^}|\n]+\|([^}\n]*)\}\}/g, '$1')
-    .replace(/\{\{([^}\n]+)\}\}/g, '[$1]')
     .replace(/\s+/g, ' ')
     .trim();
 }

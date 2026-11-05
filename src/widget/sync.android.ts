@@ -29,17 +29,19 @@ export function useWidgetSync() {
 
   useEffect(() => {
     if (!ready) return;
-    const count = () =>
-      takeWidgetCopies().then((copies) =>
-        copies.forEach((c) => {
-          if (prompts.some((p) => p.id === c.id)) recordCopy(c.id);
-          logCopy();
-        }),
-      );
+    let counting = false;
+    const count = async () => {
+      if (counting) return;
+      counting = true;
+      // recordCopy looks the prompt up itself, so prompts made since the app opened count too.
+      for (const copy of await takeWidgetCopies()) {
+        recordCopy(copy.id, copy.at);
+        logCopy(undefined, copy.at);
+      }
+      counting = false;
+    };
     count();
     const sub = AppState.addEventListener('change', (s) => s === 'active' && count());
     return () => sub.remove();
-    // Counting reads the latest prompts each time the app comes back.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, recordCopy, logCopy]);
 }

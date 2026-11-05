@@ -1,3 +1,5 @@
+import { extractVariables } from '@/lib/templates';
+
 // Everything the profile shows about how you use your prompts, worked out from the store, the version
 // history and the copy log. Pure (no React Native imports), so it's easy to check.
 
@@ -59,7 +61,6 @@ export type Insights = {
 const TIERS: Tier[] = ['wood', 'iron', 'silver', 'gold', 'platinum'];
 export const TIER_COLORS: Record<Tier, string> = { wood: '#B07A4A', iron: '#8C96A1', silver: '#B9C1CC', gold: '#E2A52A', platinum: '#5FC8D6' };
 
-const PLACEHOLDER = /\{\{\s*[^{}|]+?\s*(?:\|[^{}]*)?\}\}/;
 const DAY = 24 * 60 * 60 * 1000;
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -84,7 +85,7 @@ export function insights(
   todayIso: string,
 ): Insights {
   const copies = prompts.reduce((a, p) => a + p.copyCount, 0);
-  const templates = prompts.filter((p) => PLACEHOLDER.test(p.body)).length;
+  const templates = prompts.filter((p) => extractVariables(p.body).length > 0).length;
   const tagSet = new Set(prompts.flatMap((p) => p.tags));
   const images = prompts.reduce((a, p) => a + p.images.length, 0);
   const words = prompts.reduce((a, p) => a + (p.body.trim() ? p.body.trim().split(/\s+/).length : 0), 0);

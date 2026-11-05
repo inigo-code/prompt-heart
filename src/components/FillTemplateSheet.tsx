@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, TextInput } from '@/components/AppText';
 import { Sheet } from '@/components/Sheet';
 import { Tap } from '@/components/Tap';
-import { fillTemplate } from '@/lib/templates';
+import { extractVariables, fillTemplate } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
 import type { Prompt } from '@/store/types';
 
@@ -30,7 +30,8 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
   const close = () => setOpen(false);
 
   const filled = fillTemplate(prompt.body, values);
-  const remaining = variables.filter((v) => !values[v]?.length).length;
+  // Blanks left in the text: a cleared field with a default is still filled in.
+  const remaining = extractVariables(filled).length;
 
   return (
     <Sheet

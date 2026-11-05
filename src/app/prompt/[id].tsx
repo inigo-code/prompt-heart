@@ -65,7 +65,7 @@ function PromptEditor() {
   const [id, setId] = useState<string | null>(params.id === 'new' ? null : params.id);
   const existing = id ? store.getPrompt(id) : undefined;
 
-  const [draft, setDraft] = useState<TextDraft>(() => ({
+  const [edited, setDraft] = useState<TextDraft>(() => ({
     title: existing?.title ?? '',
     body: existing?.body ?? '',
     folderId: existing?.folderId ?? params.folderId ?? null,
@@ -78,6 +78,11 @@ function PromptEditor() {
   const [attaching, setAttaching] = useState(false);
   // Saved prompts open read-only so a stray tap can't change them; Edit switches to the editor.
   const [editing, setEditing] = useState(params.id === 'new');
+  // Reading shows the saved prompt, so text synced from another device appears here, and Edit starts from it.
+  const draft: TextDraft =
+    !editing && existing
+      ? { title: existing.title, body: existing.body, folderId: existing.folderId, tags: existing.tags, pinned: existing.pinned }
+      : edited;
   const [undo] = useState(() =>
     createUndo<Typed>({ title: draft.title, body: draft.body }, { same: (a, b) => a.title === b.title && a.body === b.body }),
   );
@@ -162,6 +167,17 @@ function PromptEditor() {
     selectionRef.current = next.selection;
     setSelection(next.selection);
     bodyRef.current?.focus();
+  };
+
+  const startEditing = () => {
+    // Text that arrived from sync while reading is what gets edited, so old undo steps no longer apply.
+    if (draft.title !== edited.title || draft.body !== edited.body) {
+      undo.reset({ title: draft.title, body: draft.body });
+      setUndoable({ canUndo: false, canRedo: false });
+      selectionRef.current = { start: draft.body.length, end: draft.body.length };
+    }
+    setDraft(draft);
+    setEditing(true);
   };
 
   const finishEditing = () => {
@@ -265,7 +281,7 @@ function PromptEditor() {
               </Pressable>
               <Pressable
                 hitSlop={8}
-                onPress={editing ? finishEditing : () => setEditing(true)}
+                onPress={editing ? finishEditing : startEditing}
                 accessibilityRole="button"
                 accessibilityLabel={editing ? 'Done editing' : 'Edit prompt'}
                 style={({ pressed }) => [styles.editBtn, { backgroundColor: editing ? theme.accent : theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
