@@ -8,7 +8,7 @@ import { Text } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
-import { stripMarkdown } from '@/lib/format';
+import { formatStamp, stripMarkdown } from '@/lib/format';
 import { extractVariables } from '@/lib/templates';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
@@ -106,23 +106,24 @@ export const PromptCard = memo(function PromptCard({
               {stripMarkdown(prompt.body)}
             </Text>
           )}
-          {(folder || vars > 0) && (
-            <View style={styles.meta}>
-              {folder && (
-                <View style={styles.metaItem}>
-                  <View style={[styles.dot, { backgroundColor: folder.color }]} />
-                  <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
-                    {folder.name}
-                  </Text>
-                </View>
-              )}
-              {vars > 0 && (
-                <Text style={[styles.metaText, { color: theme.textMuted }]}>
-                  {vars} {vars === 1 ? 'blank' : 'blanks'}
+          <View style={styles.meta}>
+            {folder && (
+              <View style={styles.metaItem}>
+                <View style={[styles.dot, { backgroundColor: folder.color }]} />
+                <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
+                  {folder.name}
                 </Text>
-              )}
-            </View>
-          )}
+              </View>
+            )}
+            {vars > 0 && (
+              <Text style={[styles.metaText, { color: theme.textMuted }]}>
+                {vars} {vars === 1 ? 'blank' : 'blanks'}
+              </Text>
+            )}
+            <Text style={[styles.metaText, styles.stamp, { color: theme.textMuted }]} numberOfLines={1}>
+              {formatStamp(prompt.updatedAt)}
+            </Text>
+          </View>
         </View>
 
         {selecting ? (
@@ -176,6 +177,7 @@ const styles = StyleSheet.create({
   body: { fontSize: font.body, lineHeight: 22 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
+  stamp: { marginLeft: 'auto', fontWeight: '500' },
   dot: { width: 8, height: 8, borderRadius: 4 },
   metaText: { fontSize: font.footnote, fontWeight: '600', flexShrink: 1 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -15,7 +15,7 @@ import { ImageThumb } from '@/components/ImageThumb';
 import { ImageViewer } from '@/components/ImageViewer';
 import { PromptText } from '@/components/PromptText';
 import { useToast } from '@/components/Toast';
-import { applyFormat } from '@/lib/format';
+import { applyFormat, formatStamp } from '@/lib/format';
 import type { FormatKind, Selection } from '@/lib/format';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
@@ -450,6 +450,12 @@ function PromptEditor() {
           </View>
         )}
 
+        {prompt && (
+          <Text style={[styles.footer, { color: theme.textMuted }]}>
+            Created {formatStamp(prompt.createdAt)}
+            {prompt.updatedAt !== prompt.createdAt ? ` · Edited ${formatStamp(prompt.updatedAt)}` : ''}
+          </Text>
+        )}
         <Text style={[styles.footer, { color: theme.textMuted }]}>
           {words} words · {draft.body.length} chars
           {settings.showTokens && draft.body ? ` · ~${estimateTokens(draft.body)} tokens` : ''}

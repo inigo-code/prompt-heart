@@ -98,3 +98,13 @@ export function stripMarkdown(text: string): string {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "5 Nov, 2:30 pm", with the year added when it isn't this year. */
+export function formatStamp(ms: number, now: Date = new Date()): string {
+  const d = new Date(ms);
+  const year = d.getFullYear() === now.getFullYear() ? '' : ` ${d.getFullYear()}`;
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${year}, ${d.getHours() % 12 || 12}:${minutes} ${d.getHours() < 12 ? 'am' : 'pm'}`;
+}

@@ -40,8 +40,6 @@ type SyncContext = {
   imagesVersion: number;
   /** Resolves when the sync finishes (for pull-to-refresh). */
   syncNow: () => Promise<void>;
-  /** When the one-minute cooldown after the last sync ends (ms timestamp; in the past if none). */
-  cooldownEndsAt: () => number;
   /** Image transfer in progress, e.g. { label: "Uploading images", done: 2, total: 5 }. */
   progress: SyncProgress | null;
   /** Known after a sync; null before the first one (or when signed out). */
@@ -211,7 +209,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   });
   const running = useRef(false);
   const again = useRef(false);
-  // Automatic syncs go through the cooldown; manual ones (syncNow) call runSync directly.
+  // Automatic syncs keep a few seconds apart; manual ones (syncNow) call runSync directly, any time.
   const runSyncRef = useRef<() => Promise<void>>(async () => {});
   const [nextSyncAt, setNextSyncAt] = useState<number | null>(null);
   const [autoSync] = useState(() => createAutoSync(() => void runSyncRef.current(), AUTO_SYNC_COOLDOWN_MS, undefined, setNextSyncAt));
@@ -269,12 +267,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, [active, autoSync]);
   useEffect(() => () => autoSync.cancel(), [autoSync]);
 
-  // On sign-in, and after local edits (including copies), at most once per cooldown.
+  // On sign-in, and after local edits (including copies).
   useEffect(() => {
     if (active) autoSync.request(localRevision === 0 ? 0 : LOCAL_DEBOUNCE_MS);
   }, [active, localRevision, autoSync]);
 
-  // Coming back to the app syncs (after the cooldown); leaving it uploads anything unsent right
+  // Coming back to the app syncs; leaving it uploads anything unsent right
   // away, so your other devices see the change.
   useEffect(() => {
     if (!active) return;
@@ -424,7 +422,6 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       nextSyncAt: userId ? nextSyncAt : null,
       imagesVersion,
       syncNow: runSync,
-      cooldownEndsAt: autoSync.cooldownEndsAt,
       progress,
       imageUsage: userId ? imageUsage : null,
       signIn,
@@ -435,7 +432,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       resetPassword,
       signOut,
     }),
-    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, autoSync, signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

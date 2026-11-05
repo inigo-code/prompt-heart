@@ -35,6 +35,8 @@ export const WHATS_NEW = {
     'Menus and sheets slide up smoothly; drag the handle down to close one',
     'Smoother moves between screens, and buttons that respond under your finger',
     'Prompt cards are smaller, so more fit on the screen, and text is easier to read',
+    'Every prompt shows its date and time',
+    'Images sync with no limit, and a new phone brings them all over',
     'Long prompts, the fill-in sheet and tags stay above the keyboard while you type',
     'Your account comes first in Settings, so signing in to sync is easy to find',
   ],

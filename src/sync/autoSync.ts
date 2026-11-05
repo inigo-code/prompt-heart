@@ -4,7 +4,7 @@
  * the meantime is folded into a single sync at the end of it. Manual syncs (the Sync button, pull
  * to refresh) don't go through this and run straight away.
  */
-export const AUTO_SYNC_COOLDOWN_MS = 60_000;
+export const AUTO_SYNC_COOLDOWN_MS = 3_000;
 
 export type Timers = {
   now: () => number;
@@ -27,8 +27,6 @@ export type AutoSync = {
   finished: () => void;
   /** Drop any planned sync (signed out, unmounted). */
   cancel: () => void;
-  /** When the current cooldown ends (ms timestamp); in the past when there is none. */
-  cooldownEndsAt: () => number;
 };
 
 /**
@@ -92,6 +90,5 @@ export function createAutoSync(
       cancel();
       askedWhileRunning = false;
     },
-    cooldownEndsAt: () => lastFinishedAt + cooldownMs,
   };
 }
