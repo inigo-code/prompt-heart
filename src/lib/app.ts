@@ -29,11 +29,11 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-widget-taps',
+  id: '2026-11-05-1.8.1',
   items: [
+    'The home-screen widget now follows its size: make it taller to see more prompts',
+    'Widget buttons keep working after you resize it',
     'Your images download straight away on a new phone',
-    'If the widget stops responding after a resize, open the app once to bring it back',
-    'The widget now fits its space, with its header and every row in place',
     'Copies from the widget always count, on the day you made them',
     'An open prompt now picks up changes from your other devices',
   ],
