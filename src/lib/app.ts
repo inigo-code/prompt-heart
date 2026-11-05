@@ -29,10 +29,13 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-cards',
+  id: '2026-11-05-1.8.0',
   items: [
-    'Prompt titles show in full, with the date and time right below',
-    'Bigger image thumbnails, in both list and grid',
-    'With App lock on, you can now show prompts in the widget: Settings, Security',
+    'A home-screen widget: your pinned prompts, one tap to copy. Touch and hold your home screen, then Widgets',
+    'Smaller cards with full titles, each with its date and time',
+    'Larger text, and clearer screens with fewer explanations',
+    'Sheets slide smoothly, and buttons respond under your finger',
+    'Sync whenever you like, with no wait between syncs',
+    'Your account comes first in Settings, so signing in is easy to find',
   ],
 };
