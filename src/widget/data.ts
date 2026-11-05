@@ -76,35 +76,6 @@ export async function readWidgetData(): Promise<WidgetData> {
   }
 }
 
-/** The last few background runs, shown under About in test builds. */
-const WIDGET_LOG_KEY = 'promptheart/widget-log';
-export const WIDGET_BOOT_KEY = 'promptheart/widget-boot';
-export type WidgetLogEntry = { at: number; action: string; height: number; error?: string };
-
-export async function logWidgetRun(entry: WidgetLogEntry) {
-  const raw = await AsyncStorage.getItem(WIDGET_LOG_KEY).catch(() => null);
-  let list: WidgetLogEntry[] = [];
-  try {
-    list = raw ? JSON.parse(raw) : [];
-  } catch {}
-  await AsyncStorage.setItem(WIDGET_LOG_KEY, JSON.stringify([entry, ...list].slice(0, 6))).catch(() => {});
-}
-
-/** When the app's code last started without the app on screen, set by trace.ts. */
-export async function readWidgetBoot(): Promise<number | null> {
-  const raw = await AsyncStorage.getItem(WIDGET_BOOT_KEY).catch(() => null);
-  return raw ? Number(raw) : null;
-}
-
-export async function readWidgetLog(): Promise<WidgetLogEntry[]> {
-  const raw = await AsyncStorage.getItem(WIDGET_LOG_KEY).catch(() => null);
-  try {
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
 export type WidgetCopy = { id: string; at: number };
 
 /** One key per copy, so two quick taps can't overwrite each other. */

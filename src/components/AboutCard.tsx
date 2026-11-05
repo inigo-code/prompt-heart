@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import * as Updates from 'expo-updates';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/AppText';
@@ -8,8 +8,6 @@ import { APP_NAME } from '@/lib/app';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { formatStamp } from '@/lib/format';
-import { readWidgetBoot, readWidgetLog } from '@/widget/data';
-import type { WidgetLogEntry } from '@/widget/data';
 
 // Updates download on launch and apply on the next restart; this lets you check and apply one right away.
 // The update APIs reject in Expo Go and dev builds, so the button only shows in real builds.
@@ -25,14 +23,6 @@ function describeRunning() {
 export function AboutCard({ theme }: { theme: Theme }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  // Test builds only: shows whether the widget's background drawing ran, which logs can't tell us from here.
-  const [widgetLog, setWidgetLog] = useState<WidgetLogEntry[]>([]);
-  const [widgetBoot, setWidgetBoot] = useState<number | null>(null);
-  useEffect(() => {
-    if (Updates.channel !== 'preview') return;
-    readWidgetLog().then(setWidgetLog);
-    readWidgetBoot().then(setWidgetBoot);
-  }, []);
 
   const check = async () => {
     setBusy(true);
@@ -75,15 +65,6 @@ export function AboutCard({ theme }: { theme: Theme }) {
         </Pressable>
       )}
       {message && <Text style={[styles.meta, { color: theme.textMuted }]}>{message}</Text>}
-      {Updates.channel === 'preview' && (
-        <Text selectable style={[styles.meta, { color: theme.textMuted }]}>
-          {`Background start: ${widgetBoot ? formatStamp(widgetBoot) : 'never'}\n`}
-          {'Widget background runs:\n'}
-          {widgetLog.length
-            ? widgetLog.map((w) => `${formatStamp(w.at)} · ${w.action} · ${w.height}dp${w.error ? ` · ${w.error}` : ''}`).join('\n')
-            : 'none yet'}
-        </Text>
-      )}
     </View>
   );
 }

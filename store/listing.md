@@ -94,6 +94,10 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 
 Welcome to Prompt Heart on Google Play! Save your best AI prompts, fill in {{placeholders}}, copy in one tap, and open ChatGPT, Claude, Gemini and more. Sync is optional and private.
 
+## Release notes for 1.8.1 (500 max)
+
+The home-screen widget now loads by itself and shows more prompts when you make it bigger, with its buttons working after a resize. Images download straight away on a new phone. Copies from the widget always count, on the day you made them. An open prompt picks up changes from your other devices. Long titles show in full, and highlights are cleaner.
+
 ## Release notes for 1.8.0 (500 max)
 
 New: a home-screen widget with your pinned prompts, one tap to copy. Prompt cards are smaller, text is easier to read, and every prompt shows its date and time. Sheets slide smoothly and buttons respond under your finger. Your account now comes first in Settings. New to the app? A short welcome shows you around.
