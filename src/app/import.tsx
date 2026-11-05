@@ -125,7 +125,7 @@ export default function ImportScreen() {
       <View style={[styles.sources, { backgroundColor: theme.card, borderColor: theme.border }]}>
         {SOURCES.map((s, i) => (
           <View key={s.name} style={[styles.source, i < SOURCES.length - 1 && { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}>
-            <View style={[styles.sourceIcon, { backgroundColor: theme.accentSoft }]}>
+            <View style={[styles.sourceIcon, { backgroundColor: theme.chip }]}>
               <Ionicons name={s.icon} size={18} color={theme.text} />
             </View>
             <View style={{ flex: 1, gap: 2 }}>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   fileRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   fileName: { flex: 1, fontSize: font.body, fontWeight: '600' },
   fileCount: { fontSize: font.footnote },
-  summary: { fontSize: font.body, lineHeight: 21, marginTop: 4 },
+  summary: { fontSize: font.body, lineHeight: 22, marginTop: 4 },
   preview: { gap: 2 },
   previewItem: { fontSize: font.footnote },
   add: { height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
@@ -192,6 +192,6 @@ const styles = StyleSheet.create({
   source: { flexDirection: 'row', gap: 12, padding: 14, alignItems: 'flex-start' },
   sourceIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   sourceName: { fontSize: font.body, fontWeight: '700' },
-  sourceHow: { fontSize: font.footnote, lineHeight: 18 },
-  note: { fontSize: font.footnote, lineHeight: 18, paddingHorizontal: 6 },
+  sourceHow: { fontSize: font.footnote, lineHeight: 20 },
+  note: { fontSize: font.footnote, lineHeight: 20, paddingHorizontal: 6 },
 });

@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 
 /** Time-of-day welcome, e.g. "Good evening, Inigo!"; late at night it's "Still up, Inigo?". */
 export function greeting(hour: number, name: string): string {
-  const who = name.trim();
+  const who = name.trim().split(/\s+/)[0];
   if (hour >= 5 && hour < 12) return who ? `Good morning, ${who}!` : 'Good morning!';
   if (hour >= 12 && hour < 17) return who ? `Good afternoon, ${who}!` : 'Good afternoon!';
   if (hour >= 17 && hour < 22) return who ? `Good evening, ${who}!` : 'Good evening!';

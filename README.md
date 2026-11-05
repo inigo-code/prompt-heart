@@ -6,7 +6,7 @@
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://inigo-code.github.io/prompt-heart-site/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.7.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.8.0-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
   <img alt="Supabase" src="https://img.shields.io/badge/Sync-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
@@ -99,10 +99,10 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
   <img src="docs/gallery.png" alt="Screens: home, filling in the blanks, a prompt with Copy and open in Claude, the prompt library, version history, bulk select" width="100%" />
 </p>
 
-### New in 1.7.0
+### New in 1.8.0
 
 <p align="center">
-  <img src="docs/new-in-1.7.png" alt="Screens: the editor with its formatting bar, profile insights, achievements, the profile card, Import prompts, and App lock" width="100%" />
+  <img src="docs/new-in-1.8.png" alt="Screens: the home-screen widget, smaller cards, list or grid, Account first in Settings, the welcome, and What's new" width="100%" />
 </p>
 
 ## ⬇️ Install

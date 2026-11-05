@@ -298,9 +298,12 @@ function PromptEditor() {
         {editing ? (
           <TextInput
             value={draft.title}
-            onChangeText={(title) => type({ title })}
+            onChangeText={(title) => type({ title: title.replace(/\n/g, ' ') })}
             placeholder="Title"
             placeholderTextColor={theme.textMuted}
+            multiline
+            scrollEnabled={false}
+            submitBehavior="blurAndSubmit"
             style={[styles.title, { color: theme.text }]}
             autoFocus={params.id === 'new'}
           />
@@ -443,7 +446,7 @@ function PromptEditor() {
             <Ionicons name="code-slash" size={14} color={theme.textMuted} />
             <Text style={{ color: theme.textMuted, fontSize: font.footnote }}>Filled in when you copy:</Text>
             {variables.map((v) => (
-              <View key={v} style={[styles.tag, { backgroundColor: theme.accentSoft }]}>
+              <View key={v} style={[styles.tag, { backgroundColor: theme.chip }]}>
                 <Text style={{ color: theme.text, fontSize: font.footnote }}>{v}</Text>
               </View>
             ))}

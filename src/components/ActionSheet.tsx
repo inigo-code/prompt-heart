@@ -109,7 +109,7 @@ export function ActionSheet({ visible, title, actions, quick, onClose }: Props) 
 const styles = StyleSheet.create({
   sheet: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 8, paddingHorizontal: 10 },
   handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
-  title: { fontSize: font.footnote, fontWeight: '600', lineHeight: 18, paddingHorizontal: 12, paddingTop: 4, paddingBottom: 6 },
+  title: { fontSize: font.footnote, fontWeight: '600', lineHeight: 20, paddingHorizontal: 12, paddingTop: 4, paddingBottom: 6 },
   quick: { gap: 8, paddingTop: 4, paddingBottom: 8 },
   quickLabel: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 12 },
   quickRow: { gap: 8, paddingHorizontal: 10 },

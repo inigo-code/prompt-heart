@@ -15,6 +15,7 @@ import type { Theme } from '@/lib/theme';
 import { useCopyPrompt } from '@/lib/useCopyPrompt';
 import { usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
+import { previewText } from '@/lib/format';
 
 const CATEGORY: Record<string, LibraryCategory> = Object.fromEntries(LIBRARY_CATEGORIES.map((c) => [c.key, c]));
 
@@ -179,7 +180,6 @@ const LibraryCard = memo(function LibraryCard({
         { backgroundColor: theme.card, borderColor: theme.border, transform: [{ scale: pressed ? 0.985 : 1 }] },
       ]}
     >
-      <View style={[styles.categoryBar, { backgroundColor: category.color }]} />
       <View style={styles.meta}>
         <View style={[styles.pill, { backgroundColor: category.color + '24' }]}>
           <Ionicons name={category.icon} size={12} color={category.color} />
@@ -196,7 +196,7 @@ const LibraryCard = memo(function LibraryCard({
       </View>
       <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
       <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={expanded ? undefined : 3}>
-        {item.body}
+        {expanded ? item.body : previewText(item.body)}
       </Text>
       <View style={styles.actions}>
         <Pressable
@@ -236,18 +236,17 @@ const styles = StyleSheet.create({
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
   catIcon: { alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 16, paddingTop: 6, gap: 12 },
-  intro: { fontSize: font.body, lineHeight: 20, marginBottom: 2 },
-  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, paddingLeft: 16, gap: 8, overflow: 'hidden' },
-  categoryBar: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
+  intro: { fontSize: font.body, lineHeight: 22, marginBottom: 2 },
+  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
   meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
   metaText: { fontSize: font.caption, fontWeight: '600' },
   title: { fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
-  body: { fontSize: font.body, lineHeight: 20 },
+  body: { fontSize: font.body, lineHeight: 22 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
   btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 16, borderRadius: 18 },
   btnOutline: { borderWidth: 1.5, backgroundColor: 'transparent' },
   btnText: { fontSize: font.body, fontWeight: '700' },
   empty: { alignItems: 'center', gap: 10, paddingTop: 60, paddingHorizontal: 32 },
-  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },
 });

@@ -10,6 +10,7 @@ import type { Theme } from '@/lib/theme';
 import { SYNC_AMBER } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
 import type { SyncStatus } from '@/sync/SyncProvider';
+import { formatStamp } from '@/lib/format';
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e));
 
@@ -245,7 +246,7 @@ function SignIn({ theme }: { theme: Theme }) {
 
       {mode === 'sign-in' && (
         <Pressable onPress={() => go('forgot')} accessibilityRole="button">
-          <Text style={[styles.switch, { color: theme.accent, fontWeight: '700' }]}>Forgot password?</Text>
+          <Text style={[styles.switch, { color: theme.accentInk, fontWeight: '700' }]}>Forgot password?</Text>
         </Pressable>
       )}
       {needsCode && (
@@ -261,7 +262,7 @@ function SignIn({ theme }: { theme: Theme }) {
       >
         <Text style={[styles.switch, { color: theme.textMuted }]}>
           {mode === 'sign-in' ? 'New here? ' : mode === 'sign-up' ? 'Already have an account? ' : ''}
-          <Text style={{ color: theme.accent, fontWeight: '700' }}>{mode === 'sign-in' ? 'Create an account' : mode === 'sign-up' ? 'Sign in' : 'Back to sign in'}</Text>
+          <Text style={{ color: theme.accentInk, fontWeight: '700' }}>{mode === 'sign-in' ? 'Create an account' : mode === 'sign-up' ? 'Sign in' : 'Back to sign in'}</Text>
         </Text>
       </Pressable>
     </Card>
@@ -314,7 +315,7 @@ function SignedIn({ theme }: { theme: Theme }) {
           <Text style={[styles.statusText, { color: theme.text }]}>{s.label}</Text>
         </View>
         <Text style={[styles.p, { color: theme.textMuted }]}>
-          {lastSyncedAt ? `Last synced ${new Date(lastSyncedAt).toLocaleTimeString()}` : 'Not synced yet this session'}
+          {lastSyncedAt ? `Last synced ${formatStamp(lastSyncedAt)}` : 'Not synced yet this session'}
           {unsentCount > 0 ? ` · ${unsentCount} change${unsentCount === 1 ? '' : 's'} waiting` : ''}
         </Text>
         {status === 'waiting' && (
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 12 },
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   h: { fontSize: font.headline, fontWeight: '800' },
-  p: { fontSize: font.body, lineHeight: 20 },
+  p: { fontSize: font.body, lineHeight: 22 },
   label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: -8 },
   input: { fontSize: font.headline, height: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16 },
   switch: { fontSize: font.body, textAlign: 'center', paddingVertical: 4 },

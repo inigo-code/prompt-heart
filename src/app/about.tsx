@@ -57,7 +57,7 @@ export default function AboutScreen() {
             key={f.text}
             style={[styles.feature, i < FEATURES.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border }]}
           >
-            <Ionicons name={f.icon} size={18} color={theme.accent} />
+            <Ionicons name={f.icon} size={18} color={theme.textMuted} />
             <Text style={[styles.featureText, { color: theme.text }]}>{f.text}</Text>
           </View>
         ))}
@@ -102,7 +102,7 @@ export default function AboutScreen() {
           theme={theme}
           icon="logo-github"
           label="GitHub"
-          value={DEVELOPER.github.replace('https://', '')}
+          value={DEVELOPER.github.replace('https://github.com/', '')}
           onPress={() => WebBrowser.openBrowserAsync(DEVELOPER.github)}
           last
         />
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   heartAppsHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   heartAppsTile: { width: 48, height: 48, borderRadius: 12 },
   heartAppsName: { fontSize: font.caption, fontWeight: '800', letterSpacing: 0.5 },
-  heartAppsLine: { fontSize: font.body, lineHeight: 20 },
+  heartAppsLine: { fontSize: font.body, lineHeight: 22 },
   otherApp: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth, borderRadius: 10 },
   otherIcon: { width: 40, height: 40, borderRadius: 10 },
   otherName: { fontSize: font.body, fontWeight: '700' },
@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
   allApps: { alignSelf: 'flex-start', height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: 'center' },
   allAppsText: { fontSize: font.footnote, fontWeight: '700' },
   feature: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
-  featureText: { flex: 1, fontSize: font.body, lineHeight: 19 },
+  featureText: { flex: 1, fontSize: font.body, lineHeight: 22 },
   credit: { textAlign: 'center', fontSize: font.caption },
 });

@@ -8,7 +8,7 @@ import { Text } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
 import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
-import { formatStamp, stripMarkdown } from '@/lib/format';
+import { formatStamp, previewText } from '@/lib/format';
 import { extractVariables } from '@/lib/templates';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
@@ -106,8 +106,8 @@ export const PromptCard = memo(function PromptCard({
         styles.card,
         grid && styles.gridCard,
         {
-          backgroundColor: prompt.pinned ? theme.cardPinned : theme.card,
-          borderColor: selected ? theme.accent : prompt.pinned ? theme.accent + '55' : theme.border,
+          backgroundColor: selected ? theme.accentSoft : theme.card,
+          borderColor: selected ? theme.accent : theme.border,
           borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
           transform: [{ scale: pressed ? 0.985 : 1 }],
         },
@@ -138,8 +138,8 @@ export const PromptCard = memo(function PromptCard({
 
         <View style={styles.text}>
           <View style={styles.titleRow}>
-            {prompt.pinned && <Ionicons name="pin" size={14} color={theme.accent} style={styles.pin} />}
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={grid ? 6 : 4}>
+            {prompt.pinned && <Ionicons name="pin" size={14} color={theme.accentInk} style={styles.pin} />}
+            <Text style={[styles.title, { color: theme.text }]}>
               {prompt.title || 'Untitled'}
             </Text>
           </View>
@@ -148,7 +148,7 @@ export const PromptCard = memo(function PromptCard({
           </Text>
           {!!prompt.body && (
             <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={lines}>
-              {stripMarkdown(prompt.body)}
+              {previewText(prompt.body)}
             </Text>
           )}
           {(folder || vars > 0) && (

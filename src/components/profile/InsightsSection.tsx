@@ -37,16 +37,16 @@ export function InsightsSection({ theme }: { theme: Theme }) {
       <Section theme={theme} title="Your most-used four">
         {data.topFour.length ? (
           <View style={styles.four}>
-            {data.topFour.map((p, i) => (
+            {data.topFour.map((p) => (
               <Pressable
                 key={p.id}
                 onPress={() => router.push({ pathname: '/prompt/[id]', params: { id: p.id } })}
                 accessibilityRole="button"
                 accessibilityLabel={`${p.title}, copied ${plural(p.copies, 'time')}`}
-                style={({ pressed }) => [styles.fourItem, { backgroundColor: i === 0 ? theme.accentSoft : theme.bg, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+                style={({ pressed }) => [styles.fourItem, { backgroundColor: theme.bg, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
               >
                 <Text style={[styles.fourCount, { color: theme.text }]}>{p.copies}×</Text>
-                <Text style={[styles.fourTitle, { color: theme.text }]} numberOfLines={2}>
+                <Text style={[styles.fourTitle, { color: theme.text }]}>
                   {p.title}
                 </Text>
               </Pressable>
@@ -107,10 +107,12 @@ export function InsightsSection({ theme }: { theme: Theme }) {
 
 function Figure({ theme, value, label, accent }: { theme: Theme; value: number; label: string; accent?: boolean }) {
   return (
-    <View style={[styles.figure, { backgroundColor: accent ? theme.accentSoft : theme.card, borderColor: theme.border }]} accessible accessibilityLabel={`${value} ${label}`}>
-      {accent && <Ionicons name="flame" size={14} color={theme.accent} />}
-      <Text style={[styles.figureValue, { color: theme.text }]}>{value.toLocaleString()}</Text>
-      <Text style={[styles.figureLabel, { color: theme.textMuted }]} numberOfLines={1}>
+    <View style={[styles.figure, { backgroundColor: theme.card, borderColor: theme.border }]} accessible accessibilityLabel={`${value} ${label}`}>
+      <View style={styles.figureTop}>
+        {accent && <Ionicons name="flame" size={16} color={theme.accentInk} />}
+        <Text style={[styles.figureValue, { color: theme.text }]}>{value.toLocaleString()}</Text>
+      </View>
+      <Text style={[styles.figureLabel, { color: theme.textMuted }]} numberOfLines={2}>
         {label}
       </Text>
     </View>
@@ -122,7 +124,7 @@ function Bar({ theme, label, value, max, color, dot, leading }: { theme: Theme; 
     <View style={styles.bar} accessible accessibilityLabel={`${label}: ${value}`}>
       <View style={styles.barHead}>
         {leading ?? (dot ? <View style={[styles.dot, { backgroundColor: dot }]} /> : null)}
-        <Text style={[styles.barLabel, { color: theme.text }]} numberOfLines={1}>
+        <Text style={[styles.barLabel, { color: theme.text }]} numberOfLines={2}>
           {label}
         </Text>
         <Text style={[styles.barValue, { color: theme.textMuted }]}>{value}</Text>
@@ -137,13 +139,14 @@ function Bar({ theme, label, value, max, color, dot, leading }: { theme: Theme; 
 const styles = StyleSheet.create({
   figures: { flexDirection: 'row', gap: 8 },
   figure: { flex: 1, minWidth: 0, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 2 },
+  figureTop: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   figureValue: { fontSize: font.title, fontWeight: '800' },
-  figureLabel: { fontSize: font.caption },
+  figureLabel: { fontSize: font.caption, textAlign: 'center' },
   four: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, padding: 12 },
-  fourItem: { width: '48.6%', minHeight: 88, borderRadius: 14, padding: 12, justifyContent: 'space-between', gap: 6 },
+  fourItem: { width: '48.6%', minHeight: 88, borderRadius: 14, padding: 12, gap: 6 },
   fourCount: { fontSize: font.title, fontWeight: '800' },
-  fourTitle: { fontSize: font.footnote, fontWeight: '700', lineHeight: 17 },
-  empty: { fontSize: font.body, lineHeight: 21, padding: 16 },
+  fourTitle: { fontSize: font.footnote, fontWeight: '700', lineHeight: 20 },
+  empty: { fontSize: font.body, lineHeight: 22, padding: 16 },
   graph: { padding: 16, gap: 10 },
   bars: { padding: 16, gap: 14 },
   bar: { gap: 6 },

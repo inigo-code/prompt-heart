@@ -25,10 +25,10 @@ export function Achievements({ list, theme }: { list: Achievement[]; theme: Them
               </View>
               {a.tier && <Text style={[styles.tier, { color: metal }]}>{TIER_NAMES[a.tier]}</Text>}
             </View>
-            <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
+            <Text style={[styles.name, { color: theme.text }]}>
               {a.name}
             </Text>
-            <Text style={[styles.goal, { color: theme.textMuted }]} numberOfLines={2}>
+            <Text style={[styles.goal, { color: theme.textMuted }]}>
               {done ? 'Every tier unlocked' : a.goal}
             </Text>
             {!done && (
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   medal: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   tier: { fontSize: font.caption, fontWeight: '800' },
   name: { fontSize: font.body, fontWeight: '800' },
-  goal: { fontSize: font.caption, lineHeight: 16, minHeight: 32 },
+  goal: { fontSize: font.caption, lineHeight: 18, minHeight: 36 },
   track: { height: 6, borderRadius: 3, overflow: 'hidden', marginTop: 4 },
   fill: { height: '100%', borderRadius: 3 },
 });

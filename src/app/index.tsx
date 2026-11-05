@@ -211,7 +211,7 @@ export default function HomeScreen() {
               hitSlop={8}
               accessibilityLabel={allVisibleSelected ? 'Select none' : 'Select all'}
             >
-              <Text style={[styles.selectAll, { color: theme.accent }]}>{allVisibleSelected ? 'None' : 'Select all'}</Text>
+              <Text style={[styles.selectAll, { color: theme.accentInk }]}>{allVisibleSelected ? 'None' : 'Select all'}</Text>
             </Pressable>
           </View>
         )}
@@ -356,14 +356,14 @@ export default function HomeScreen() {
             accessibilityLabel={selecting ? 'Done selecting' : 'Select prompts'}
             style={styles.selectBtn}
           >
-            <Ionicons name={selecting ? 'checkmark-done' : 'checkbox-outline'} size={16} color={selecting ? theme.accent : theme.textMuted} />
-            <Text style={[styles.toolbarText, { color: selecting ? theme.accent : theme.textMuted }]}>{selecting ? 'Done' : 'Select'}</Text>
+            <Ionicons name={selecting ? 'checkmark-done' : 'checkbox-outline'} size={16} color={selecting ? theme.accentInk : theme.textMuted} />
+            <Text style={[styles.toolbarText, { color: selecting ? theme.accentInk : theme.textMuted }]}>{selecting ? 'Done' : 'Select'}</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/categories')}
             accessibilityRole="button"
             accessibilityLabel="Manage categories"
-            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.accentSoft, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
           >
             <Ionicons name="folder-open-outline" size={15} color={theme.text} />
             <Text style={[styles.manageText, { color: theme.text }]}>Categories</Text>
@@ -442,8 +442,8 @@ export default function HomeScreen() {
         ListEmptyComponent={
           ready ? (
             <View style={styles.empty}>
-              <View style={[styles.emptyIcon, { backgroundColor: theme.accentSoft }]}>
-                <Ionicons name={query || filter.kind !== 'all' ? 'search' : 'albums-outline'} size={30} color={theme.accent} />
+              <View style={[styles.emptyIcon, { backgroundColor: theme.chip }]}>
+                <Ionicons name={query || filter.kind !== 'all' ? 'search' : 'albums-outline'} size={30} color={theme.text} />
               </View>
               <Text style={[styles.emptyTitle, { color: theme.text }]}>
                 {query || filter.kind !== 'all' ? 'Nothing matches' : 'No prompts yet'}
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: 8, paddingTop: 70, paddingHorizontal: 32 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   emptyTitle: { fontSize: font.headline, fontWeight: '700' },
-  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },
   emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 16, borderRadius: 21, marginTop: 10 },
   emptyBtnText: { fontSize: font.body, fontWeight: '700' },
   sheetDotWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },

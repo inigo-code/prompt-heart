@@ -11,7 +11,7 @@ type Props = {
   color?: string;
   /** Replaces the colour dot, e.g. an AI app badge. */
   leading?: ReactNode;
-  /** "action" chips (like "+ New category") are outlined so they don't read as filters. */
+  /** "action" chips (like "+ New category") are outlined so they don't read as filters. Only a chosen filter is filled. */
   variant?: 'filter' | 'action';
   theme: Theme;
   onPress: () => void;
@@ -32,14 +32,14 @@ export function Chip({ label, active, color, leading, variant = 'filter', theme,
       style={({ pressed }) => [
         styles.chip,
         action
-          ? { backgroundColor: 'transparent', borderWidth: 1.5, borderStyle: 'dashed', borderColor: theme.accent }
+          ? { backgroundColor: 'transparent', borderWidth: 1, borderColor: `${theme.textMuted}66` }
           : { backgroundColor: active ? theme.chipActive : theme.chip },
         leading ? styles.withLeading : null,
         pressed && { opacity: 0.75 },
       ]}
     >
       {leading ?? (color && <View style={[styles.dot, { backgroundColor: color }]} />)}
-      <Text style={[styles.label, { color: action ? theme.accent : active ? theme.chipActiveText : theme.text }]}>{label}</Text>
+      <Text style={[styles.label, { color: active ? theme.chipActiveText : theme.text }]}>{label}</Text>
     </Pressable>
   );
 }

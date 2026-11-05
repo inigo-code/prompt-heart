@@ -99,6 +99,19 @@ export function stripMarkdown(text: string): string {
     .trim();
 }
 
+/** A prompt as one readable run of text for cards: no Markdown or line breaks, and blanks in plain words. */
+export function previewText(text: string): string {
+  // Headings are labels like "Role"; run into the sentence after them they read as a mistake.
+  const body = text.replace(/^#{1,6} .*$/gm, '');
+  return stripMarkdown(body.trim() ? body : text)
+    .replace(/\[([^\]\n]+)\]\([^)\n]+\)/g, '$1')
+    .replace(/^\s*(?:[-*]|\d+\.) /gm, '')
+    .replace(/\{\{[^}|\n]+\|([^}\n]*)\}\}/g, '$1')
+    .replace(/\{\{([^}\n]+)\}\}/g, '[$1]')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** "5 Nov, 2:30 pm", with the year added when it isn't this year. */

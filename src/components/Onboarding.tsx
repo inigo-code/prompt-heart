@@ -92,7 +92,7 @@ function FillDemo({ theme }: { theme: Theme }) {
       <View style={[styles.preview, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <Text style={[styles.previewText, { color: theme.text }]}>
           {before}
-          <Text style={{ fontWeight: '800', backgroundColor: ready ? 'transparent' : theme.accentSoft }}>{ready ? topic.trim() : '{{topic}}'}</Text>
+          <Text style={{ fontWeight: '800', color: ready ? theme.text : theme.accentInk }}>{ready ? topic.trim() : '{{topic}}'}</Text>
           {after}
         </Text>
       </View>

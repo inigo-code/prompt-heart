@@ -45,11 +45,11 @@ export function Row({ theme, icon, leading, label, value, onPress, busy, destruc
       ]}
     >
       {leading ?? (
-        <View style={[styles.iconWrap, { backgroundColor: destructive ? theme.danger + '22' : theme.accentSoft }]}>
+        <View style={[styles.iconWrap, { backgroundColor: destructive ? theme.danger + '22' : theme.chip }]}>
           <Ionicons name={icon ?? 'ellipse-outline'} size={17} color={destructive ? theme.danger : theme.text} />
         </View>
       )}
-      <Text style={[styles.label, { color }]} numberOfLines={1}>
+      <Text style={[styles.label, { color }]} numberOfLines={2}>
         {label}
       </Text>
       {value !== undefined && (
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   section: { gap: 8 },
   sectionTitle: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 6 },
   group: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  footer: { fontSize: font.caption, paddingHorizontal: 6, lineHeight: 17 },
+  footer: { fontSize: font.caption, paddingHorizontal: 6, lineHeight: 18 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, minHeight: 52, paddingVertical: 8 },
   iconWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   label: { flex: 1, fontSize: font.body, fontWeight: '600' },

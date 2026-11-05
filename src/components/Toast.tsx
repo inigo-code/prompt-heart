@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 hide();
               }}
             >
-              <Text style={[styles.action, { color: theme.accent }]}>{action.label}</Text>
+              <Text style={[styles.action, { color: theme.toastText }]}>{action.label}</Text>
             </Pressable>
           )}
         </Animated.View>

@@ -11,6 +11,7 @@ import { deleteLocalImage } from '@/lib/images';
 import { font, useTheme } from '@/lib/theme';
 import { TRASH_DAYS, usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
+import { previewText } from '@/lib/format';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -51,11 +52,11 @@ export default function TrashScreen() {
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={{ flex: 1, gap: 3 }}>
-              <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+              <Text style={[styles.title, { color: theme.text }]}>
                 {item.title || 'Untitled'}
               </Text>
               <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={2}>
-                {item.body || (item.images.length ? `${item.images.length} image(s)` : '')}
+                {previewText(item.body) || (item.images.length === 1 ? '1 image' : item.images.length ? `${item.images.length} images` : '')}
               </Text>
               <Text style={[styles.days, { color: theme.textMuted }]}>{daysLeft(item)} days left</Text>
             </View>
@@ -64,7 +65,7 @@ export default function TrashScreen() {
                 restorePrompt(item.id);
                 toast('Restored');
               }}
-              style={[styles.btn, { backgroundColor: theme.accentSoft }]}
+              style={[styles.btn, { backgroundColor: theme.chip }]}
               accessibilityLabel={`Restore ${item.title}`}
             >
               <Ionicons name="arrow-undo-outline" size={18} color={theme.text} />
@@ -80,7 +81,7 @@ export default function TrashScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <View style={[styles.emptyIcon, { backgroundColor: theme.accentSoft }]}>
+            <View style={[styles.emptyIcon, { backgroundColor: theme.chip }]}>
               <Ionicons name="trash-outline" size={32} color={theme.text} />
             </View>
             <Text style={[styles.emptyTitle, { color: theme.text }]}>Trash is empty</Text>
@@ -124,13 +125,13 @@ const styles = StyleSheet.create({
   note: { fontSize: font.footnote, marginBottom: 4 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
   title: { fontSize: font.body, fontWeight: '700' },
-  body: { fontSize: font.footnote, lineHeight: 18 },
+  body: { fontSize: font.footnote, lineHeight: 20 },
   days: { fontSize: font.caption, fontWeight: '600', marginTop: 2 },
   btn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   empty: { alignItems: 'center', gap: 8, paddingTop: 96, paddingHorizontal: 24 },
   emptyIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   emptyTitle: { fontSize: font.headline, fontWeight: '700' },
-  emptyText: { fontSize: font.body, lineHeight: 21, textAlign: 'center', maxWidth: 300 },
+  emptyText: { fontSize: font.body, lineHeight: 22, textAlign: 'center', maxWidth: 300 },
   emptyBtn: { marginTop: 12, height: 44, paddingHorizontal: 20, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   emptyBtnText: { fontSize: font.body, fontWeight: '700' },
 });

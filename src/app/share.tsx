@@ -87,7 +87,7 @@ export default function ShareScreen() {
         <Pressable
           onPress={() => router.replace('/')}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.secondary, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+          style={({ pressed }) => [styles.homeBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Text style={[styles.btnText, { color: theme.text }]}>Go to prompts</Text>
         </Pressable>
@@ -103,9 +103,12 @@ export default function ShareScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
         <TextInput
           value={title}
-          onChangeText={setTitle}
+          onChangeText={(t) => setTitle(t.replace(/\n/g, ' '))}
           placeholder="Title"
           placeholderTextColor={theme.textMuted}
+          multiline
+          scrollEnabled={false}
+          submitBehavior="blurAndSubmit"
           style={[styles.title, { color: theme.text }]}
         />
 
@@ -167,6 +170,7 @@ const styles = StyleSheet.create({
   thumb: { width: 96, height: 96, borderRadius: 12 },
   body: { minHeight: 200, fontSize: font.body, lineHeight: 22, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 16 },
   actions: { flexDirection: 'row', gap: 10 },
+  homeBtn: { height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   secondary: { flex: 1, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   primary: { flex: 2, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   btnText: { fontSize: font.body, fontWeight: '700' },

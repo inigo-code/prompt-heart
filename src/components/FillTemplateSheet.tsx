@@ -40,12 +40,11 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
       style={[styles.sheet, { backgroundColor: theme.card, paddingBottom: insets.bottom + 16 }]}
       handle={<View style={[styles.grabber, { backgroundColor: theme.border }]} />}
     >
-      <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
-        {prompt.title || 'Untitled'}
-      </Text>
-      <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then copy.</Text>
-
       <ScrollView style={styles.fields} contentContainerStyle={styles.fieldsContent} keyboardShouldPersistTaps="handled">
+        <View>
+          <Text style={[styles.title, { color: theme.text }]}>{prompt.title || 'Untitled'}</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then copy.</Text>
+        </View>
         {variables.map((name, i) => (
           <View key={name} style={styles.field}>
             <Text style={[styles.label, { color: theme.textMuted }]}>{name}</Text>
@@ -62,7 +61,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
         ))}
 
         <Text style={[styles.label, { color: theme.textMuted }]}>Preview</Text>
-        <Text style={[styles.preview, { color: theme.text, backgroundColor: theme.bg }]} numberOfLines={8}>
+        <Text style={[styles.preview, { color: theme.text, backgroundColor: theme.bg }]}>
           {filled}
         </Text>
       </ScrollView>
@@ -87,7 +86,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
           accessibilityLabel="Copy filled prompt"
         >
           <Text style={[styles.btnText, { color: theme.accentText }]}>
-            {remaining > 0 ? `${actionLabel} (${remaining} blank)` : actionLabel}
+            {remaining > 0 ? `${actionLabel} (${remaining} ${remaining === 1 ? 'blank' : 'blanks'})` : actionLabel}
           </Text>
         </Tap>
       </View>
@@ -99,13 +98,13 @@ const styles = StyleSheet.create({
   sheet: { maxHeight: '85%', flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
   grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
   title: { fontSize: font.headline, fontWeight: '800' },
-  subtitle: { fontSize: font.footnote, marginTop: 2, marginBottom: 12 },
+  subtitle: { fontSize: font.footnote, marginTop: 2 },
   fields: { flexGrow: 0, flexShrink: 1 },
   fieldsContent: { gap: 12, paddingBottom: 12 },
   field: { gap: 6 },
   label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   input: { fontSize: font.body, minHeight: 44, maxHeight: 140, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10 },
-  preview: { fontSize: font.body, lineHeight: 20, borderRadius: 12, padding: 12 },
+  preview: { fontSize: font.body, lineHeight: 22, borderRadius: 12, padding: 12 },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 4 },
   btn: { flex: 1, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   primary: { flex: 1.6 },

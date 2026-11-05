@@ -7,13 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/AppText';
 import { useToast } from '@/components/Toast';
+import { formatStamp, previewText } from '@/lib/format';
 import { font, useTheme } from '@/lib/theme';
 import { useHistory } from '@/store/HistoryProvider';
 import type { Version } from '@/store/HistoryProvider';
 import { usePromptStore } from '@/store/PromptStore';
-
-const when = (at: number) =>
-  new Date(at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 /** Earlier versions of one prompt: tap to preview, then copy or restore. */
 export default function HistoryScreen() {
@@ -29,7 +27,7 @@ export default function HistoryScreen() {
 
   const restore = (v: Version) => {
     history.restore(id, v);
-    toast(`Restored the version from ${when(v.at)}`);
+    toast(`Restored the version from ${formatStamp(v.at)}`);
     if (router.canGoBack()) router.back();
   };
 
@@ -42,7 +40,7 @@ export default function HistoryScreen() {
       ListHeaderComponent={
         <View style={[styles.current, { backgroundColor: theme.accentSoft, borderColor: theme.accent + '55' }]}>
           <Text style={[styles.label, { color: theme.textMuted }]}>Current</Text>
-          <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+          <Text style={[styles.title, { color: theme.text }]}>
             {prompt?.title || 'Untitled'}
           </Text>
           <Text style={[styles.meta, { color: theme.textMuted }]}>
@@ -72,14 +70,14 @@ export default function HistoryScreen() {
           >
             <View style={styles.row}>
               <View style={[styles.dot, { backgroundColor: index === 0 ? theme.accent : theme.textMuted }]} />
-              <Text style={[styles.time, { color: theme.text }]}>{when(item.at)}</Text>
+              <Text style={[styles.time, { color: theme.text }]}>{formatStamp(item.at)}</Text>
               <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={theme.textMuted} />
             </View>
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={expanded ? undefined : 1}>
+            <Text style={[styles.title, { color: theme.text }]}>
               {item.title || 'Untitled'}
             </Text>
             <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={expanded ? undefined : 2}>
-              {item.body}
+              {expanded ? item.body : previewText(item.body)}
             </Text>
             {expanded && (
               <View style={styles.actions}>
@@ -121,11 +119,11 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   time: { flex: 1, fontSize: font.footnote, fontWeight: '700' },
   title: { fontSize: font.body, fontWeight: '700' },
-  body: { fontSize: font.body, lineHeight: 20 },
+  body: { fontSize: font.body, lineHeight: 22 },
   actions: { flexDirection: 'row', gap: 8, marginTop: 6 },
   btn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, height: 44, borderRadius: 12 },
   primary: { flex: 1, justifyContent: 'center' },
   btnText: { fontSize: font.body, fontWeight: '700' },
   empty: { alignItems: 'center', gap: 10, paddingTop: 50, paddingHorizontal: 24 },
-  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 20 },
+  emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },
 });

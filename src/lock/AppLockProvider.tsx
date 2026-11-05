@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   icon: { width: 88, height: 88, borderRadius: 22 },
   texts: { alignItems: 'center', gap: 6 },
   title: { fontSize: font.title, fontWeight: '800' },
-  body: { fontSize: font.body, textAlign: 'center', lineHeight: 21 },
+  body: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },
   button: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 48, paddingHorizontal: 28, borderRadius: 24, marginTop: 8 },
   buttonText: { fontSize: font.headline, fontWeight: '700' },
   message: { fontSize: font.body, textAlign: 'center' },

@@ -7,6 +7,7 @@ import { Text } from '@/components/AppText';
 import { APP_NAME } from '@/lib/app';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
+import { formatStamp } from '@/lib/format';
 
 // Updates download on launch and apply on the next restart; this lets you check and apply one right away.
 // The update APIs reject in Expo Go and dev builds, so the button only shows in real builds.
@@ -15,7 +16,7 @@ const canUpdate = Updates.isEnabled && !__DEV__;
 function describeRunning() {
   if (!Updates.isEnabled || __DEV__) return 'Development';
   if (Updates.isEmbeddedLaunch || !Updates.updateId) return 'Built-in version';
-  const when = Updates.createdAt ? Updates.createdAt.toLocaleString() : '';
+  const when = Updates.createdAt ? formatStamp(Updates.createdAt.getTime()) : '';
   return `Update ${Updates.updateId.slice(0, 8)}${when ? ` · ${when}` : ''}`;
 }
 

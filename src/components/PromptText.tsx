@@ -49,8 +49,8 @@ function inline(text: string, theme: Theme): ReactNode[] {
     if (at > last) out.push(text.slice(last, at));
     const key = out.length;
     if (part.startsWith('**')) out.push(<Text key={key} style={styles.bold}>{part.slice(2, -2)}</Text>);
-    else if (part.startsWith('`')) out.push(<Text key={key} style={[styles.mono, { backgroundColor: theme.chip }]}>{part.slice(1, -1)}</Text>);
-    else if (part.startsWith('{{')) out.push(<Text key={key} style={[styles.variable, { backgroundColor: theme.accentSoft }]}>{part}</Text>);
+    else if (part.startsWith('`')) out.push(<Text key={key} style={styles.mono}>{part.slice(1, -1)}</Text>);
+    else if (part.startsWith('{{')) out.push(<Text key={key} style={[styles.variable, { color: theme.accentInk }]}>{part}</Text>);
     else out.push(<Text key={key} style={styles.italic}>{part.slice(1, -1)}</Text>);
     last = at + part.length;
   }
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   marker: { minWidth: 16, textAlign: 'right' },
   quote: { borderLeftWidth: 3, paddingLeft: 12 },
   code: { borderRadius: 10, padding: 12, marginVertical: 4 },
-  codeText: { fontSize: font.body, lineHeight: 21 },
+  codeText: { fontSize: font.body, lineHeight: 22 },
   bold: { fontWeight: '800' },
   italic: { fontStyle: 'italic' },
   mono: { fontFamily: 'monospace', fontSize: font.body },

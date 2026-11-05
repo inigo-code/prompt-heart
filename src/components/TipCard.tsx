@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8, marginBottom: 4 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { flex: 1, fontSize: font.body, fontWeight: '800' },
-  body: { fontSize: font.footnote, lineHeight: 19 },
+  body: { fontSize: font.footnote, lineHeight: 20 },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 2 },
   btn: { paddingHorizontal: 16, height: 32, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   btnText: { fontSize: font.footnote, fontWeight: '700' },

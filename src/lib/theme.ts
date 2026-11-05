@@ -7,12 +7,13 @@ const light = {
   dark: false,
   bg: '#F6F4EF',
   card: '#FFFFFF',
-  cardPinned: '#FFF8E8',
   elevated: '#FFFFFF',
   text: '#1C1A17',
   textMuted: '#76706A',
   border: '#E5E0D7',
   accent: '#D99A1E',
+  /** The accent as text or a small icon; readable on cards and backgrounds. */
+  accentInk: '#8F5E00',
   accentText: '#1C1A17',
   accentSoft: '#F7E7C4',
   chip: '#ECE8E0',
@@ -28,12 +29,12 @@ const dark: typeof light = {
   dark: true,
   bg: '#121110',
   card: '#1C1B19',
-  cardPinned: '#272217',
   elevated: '#232220',
   text: '#F2EFEA',
   textMuted: '#9C968E',
   border: '#2D2A26',
   accent: '#F2B84B',
+  accentInk: '#F2B84B',
   accentText: '#121110',
   accentSoft: '#3A2F17',
   chip: '#272522',
@@ -79,10 +80,13 @@ export const ACCENTS: Record<AccentKey, AccentSpec> = {
   violet: { label: 'Violet', light: ['#6E52D9', '#FFFFFF', '#E5DFFA'], dark: ['#A693FF', '#16112B', '#29224A'] },
 };
 
+// The light-theme accents as text. Amber and green are too pale on white at their fill colour.
+const INK_ON_LIGHT: Record<AccentKey, string> = { amber: '#8F5E00', blue: '#3467D6', green: '#1E7A50', rose: '#C93D70', violet: '#6E52D9' };
+
 export function buildTheme(isDark: boolean, accent: AccentKey): Theme {
   const base = isDark ? dark : light;
   const [a, aText, aSoft] = ACCENTS[accent][isDark ? 'dark' : 'light'];
-  return { ...base, accent: a, accentText: aText, accentSoft: aSoft, cardPinned: isDark ? aSoft : `${aSoft}99` };
+  return { ...base, accent: a, accentInk: isDark ? a : INK_ON_LIGHT[accent], accentText: aText, accentSoft: aSoft };
 }
 
 export function useTheme(): Theme {
