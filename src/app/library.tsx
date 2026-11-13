@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, TextInput } from '@/components/AppText';
 import { Chip } from '@/components/Chip';
 import { useToast } from '@/components/Toast';
-import { LIBRARY_CATEGORIES, LIBRARY_PROMPTS } from '@/library/prompts';
+import { LIBRARY_CATEGORIES, LIBRARY_ID_PREFIX, LIBRARY_PROMPTS } from '@/library/prompts';
 import type { LibraryCategory, LibraryPrompt } from '@/library/prompts';
 import { extractVariables } from '@/lib/templates';
 import { font, useTheme } from '@/lib/theme';
@@ -21,7 +21,7 @@ const CATEGORY: Record<string, LibraryCategory> = Object.fromEntries(LIBRARY_CAT
 
 /** A library entry shaped like a prompt, for the copy flow (fill-in sheet, clipboard). It isn't stored. */
 const asPrompt = (p: LibraryPrompt): Prompt => ({
-  id: `library:${p.id}`,
+  id: `${LIBRARY_ID_PREFIX}${p.id}`,
   title: p.title,
   body: p.body,
   folderId: null,

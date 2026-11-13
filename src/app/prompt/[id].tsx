@@ -23,7 +23,7 @@ import { font, useTheme } from '@/lib/theme';
 import { createUndo, textChange } from '@/lib/undo';
 import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
-import { useCopyPrompt } from '@/lib/useCopyPrompt';
+import { canShare, useCopyPrompt, useSharePrompt } from '@/lib/useCopyPrompt';
 import { useSettings } from '@/settings/SettingsProvider';
 import { useHistory } from '@/store/HistoryProvider';
 import { normalizeTag, usePromptStore } from '@/store/PromptStore';
@@ -55,6 +55,7 @@ function PromptEditor() {
   const { settings } = useSettings();
   const store = usePromptStore();
   const copy = useCopyPrompt();
+  const share = useSharePrompt();
   const history = useHistory();
   // One version is saved per editing session, right before the first change to the text.
   const snapped = useRef(false);
@@ -496,6 +497,7 @@ function PromptEditor() {
             : undefined
         }
         actions={[
+          ...(canShare && prompt ? [{ label: 'Share', icon: 'share-social-outline' as const, onPress: () => share(prompt) }] : []),
           {
             icon: 'time-outline',
             label: `Version history${id && history.versionsFor(id).length ? ` (${history.versionsFor(id).length})` : ''}`,

@@ -2,3 +2,5 @@
 // the background, can read the same data without loading them.
 export const PROMPTS_STORAGE_KEY = 'prompt-notes/v1';
 export const SETTINGS_STORAGE_KEY = 'promptheart/settings';
+/** What was last typed into each prompt's blanks. On this phone only; never synced. */
+export const BLANKS_STORAGE_KEY = 'promptheart/blanks';

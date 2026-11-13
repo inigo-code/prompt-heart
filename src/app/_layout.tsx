@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { Onboarding } from '@/components/Onboarding';
+import { StoreTrouble } from '@/components/StoreTrouble';
 import { ToastProvider } from '@/components/Toast';
 import { UpdatePrompt } from '@/components/UpdatePrompt';
 import { useTheme } from '@/lib/theme';
@@ -19,7 +20,7 @@ import { ActivityProvider } from '@/profile/ActivityProvider';
 import { ProfileProvider } from '@/profile/ProfileProvider';
 import { SettingsProvider, useSettings } from '@/settings/SettingsProvider';
 import { HistoryProvider } from '@/store/HistoryProvider';
-import { PromptStoreProvider } from '@/store/PromptStore';
+import { PromptStoreProvider, usePromptStore } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 import { useWidgetSync } from '@/widget/sync';
 
@@ -67,8 +68,9 @@ function Navigator() {
   useEnsureAiFolders();
   useWidgetSync();
   const { settings, ready } = useSettings();
+  const { loadFailed } = usePromptStore();
   // Over the home screen only, so a link or a shared item that opened the app isn't covered.
-  const welcome = ready && !settings.onboarded && pathname === '/';
+  const welcome = ready && !settings.onboarded && pathname === '/' && !loadFailed;
 
   // On Android, shared content arrives through the native module rather than a deep link,
   // so open the Share screen whenever something has been shared and not yet handled.
@@ -79,7 +81,7 @@ function Navigator() {
   return (
     <>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />
-      <UpdatePrompt />
+      {!loadFailed && <UpdatePrompt />}
       <Stack
         screenOptions={{
           animation: 'ios_from_right',
@@ -104,6 +106,8 @@ function Navigator() {
         <Stack.Screen name="share" options={{ title: 'Save prompt' }} />
       </Stack>
       {welcome && <Onboarding />}
+      {/* Over everything else (but under App lock), so the samples never stand in for your prompts. */}
+      <StoreTrouble />
     </>
   );
 }

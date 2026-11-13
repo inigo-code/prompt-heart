@@ -6,6 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 
 import { IMAGE_BUCKET, imagesSupported } from '@/lib/images';
+import { readWithRetries } from '@/lib/readRetry';
 import { useSync } from '@/sync/SyncProvider';
 import { supabase } from '@/sync/supabase';
 
@@ -68,13 +69,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => raw && setProfile({ ...EMPTY, ...(JSON.parse(raw) as Partial<LocalProfile>) }))
-      .catch(() => {})
-      .finally(() => {
+    readWithRetries(() => AsyncStorage.getItem(STORAGE_KEY)).then(
+      (raw) => {
+        if (loaded.current) return; // cleared while this was loading
+        try {
+          if (raw) setProfile({ ...EMPTY, ...(JSON.parse(raw) as Partial<LocalProfile>) });
+        } catch {
+          // Unreadable: start empty.
+        }
         loaded.current = true;
         setReady(true);
-      });
+      },
+      // The phone couldn't read the saved profile. Nothing is saved over it, and `ready` stays false, so the
+      // account isn't matched against an empty profile (that could upload or delete a photo).
+      () => {},
+    );
   }, []);
 
   useEffect(() => {
@@ -174,9 +183,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
   }, [userId, updateProfile]);
 
+  // Clearing saves the empty profile even if the saved one couldn't be read, since removing it is the point.
   const clear = useCallback(() => {
     deleteAvatarFiles();
-    setProfile(EMPTY);
+    loaded.current = true;
+    setReady(true);
+    setProfile({ ...EMPTY });
   }, []);
 
   const email = user?.email ?? null;

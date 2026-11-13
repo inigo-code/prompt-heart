@@ -23,7 +23,7 @@ import { greeting, useHour } from '@/lib/greeting';
 import { font, shadow, useTheme } from '@/lib/theme';
 import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
-import { useCopyPrompt } from '@/lib/useCopyPrompt';
+import { canShare, useCopyPrompt, useSharePrompt } from '@/lib/useCopyPrompt';
 import { LIBRARY_PROMPTS } from '@/library/prompts';
 import { useProfile } from '@/profile/ProfileProvider';
 import { useSettings } from '@/settings/SettingsProvider';
@@ -70,6 +70,7 @@ const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
           : undefined;
 
 const ALL: Filter = { kind: 'all' };
+const filterKey = (f: Filter) => (f.kind === 'folder' ? `folder:${f.id}` : f.kind === 'tag' ? `tag:${f.tag}` : f.kind);
 const sameFilter = (a: Filter, b: Filter) => JSON.stringify(a) === JSON.stringify(b);
 
 export default function HomeScreen() {
@@ -80,6 +81,7 @@ export default function HomeScreen() {
   const { ready, prompts, allTags, togglePin, duplicatePrompt, deletePrompt, restorePrompt, movePrompts, tagPrompts, setPinned, deletePrompts, restorePrompts } =
     usePromptStore();
   const copy = useCopyPrompt();
+  const share = useSharePrompt();
   const { status: syncStatus, syncNow, progress } = useSync();
   const [pulling, setPulling] = useState(false);
   const profile = useProfile();
@@ -114,13 +116,20 @@ export default function HomeScreen() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase().replace(/^#/, '');
+    // Typing a category's name finds its prompts (only categories that show on the cards).
+    const categoryMatches = new Set(q ? folders.filter((f) => f.name.toLowerCase().includes(q)).map((f) => f.id) : []);
     const list = prompts.filter((p) => {
       if (filter.kind === 'pinned' && !p.pinned) return false;
       if (filter.kind === 'copied' && !p.lastCopiedAt) return false;
       if (filter.kind === 'folder' && p.folderId !== filter.id) return false;
       if (filter.kind === 'tag' && !p.tags.includes(filter.tag)) return false;
       if (!q) return true;
-      return p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q) || p.tags.some((t) => t.includes(q));
+      return (
+        p.title.toLowerCase().includes(q) ||
+        p.body.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.includes(q)) ||
+        (p.folderId !== null && categoryMatches.has(p.folderId))
+      );
     });
     if (filter.kind === 'copied') return list.sort((a, b) => (b.lastCopiedAt ?? 0) - (a.lastCopiedAt ?? 0));
     return list.sort((a, b) => {
@@ -129,7 +138,19 @@ export default function HomeScreen() {
       if (settings.sort === 'title') return (a.title || 'Untitled').localeCompare(b.title || 'Untitled');
       return b.updatedAt - a.updatedAt;
     });
-  }, [prompts, query, filter, settings.sort]);
+  }, [prompts, folders, query, filter, settings.sort]);
+
+  // Prompts that a search or filter hides drop out of the selection, so Move, Tag, Pin and Delete
+  // only ever act on prompts you can see.
+  const [shownFor, setShownFor] = useState(visible);
+  if (shownFor !== visible) {
+    setShownFor(visible);
+    if (selected && selected.length > 0) {
+      const shown = new Set(visible.map((p) => p.id));
+      const kept = selected.filter((id) => shown.has(id));
+      if (kept.length !== selected.length) setSelected(kept);
+    }
+  }
 
   const openPrompt = useCallback((p: Prompt) => router.push({ pathname: '/prompt/[id]', params: { id: p.id } }), []);
 
@@ -189,7 +210,8 @@ export default function HomeScreen() {
 
   const chip = (label: string, f: Filter, color?: string, leading?: ReactNode) => (
     <Chip
-      key={label}
+      // Keyed by what it filters: two categories can share a name, or be called "All" or "Pinned".
+      key={filterKey(f)}
       label={label}
       color={color}
       leading={leading}
@@ -340,48 +362,39 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
+      {/* One style for every button in the row, with even gaps, so the sort label never runs into Select. */}
       <View style={styles.toolbar}>
-        <Pressable
-          onPress={() => update({ sort: SORTS[settings.sort].next })}
-          disabled={filter.kind === 'copied'}
-          style={styles.sortBtn}
-          hitSlop={12}
-          accessibilityRole="button"
+        <ToolButton
+          theme={theme}
+          icon="swap-vertical"
+          label={filter.kind === 'copied' ? 'Last copied' : SORTS[settings.sort].label}
           accessibilityLabel="Change sort order"
-        >
-          <Ionicons name="swap-vertical" size={15} color={theme.textMuted} />
-          <Text style={[styles.toolbarText, { color: theme.textMuted }]}>
-            {filter.kind === 'copied' ? 'Last copied' : SORTS[settings.sort].label}
-          </Text>
-        </Pressable>
+          disabled={filter.kind === 'copied'}
+          shrink
+          onPress={() => update({ sort: SORTS[settings.sort].next })}
+        />
         <View style={styles.toolbarRight}>
-          <Pressable
-            onPress={() => (selecting ? exitSelect() : setSelected([]))}
-            hitSlop={12}
-            accessibilityRole="button"
+          <ToolButton
+            theme={theme}
+            icon={selecting ? 'checkmark-done' : 'checkbox-outline'}
+            label={selecting ? 'Done' : 'Select'}
             accessibilityLabel={selecting ? 'Done selecting' : 'Select prompts'}
-            style={styles.selectBtn}
-          >
-            <Ionicons name={selecting ? 'checkmark-done' : 'checkbox-outline'} size={16} color={selecting ? theme.accentInk : theme.textMuted} />
-            <Text style={[styles.toolbarText, { color: selecting ? theme.accentInk : theme.textMuted }]}>{selecting ? 'Done' : 'Select'}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/categories')}
-            accessibilityRole="button"
+            active={selecting}
+            onPress={() => (selecting ? exitSelect() : setSelected([]))}
+          />
+          <ToolButton
+            theme={theme}
+            icon="folder-open-outline"
+            label="Categories"
             accessibilityLabel="Manage categories"
-            style={({ pressed }) => [styles.manageBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
-          >
-            <Ionicons name="folder-open-outline" size={15} color={theme.text} />
-            <Text style={[styles.manageText, { color: theme.text }]}>Categories</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => update({ layout: grid ? 'list' : 'grid' })}
-            hitSlop={12}
-            accessibilityRole="button"
+            onPress={() => router.push('/categories')}
+          />
+          <ToolButton
+            theme={theme}
+            icon={grid ? 'list-outline' : 'grid-outline'}
             accessibilityLabel={grid ? 'Show as list' : 'Show as grid'}
-          >
-            <Ionicons name={grid ? 'list-outline' : 'grid-outline'} size={18} color={theme.textMuted} />
-          </Pressable>
+            onPress={() => update({ layout: grid ? 'list' : 'grid' })}
+          />
         </View>
       </View>
 
@@ -459,6 +472,21 @@ export default function HomeScreen() {
                   ? 'Try a different search or filter.'
                   : 'Tap + to write one, or share text to ' + APP_NAME + ' from any app.'}
               </Text>
+              {(query || filter.kind !== 'all') && (
+                <Pressable
+                  onPress={() => {
+                    setQuery('');
+                    setFilter(ALL);
+                  }}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+                >
+                  <Ionicons name="close-circle-outline" size={16} color={theme.text} />
+                  <Text style={[styles.emptyBtnText, { color: theme.text }]}>
+                    {query && filter.kind !== 'all' ? 'Clear search and filter' : query ? 'Clear search' : 'Show all prompts'}
+                  </Text>
+                </Pressable>
+              )}
               {!query && filter.kind === 'all' && (
                 <Pressable
                   onPress={() => router.push('/library')}
@@ -555,6 +583,7 @@ export default function HomeScreen() {
           menuFor
             ? [
                 { label: 'Copy', icon: 'copy-outline', onPress: () => copy(menuFor) },
+                ...(canShare ? [{ label: 'Share', icon: 'share-social-outline' as const, onPress: () => share(menuFor) }] : []),
                 { label: menuFor.pinned ? 'Unpin' : 'Pin to top', icon: menuFor.pinned ? 'pin' : 'pin-outline', onPress: () => togglePin(menuFor.id) },
                 { label: 'Select multiple…', icon: 'checkbox-outline', onPress: () => setSelected([menuFor.id]) },
                 { label: 'Duplicate', icon: 'duplicate-outline', onPress: () => duplicatePrompt(menuFor.id) },
@@ -586,6 +615,37 @@ function BulkButton({ theme, icon, label, onPress, disabled, danger }: {
     >
       <Ionicons name={icon} size={22} color={color} />
       <Text style={[styles.bulkText, { color }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function ToolButton({ theme, icon, label, accessibilityLabel, active, disabled, shrink, onPress }: {
+  theme: ReturnType<typeof useTheme>;
+  icon: keyof typeof Ionicons.glyphMap;
+  label?: string;
+  accessibilityLabel: string;
+  active?: boolean;
+  disabled?: boolean;
+  /** Lets a long label give way (with an ellipsis) on narrow phones or with large text. */
+  shrink?: boolean;
+  onPress: () => void;
+}) {
+  const color = active ? theme.accentInk : theme.textMuted;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={({ pressed }) => [styles.toolBtn, shrink && styles.toolBtnShrink, { opacity: pressed ? 0.6 : 1 }]}
+    >
+      <Ionicons name={icon} size={16} color={color} />
+      {label && (
+        <Text style={[styles.toolbarText, { color }]} numberOfLines={1}>
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -627,8 +687,7 @@ const styles = StyleSheet.create({
   aiPill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 4, paddingRight: 12, height: 34, borderRadius: 17, borderWidth: StyleSheet.hairlineWidth },
   aiPillText: { fontSize: font.footnote, fontWeight: '700' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
-  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 6 },
-  sortBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 },
+  toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 16, paddingVertical: 6 },
   hidden: { display: 'none' },
   progress: { marginHorizontal: 16, marginTop: 10, padding: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -639,7 +698,6 @@ const styles = StyleSheet.create({
   selectClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   selectCount: { flex: 1, fontSize: font.title, fontWeight: '800' },
   selectAll: { fontSize: font.body, fontWeight: '700' },
-  selectBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   bulkBar: {
     position: 'absolute',
     left: 16,
@@ -653,12 +711,12 @@ const styles = StyleSheet.create({
   },
   bulkBtn: { alignItems: 'center', gap: 2, paddingHorizontal: 12, paddingVertical: 4 },
   bulkText: { fontSize: font.caption, fontWeight: '700' },
-  toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: 10 },
-  manageText: { fontSize: font.footnote, fontWeight: '700' },
+  toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 },
+  toolBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 32 },
+  toolBtnShrink: { flexShrink: 1, minWidth: 0 },
   aiBarLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 2 },
   aiBarLabelText: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  toolbarText: { fontSize: font.footnote, fontWeight: '600' },
+  toolbarText: { fontSize: font.footnote, fontWeight: '600', flexShrink: 1 },
   list: { paddingHorizontal: 16, gap: 12, paddingTop: 4 },
   gridRow: { gap: 12 },
   empty: { alignItems: 'center', gap: 8, paddingTop: 70, paddingHorizontal: 32 },

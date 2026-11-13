@@ -242,7 +242,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, [ready, userId, meta.userId, resetForUser]);
 
   const runSync = useCallback(async () => {
-    if (!supabase || !userId) return;
+    // Until the saved prompts are read (or while reading them failed), the store only holds the samples.
+    if (!supabase || !userId || !ready) return;
     if (running.current) {
       again.current = true;
       return;
@@ -273,7 +274,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       autoSync.finished();
       if (imagesToRetry > 0) autoSync.request(RETRY_MS);
     }
-  }, [userId, autoSync]);
+  }, [userId, ready, autoSync]);
 
   useEffect(() => {
     runSyncRef.current = runSync;

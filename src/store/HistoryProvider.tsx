@@ -2,14 +2,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { readWithRetries } from '@/lib/readRetry';
+
 import { usePromptStore } from './PromptStore';
+import { MAX_VERSIONS, mergeHistory, parseHistory, pruneHistory } from './versions';
+import type { History, Version } from './versions';
+
+export type { Version };
 
 // Earlier versions of each prompt's text, kept on this device (not synced, to keep sync light).
 const STORAGE_KEY = 'promptheart/history';
-const MAX_VERSIONS = 25;
-
-export type Version = { at: number; title: string; body: string };
-type History = Record<string, Version[]>;
 
 type HistoryContext = {
   /** Every prompt's versions (for the profile's activity). */
@@ -31,14 +33,22 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
   const store = usePromptStore();
   const [history, setHistory] = useState<History>({});
   const loaded = useRef(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => raw && setHistory(JSON.parse(raw) as History))
-      .catch(() => {})
-      .finally(() => {
+    readWithRetries(() => AsyncStorage.getItem(STORAGE_KEY)).then(
+      (raw) => {
+        if (loaded.current) return; // erased while this was loading
+        // Versions kept in the moments before this loaded are added, not lost.
+        const saved = parseHistory(raw);
+        setHistory((now) => mergeHistory(saved, now));
         loaded.current = true;
-      });
+        setReady(true);
+      },
+      // The phone couldn't read the saved history. New versions still show for now, but nothing is saved,
+      // so the saved history isn't replaced by this session's few.
+      () => {},
+    );
   }, []);
 
   useEffect(() => {
@@ -49,6 +59,16 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
 
   const getSnapshot = store.sync.getSnapshot;
   const updatePrompt = store.updatePrompt;
+  const { ready: storeReady, pruneSafe, prompts, trash } = store;
+
+  // A prompt deleted for good (Empty Trash, after its time in Trash, or on another device) takes its old
+  // versions with it, so its text doesn't stay on the phone. Prompts in Trash keep theirs.
+  useEffect(() => {
+    if (!storeReady || !pruneSafe || !ready) return;
+    const known = new Set([...prompts, ...trash].map((p) => p.id));
+    // Async, as it reacts to a change in the prompt store (like the profile's reaction to the account).
+    void Promise.resolve().then(() => setHistory((h) => pruneHistory(h, (id) => known.has(id))));
+  }, [storeReady, pruneSafe, ready, prompts, trash]);
 
   const snapshot = useCallback(
     (promptId: string) => {
@@ -81,7 +101,12 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const clearAll = useCallback(() => setHistory({}), []);
+  // Erasing saves the empty history even if the saved one couldn't be read, since removing it is the point.
+  const clearAll = useCallback(() => {
+    loaded.current = true;
+    setReady(true);
+    setHistory({});
+  }, []);
 
   const value = useMemo<HistoryContext>(
     () => ({ all: history, versionsFor: (id) => history[id] ?? [], snapshot, restore, forget, clearAll }),

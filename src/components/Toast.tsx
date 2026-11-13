@@ -7,7 +7,11 @@ import { Text } from '@/components/AppText';
 import { font, useTheme } from '@/lib/theme';
 
 type ToastAction = { label: string; onPress: () => void };
-type ShowToast = (message: string, action?: ToastAction) => void;
+/** `duration` (in ms) is for messages that need longer to read, such as a warning; most toasts leave it out. */
+type ShowToast = (message: string, action?: ToastAction, duration?: number) => void;
+
+/** For warnings someone should have time to read. */
+export const LONG_TOAST_MS = 6000;
 
 const ToastCtx = createContext<ShowToast>(() => {});
 
@@ -25,14 +29,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [opacity]);
 
   const show = useCallback<ShowToast>(
-    (msg, act) => {
+    (msg, act, duration) => {
       setMessage(msg);
       setAction(act ?? null);
       setVisible(true);
       if (timer.current) clearTimeout(timer.current);
       Animated.timing(opacity, { toValue: 1, duration: 180, easing: Easing.bezier(0.23, 1, 0.32, 1), useNativeDriver: true }).start();
       // Toasts with an action (Undo) stay up longer so there's time to tap it.
-      timer.current = setTimeout(hide, act ? 4000 : 1400);
+      timer.current = setTimeout(hide, duration ?? (act ? 4000 : 1400));
     },
     [opacity, hide],
   );

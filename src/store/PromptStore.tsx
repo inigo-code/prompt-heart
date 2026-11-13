@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { newId } from '@/lib/id';
 import { deleteLocalImage } from '@/lib/images';
+import { readWithRetries } from '@/lib/readRetry';
 import { PROMPTS_STORAGE_KEY } from '@/lib/storageKeys';
 
 import { clearPending, emptySyncMeta, mergeBackup, mergePrompts, mergeRecords, migrate, promptVersion } from './merge';
@@ -13,8 +14,8 @@ import { seedData } from './seed';
 import type { Folder, Prompt, PromptDraft, StoreData, SyncMeta } from './types';
 
 // Kept from the app's first name so existing installs keep their data.
-const STORAGE_KEY = PROMPTS_STORAGE_KEY;
 /** The home-screen widget reads prompts straight from here. */
+const STORAGE_KEY = PROMPTS_STORAGE_KEY;
 const UNREADABLE_KEY = 'prompt-notes/unreadable';
 
 /** Deleted prompts stay in Trash this long before they're hidden for good. */
@@ -59,7 +60,20 @@ function orphanedImages(prompts: Prompt[], candidates: string[]): string[] {
 const isPurged = (p: Prompt) => p.deletedAt !== null && !p.title && !p.body && p.images.length === 0;
 
 type PromptStore = {
+  /** False until saved prompts are read, and stays false while `loadFailed`. */
   ready: boolean;
+  /** The phone couldn't read the saved prompts. Nothing is saved or synced until `retryLoad` works. */
+  loadFailed: boolean;
+  /** Reads the saved prompts again after a failed read. */
+  retryLoad: () => Promise<void>;
+  /** Goes up by one each time saving starts failing (not on every failed try), so the app can say so once. */
+  saveFailures: number;
+  /**
+   * True once the prompts here are known to be the real ones, so data kept for other prompts (version
+   * history, typed blanks) can be dropped. False while unreadable prompts are set aside, since the
+   * samples standing in for them would make every real prompt look deleted.
+   */
+  pruneSafe: boolean;
   prompts: Prompt[];
   folders: Folder[];
   /** Deleted prompts from the last TRASH_DAYS days, newest first. */
@@ -121,6 +135,9 @@ const Ctx = createContext<PromptStore | null>(null);
 export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<StoreData>(seedData);
   const [ready, setReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [saveFailures, setSaveFailures] = useState(0);
+  const [pruneSafe, setPruneSafe] = useState(false);
   // Bumped on every local edit (not on merges from the server), so sync knows when to upload.
   const [localRevision, setLocalRevision] = useState(0);
   // Trash cutoff is computed from launch time; a 30-day window doesn't need to tick live.
@@ -128,23 +145,34 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   const loaded = useRef(false);
   const snapshot = useRef(data);
 
+  const read = useCallback(
+    () =>
+      readWithRetries(() => AsyncStorage.getItem(STORAGE_KEY)).then(
+        async (raw) => {
+          try {
+            setData(raw ? migrate(JSON.parse(raw)) : seedData);
+            // Prompts set aside as unreadable on an earlier launch are still there: keep what belongs to them.
+            setPruneSafe((await AsyncStorage.getItem(UNREADABLE_KEY).catch(() => 'unknown')) === null);
+          } catch {
+            // Unreadable: start from the samples, but keep the original so the next save can't destroy it.
+            if (raw) await AsyncStorage.setItem(UNREADABLE_KEY, raw).catch(() => {});
+            setData(seedData);
+            setPruneSafe(false);
+          }
+          loaded.current = true;
+          setLoadFailed(false);
+          setReady(true);
+        },
+        // The phone couldn't read storage at all, so we don't know what's there. Saving now would put the
+        // samples over the real prompts, so saving and sync stay off until a read works.
+        () => setLoadFailed(true),
+      ),
+    [],
+  );
+
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then(async (raw) => {
-        try {
-          setData(raw ? migrate(JSON.parse(raw)) : seedData);
-        } catch {
-          // Unreadable: start from the samples, but keep the original so the next save can't destroy it.
-          if (raw) await AsyncStorage.setItem(UNREADABLE_KEY, raw).catch(() => {});
-          setData(seedData);
-        }
-      })
-      .catch(() => setData(seedData))
-      .finally(() => {
-        loaded.current = true;
-        setReady(true);
-      });
-  }, []);
+    void read();
+  }, [read]);
 
   // Layout effect so the snapshot is current before any child's effects (the sync engine) run.
   useLayoutEffect(() => {
@@ -152,9 +180,21 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   }, [data]);
 
   const unsaved = useRef(false);
+  const saveFailing = useRef(false);
   const save = useCallback(() => {
     unsaved.current = false;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot.current)).catch(() => {});
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot.current)).then(
+      () => {
+        saveFailing.current = false;
+      },
+      () => {
+        // Try again with the next change or when the app is left; say so once, not on every keystroke.
+        unsaved.current = true;
+        if (saveFailing.current) return;
+        saveFailing.current = true;
+        setSaveFailures((n) => n + 1);
+      },
+    );
   }, []);
 
   // Persist shortly after changes settle (the editor saves on every keystroke),
@@ -482,6 +522,10 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
     const allTags = [...new Set(prompts.flatMap((p) => p.tags))].sort();
     return {
       ready,
+      loadFailed,
+      retryLoad: read,
+      saveFailures,
+      pruneSafe,
       prompts,
       folders,
       trash,
@@ -505,7 +549,8 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
         const src = getPrompt(id);
         if (!src) return undefined;
         // Image files are shared by id; a file is only deleted once no prompt uses it.
-        return createPrompt({ title: `${src.title} (copy)`, body: src.body, folderId: src.folderId, tags: src.tags, images: src.images });
+        // An untitled prompt's copy stays untitled, rather than being called " (copy)".
+        return createPrompt({ title: src.title ? `${src.title} (copy)` : '', body: src.body, folderId: src.folderId, tags: src.tags, images: src.images });
       },
       togglePin,
       recordCopy,
@@ -520,6 +565,10 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
   }, [
     data,
     ready,
+    loadFailed,
+    read,
+    saveFailures,
+    pruneSafe,
     openedAt,
     createPrompt,
     updatePrompt,

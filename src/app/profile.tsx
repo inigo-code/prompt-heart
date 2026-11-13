@@ -17,6 +17,7 @@ import { useToast } from '@/components/Toast';
 import { deleteLocalImage } from '@/lib/images';
 import type { Theme } from '@/lib/theme';
 import { font, useTheme } from '@/lib/theme';
+import { useForgetAllBlanks } from '@/lib/useCopyPrompt';
 import { useActivity } from '@/profile/ActivityProvider';
 import { BIO_MAX, useProfile } from '@/profile/ProfileProvider';
 import { useHistory } from '@/store/HistoryProvider';
@@ -46,6 +47,7 @@ export default function ProfileScreen() {
 
   const activity = useActivity();
   const history = useHistory();
+  const forgetAllBlanks = useForgetAllBlanks();
   const [name, setName] = useState(profile.name);
   const [bio, setBio] = useState(profile.bio);
   const [synced, setSynced] = useState({ name: profile.name, bio: profile.bio });
@@ -104,6 +106,7 @@ export default function ProfileScreen() {
         store.eraseAll().forEach(deleteLocalImage);
         history.clearAll();
         activity.clear();
+        forgetAllBlanks();
       }
       router.replace('/');
       return eraseDevice ? 'Account deleted and this device erased' : 'Account deleted. Your prompts are still on this device.';

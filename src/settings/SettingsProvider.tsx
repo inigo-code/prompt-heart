@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 
 import { defaultAiApps } from '@/lib/ai';
+import { readWithRetries } from '@/lib/readRetry';
 import { SETTINGS_STORAGE_KEY } from '@/lib/storageKeys';
 
 const STORAGE_KEY = SETTINGS_STORAGE_KEY;
@@ -57,8 +58,13 @@ export const DEFAULT_SETTINGS: Settings = {
 
 type SettingsContext = {
   settings: Settings;
-  /** False until saved settings are loaded (so the app lock never flashes the app open first). */
+  /** False until saved settings are loaded (so the app lock never flashes the app open first). Stays false while `loadFailed`. */
   ready: boolean;
+  /**
+   * The phone couldn't read the saved settings, so the defaults stand in for this session. Nothing is saved,
+   * and App lock counts as on, since we can't tell whether it was.
+   */
+  loadFailed: boolean;
   /** True when this phone had no saved settings: a fresh install (or cleared app data). */
   firstRun: boolean;
   update: (patch: Partial<Settings>) => void;
@@ -72,24 +78,31 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const loaded = useRef(false);
   const [ready, setReady] = useState(false);
   const [firstRun, setFirstRun] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
+    // The app stays covered while this retries, so nothing can change the settings in the meantime.
+    readWithRetries(() => AsyncStorage.getItem(STORAGE_KEY)).then(
+      (raw) => {
         if (!raw) {
           setFirstRun(true);
-          return;
+        } else {
+          try {
+            const saved = JSON.parse(raw) as Partial<Settings>;
+            // Merge per app so apps added in later versions get their default.
+            // Anyone with saved settings from before the welcome existed has already started; don't show it to them.
+            setSettings({ ...DEFAULT_SETTINGS, onboarded: true, ...saved, aiApps: { ...DEFAULT_SETTINGS.aiApps, ...saved.aiApps } });
+          } catch {
+            // Unreadable: start from the defaults.
+          }
         }
-        const saved = JSON.parse(raw) as Partial<Settings>;
-        // Merge per app so apps added in later versions get their default.
-        // Anyone with saved settings from before the welcome existed has already started; don't show it to them.
-        setSettings({ ...DEFAULT_SETTINGS, onboarded: true, ...saved, aiApps: { ...DEFAULT_SETTINGS.aiApps, ...saved.aiApps } });
-      })
-      .catch(() => {})
-      .finally(() => {
         loaded.current = true;
         setReady(true);
-      });
+      },
+      // We don't know what's saved, App lock included. `ready` stays false, so the welcome and What's new
+      // don't run on the defaults, and nothing is saved over the real settings.
+      () => setLoadFailed(true),
+    );
   }, []);
 
   useEffect(() => {
@@ -101,7 +114,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   // bring back a What's new card that was already read.
   const reset = useCallback(() => setSettings((s) => ({ ...DEFAULT_SETTINGS, appLock: s.appLock, lockAfter: s.lockAfter, seenUpdate: s.seenUpdate, onboarded: s.onboarded })), []);
 
-  const value = useMemo(() => ({ settings, ready, firstRun, update, reset }), [settings, ready, firstRun, update, reset]);
+  const value = useMemo(() => ({ settings, ready, loadFailed, firstRun, update, reset }), [settings, ready, loadFailed, firstRun, update, reset]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

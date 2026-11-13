@@ -32,8 +32,9 @@ const AUTH_SETTLE_MS = 1500;
  * underneath (sync, shared text waiting to be saved), so unlocking picks up exactly where you were.
  */
 export function AppLockProvider({ children }: { children: ReactNode }) {
-  const { settings, ready } = useSettings();
-  const enabled = ready && settings.appLock;
+  const { settings, ready, loadFailed } = useSettings();
+  // If the settings couldn't be read, we can't tell whether App lock is on, so it is. Unlocking works as usual.
+  const enabled = (ready && settings.appLock) || loadFailed;
   const [unlocked, setUnlocked] = useState(false);
   const backgroundedAt = useRef<number | null>(null);
   const authenticating = useRef(false);
@@ -72,14 +73,16 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
   }, [enabled, settings.lockAfter]);
 
   // Until settings are loaded we don't know whether to lock, so cover the app rather than flash it open.
-  const showLock = !ready || (enabled && !unlocked);
+  const showLock = (!ready && !loadFailed) || (enabled && !unlocked);
   const value = useMemo(() => ({ confirm, markUnlocked, locked: showLock }), [confirm, markUnlocked, showLock]);
 
   return (
     <Ctx.Provider value={value}>
       {children}
       <Modal visible={showLock} animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
-        {ready ? <LockScreen confirm={confirm} onUnlocked={markUnlocked} /> : <Cover />}
+        {/* Keyed on the lock itself, not on settings loading: otherwise the cover turns into the lock
+            screen (and asks to unlock) while it fades out with App lock off. */}
+        {enabled && !unlocked ? <LockScreen confirm={confirm} onUnlocked={markUnlocked} /> : <Cover />}
       </Modal>
     </Ctx.Provider>
   );

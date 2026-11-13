@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { readWithRetries } from '@/lib/readRetry';
 import { isoDate } from '@/profile/insights';
 import type { ActivityDay } from '@/profile/insights';
 
@@ -47,14 +48,23 @@ export function ActivityProvider({ children }: { children: ReactNode }) {
   const loaded = useRef(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => raw && setDays((now) => addDays(JSON.parse(raw) as Record<string, ActivityDay>, now)))
-      .catch(() => {})
-      .finally(() => {
+    readWithRetries(() => AsyncStorage.getItem(STORAGE_KEY)).then(
+      (raw) => {
+        if (loaded.current) return; // cleared while this was loading
+        try {
+          const saved = raw ? (JSON.parse(raw) as Record<string, ActivityDay> | null) : null;
+          if (saved) setDays((now) => addDays(saved, now));
+        } catch {
+          // Unreadable: start from what was counted since the app opened.
+        }
         loaded.current = true;
         // A new object, so copies counted while this loaded get saved even if nothing was stored yet.
         setDays((d) => ({ ...d }));
-      });
+      },
+      // The phone couldn't read the saved log. Copies still count for now, but nothing is saved, so the
+      // saved year of activity isn't replaced by today's few.
+      () => {},
+    );
   }, []);
 
   useEffect(() => {
@@ -70,7 +80,11 @@ export function ActivityProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const clear = useCallback(() => setDays({}), []);
+  // Clearing saves the empty log even if the saved one couldn't be read, since removing it is the point.
+  const clear = useCallback(() => {
+    loaded.current = true;
+    setDays({});
+  }, []);
 
   const value = useMemo(() => ({ days, logCopy, clear }), [days, logCopy, clear]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

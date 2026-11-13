@@ -12,6 +12,9 @@ export type LibraryCategory = {
   tag: string;
 };
 
+/** Library prompts copied straight from the library go through the copy flow with this before their id. */
+export const LIBRARY_ID_PREFIX = "library:";
+
 export type LibraryPrompt = {
   /** Stable id, so copies can remember typed values. Never reuse or rename. */
   id: string;

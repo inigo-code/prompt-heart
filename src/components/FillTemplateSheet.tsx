@@ -14,7 +14,9 @@ type Props = {
   variables: string[];
   initialValues: Record<string, string>;
   actionLabel?: string;
-  /** Called the moment Copy is tapped; the sheet then slides away. */
+  /** What the sheet ends in: copying (the default) or sharing. */
+  verb?: 'Copy' | 'Share';
+  /** Called the moment Copy (or Share) is tapped; the sheet then slides away. */
   onCopy: (text: string, values: Record<string, string>) => void;
   /** Called once the sheet has slid away, after a copy or a cancel. */
   onClose: () => void;
@@ -22,7 +24,7 @@ type Props = {
 
 // Mounted fresh for each copy, so its state always starts from initialValues. It closes itself (so the
 // slide down can play) and tells the parent when it's gone.
-export function FillTemplateSheet({ prompt, variables, initialValues, actionLabel = 'Copy', onCopy, onClose }: Props) {
+export function FillTemplateSheet({ prompt, variables, initialValues, verb = 'Copy', actionLabel = verb, onCopy, onClose }: Props) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [values, setValues] = useState(initialValues);
@@ -44,7 +46,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
       <ScrollView style={styles.fields} contentContainerStyle={styles.fieldsContent} keyboardShouldPersistTaps="handled">
         <View>
           <Text style={[styles.title, { color: theme.text }]}>{prompt.title || 'Untitled'}</Text>
-          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then copy.</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Fill in the blanks, then {verb.toLowerCase()}.</Text>
         </View>
         {variables.map((name, i) => (
           <View key={name} style={styles.field}>
@@ -74,9 +76,9 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
             close();
           }}
           style={[styles.btn, { backgroundColor: theme.chip }]}
-          accessibilityLabel="Copy template without filling"
+          accessibilityLabel={`${verb} template without filling`}
         >
-          <Text style={[styles.btnText, { color: theme.text }]}>Copy as-is</Text>
+          <Text style={[styles.btnText, { color: theme.text }]}>{verb} as-is</Text>
         </Tap>
         <Tap
           onPress={() => {
@@ -84,7 +86,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, actionLabe
             close();
           }}
           style={[styles.btn, styles.primary, { backgroundColor: theme.accent }]}
-          accessibilityLabel="Copy filled prompt"
+          accessibilityLabel={`${verb} filled prompt`}
         >
           <Text style={[styles.btnText, { color: theme.accentText }]}>
             {remaining > 0 ? `${actionLabel} (${remaining} ${remaining === 1 ? 'blank' : 'blanks'})` : actionLabel}

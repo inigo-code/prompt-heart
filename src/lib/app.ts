@@ -29,12 +29,14 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-05-1.8.1',
+  id: '2026-11-13-share-and-fixes',
   items: [
-    'The home-screen widget now loads by itself, without opening the app',
-    'Resize the widget and it shows more prompts, with its buttons still working',
-    'Your images download straight away on a new phone',
-    'Copies from the widget always count, on the day you made them',
-    'An open prompt now picks up changes from your other devices',
+    'Share a prompt to any app from its menu',
+    'Blanks remember what you typed last time, even after the app closes',
+    'Search now finds prompts by their category too',
+    'If your prompts ever fail to open, the app says so and keeps them safe',
+    'App lock no longer flashes its screen when it is turned off',
+    'Select, then search, and only the prompts you can see stay selected',
+    'Deleting a prompt for good now removes its version history too',
   ],
 };

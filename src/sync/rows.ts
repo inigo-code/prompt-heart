@@ -79,7 +79,7 @@ export const rowToPrompt = (r: PromptRow): Prompt => ({
   tags: r.tags ?? [],
   pinned: r.pinned,
   images: r.images ?? [],
-  copyCount: r.copy_count,
+  copyCount: num(r.copy_count),
   createdAt: num(r.created_at),
   updatedAt: num(r.updated_at),
   lastCopiedAt: numOrNull(r.last_copied_at),
