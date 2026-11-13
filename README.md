@@ -4,8 +4,8 @@
 
 <p align="center">
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
-  <a href="https://inigo-code.github.io/prompt-heart-site/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
-  <a href="https://inigo-code.github.io/prompt-heart-site/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
+  <a href="https://heartapps.github.io/prompt-heart/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
+  <a href="https://heartapps.github.io/prompt-heart/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
   <img alt="Version" src="https://img.shields.io/badge/version-1.8.1-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
@@ -21,7 +21,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 </p>
 
 <p align="center">
-🌐 <a href="https://inigo-code.github.io/prompt-heart-site/"><b>inigo-code.github.io/prompt-heart-site</b></a>: fill in a real prompt from the library, right in your browser.
+🌐 <a href="https://heartapps.github.io/prompt-heart/"><b>heartapps.github.io/prompt-heart</b></a>: fill in a real prompt from the library, right in your browser.
 </p>
 
 <br/>
@@ -110,7 +110,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 ### With F-Droid (recommended, updates automatically)
 
 1. Install [F-Droid](https://f-droid.org) (or Neo Store / Droid-ify) on your phone.
-2. Open the **[Prompt Heart F-Droid page](https://inigo-code.github.io/prompt-heart-site/fdroid.html)** on your phone and tap **Add to F-Droid**, or scan its QR code from another screen.
+2. Open the **[Prompt Heart F-Droid page](https://heartapps.github.io/prompt-heart/fdroid.html)** on your phone and tap **Add to F-Droid**, or scan its QR code from another screen.
 3. Search for **Prompt Heart** in F-Droid and install it. New versions show up in F-Droid like any other app.
 
 <details>
@@ -145,7 +145,7 @@ Both ways install the same signed APK, so you can switch between them without lo
 - **Optional App lock.** Unlock with your fingerprint, face or phone screen lock, and keep your prompts hidden in the recent-apps screen.
 - **You're in control.** Change your email or password, export everything, or delete your account and all of its cloud data from **Profile**.
 
-Read the full [privacy policy](https://inigo-code.github.io/prompt-heart-site/privacy.html), or see [how to delete your account](https://inigo-code.github.io/prompt-heart-site/delete-account.html).
+Read the full [privacy policy](https://heartapps.github.io/prompt-heart/privacy.html), or see [how to delete your account](https://heartapps.github.io/prompt-heart/delete-account.html).
 
 ## 🗺️ Roadmap
 
