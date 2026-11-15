@@ -12,69 +12,48 @@ Prompt Heart: AI Prompt Notes
 
 Keep your AI prompts organised and private, with 100 ready-made ones to start
 
-## Full description (4000 max)
+## Full description (4000 max; short, no ALL CAPS, no lists of brand names)
 
-Prompt Heart is the home for the AI prompts that work. Save them like notes, fill in the blanks, and copy any prompt in one tap. Then jump straight into ChatGPT, Claude, Gemini, Grok, Perplexity and more.
+Prompt Heart keeps the AI prompts that work in one place. Save them like notes, fill in the blanks, and copy any prompt in one tap, or open it straight in ChatGPT, Claude, Gemini and other AI apps.
 
-ONE TAP, DONE
-• Tap any prompt on the home screen to copy it
-• Share a prompt to any app from its menu
-• Pin favourites, and search by words, #tags or category
-• See your most-used and recently copied prompts at a glance
-
-TEMPLATES THAT FILL THEMSELVES IN
-• Write {{placeholders}} once, like {{topic}} or {{tone|friendly}}
-• Fill them in with a live preview before you copy
-• Defaults mean most prompts are ready with a single tap
+Fill in the blanks
+• Mark the parts that change, like {{topic}}, and fill them in with a live preview before you copy
+• Give a blank a default, and most prompts are ready in a single tap
 • Blanks remember what you typed last time
 
-YOUR AI APPS, ONE TAP AWAY
-• Every AI app gets its own folder
-• "Copy & open" copies your prompt and opens the app, ready to paste
-• Works with ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot, DeepSeek and Le Chat
-• Turn apps on or off in Settings
+One tap to your AI app
+• Copy & open copies your prompt and opens the AI app you choose, ready to paste
+• Choose which AI apps you use in Settings
+• Share a prompt to any other app from its menu
 
-A LIBRARY OF 100 GREAT PROMPTS
-• Ready-made prompts for image generation, productivity, business, marketing, writing, coding, research, learning and careers
-• Copy one as it is, or save it and make it your own
+Start with 100 prompts
+• Ready-made prompts for images, writing, work, coding, research, learning and careers
+• Use one as it is, or save it and make it your own
 
-ORGANISED YOUR WAY
-• Categories with colours, tags and pins
-• Bulk select to move, tag, pin or delete many prompts at once
-• Prompts open read-only, so a stray tap can’t change them. Tap Edit for bold, lists, headings, undo and redo
-• Version history: go back to any earlier version of a prompt
-• Trash keeps deleted prompts for 30 days
+Organised your way
+• Categories, #tags and pins, with search across all of them
+• Select many prompts to move, tag, pin or delete them together
+• Prompts open read-only, so a stray tap can't change them. Tap Edit for formatting, with undo and redo
+• Version history, and a trash that keeps deleted prompts for 30 days
 
-YOUR PROFILE
-• Your most-used four prompts, a year of activity and streaks
-• Eleven achievements to earn, from wood to platinum
-• A short bio under your name
+On your home screen
+• A widget with your pinned prompts. One tap copies, and prompts with blanks open to be filled in
 
-HOME-SCREEN WIDGET
-• Your pinned prompts right on your home screen
-• One tap copies a prompt; prompts with blanks open to be filled in
+Save from anywhere
+• Share text or images from other apps into Prompt Heart
+• Import from spreadsheets, Notion, JSON or Markdown, and export a backup, Markdown or a spreadsheet at any time
 
-SAVE FROM ANYWHERE
-• Share text or images from any app straight into Prompt Heart
-• Attach reference images to a prompt. Only the text is copied, never the image.
-• Import prompts from spreadsheets, Notion, JSON or Markdown
-
-SYNC, OR DON'T
-• Works fully offline with no account
-• Optional free account syncs your prompts across devices
-• Export a backup, Markdown or a spreadsheet (CSV) at any time
-
-MAKE IT YOURS
-• Light, dark or system theme
-• Accent colours, and a list or grid layout
-
-PRIVATE BY DESIGN
+Private by design
+• Works fully offline, with no account. A free account syncs your prompts across your devices if you want it
 • Optional App lock with your fingerprint, face or screen lock
-• No ads, no analytics, no tracking
-• Your data is never sold
-• Delete your account and its data at any time, right from the app
+• No ads, no analytics and no tracking
+• Delete your account and its data from the app at any time
 
-Prompt Heart is an independent app. It isn't affiliated with or endorsed by OpenAI, Anthropic, Google, xAI, Perplexity, Microsoft, DeepSeek or Mistral AI.
+Make it yours
+• A profile with your most-used prompts, a year of activity, streaks and achievements
+• Light or dark theme, accent colours, and a list or grid layout
+
+Prompt Heart is an independent app and isn't affiliated with or endorsed by OpenAI, Anthropic or Google.
 
 ## Category and contact
 
