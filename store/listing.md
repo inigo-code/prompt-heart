@@ -90,6 +90,12 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 | Feature graphic | `feature-graphic.png` | 1024 × 500 |
 | Phone screenshots | `screenshots/01.png` to `06.png` | 1080 × 1920 |
 
+## Release notes for 1.8.2 (500 max)
+
+<en-IN>
+Share a prompt to any app from its menu. Blanks now remember what you typed last time, even after the app closes, and search finds prompts by their category too. If your prompts ever fail to open, Prompt Heart says so and keeps them safe. App lock no longer flashes when it is off, only the prompts you can see stay selected after a search, and deleting a prompt for good also removes its old versions.
+</en-IN>
+
 ## Release notes for the first Play release (500 max)
 
 Welcome to Prompt Heart on Google Play! Save your best AI prompts, fill in {{placeholders}}, copy in one tap, and open ChatGPT, Claude, Gemini and more. Sync is optional and private.
