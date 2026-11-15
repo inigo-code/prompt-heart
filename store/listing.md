@@ -8,9 +8,9 @@ Default language: **English (India), en-IN**. Release notes go between `<en-IN>`
 
 Prompt Heart: AI Prompt Notes
 
-## Short description (80 max)
+## Short description (80 max; one sentence takes no full stop, and it shouldn't repeat the feature graphic)
 
-Save your AI prompts, fill in the blanks, and copy or share them in one tap.
+Keep your AI prompts organised and private, with 100 ready-made ones to start
 
 ## Full description (4000 max)
 
