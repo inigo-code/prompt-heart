@@ -1,7 +1,7 @@
 # Play Console answers
 
 Answers for the forms under Play Console → Policy → App content, based on what the app actually does.
-If the app changes (new data, a new SDK, ads), update these and the [privacy policy](https://inigo-code.github.io/prompt-heart-site/privacy.html).
+If the app changes (new data, a new SDK, ads), update these and the [privacy policy](https://heartapps.github.io/prompt-heart/privacy.html).
 
 ## Before you start
 
@@ -12,7 +12,7 @@ If the app changes (new data, a new SDK, ads), update these and the [privacy pol
 
 ## Privacy policy
 
-https://inigo-code.github.io/prompt-heart-site/privacy.html
+https://heartapps.github.io/prompt-heart/privacy.html
 
 ## App access
 
@@ -51,9 +51,9 @@ Expected rating: Everyone / PEGI 3.
 
 **Does your app collect or share any of the required user data types?** Yes.
 **Is all of the user data collected by your app encrypted in transit?** Yes.
-**Do you provide a way for users to request that their data is deleted?** Yes. In the app (Settings → Profile → Delete account), and at https://inigo-code.github.io/prompt-heart-site/delete-account.html
+**Do you provide a way for users to request that their data is deleted?** Yes. In the app (Settings → Profile → Delete account), and at https://heartapps.github.io/prompt-heart/delete-account.html
 
-**Account creation:** "My app allows users to create an account": username and password (email + password). Account deletion URL: https://inigo-code.github.io/prompt-heart-site/delete-account.html
+**Account creation:** "My app allows users to create an account": username and password (email + password). Account deletion URL: https://heartapps.github.io/prompt-heart/delete-account.html
 
 Data types. For each one: **Collected: yes. Shared: no.** (Supabase and Expo are service providers processing data on your behalf, which Google doesn't count as sharing.) **Processed ephemerally: no.**
 

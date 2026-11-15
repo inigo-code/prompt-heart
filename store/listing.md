@@ -10,7 +10,7 @@ Prompt Heart: AI Prompt Notes
 
 ## Short description (80 max)
 
-Save your best AI prompts and copy them in one tap. Templates, folders and sync.
+Save your AI prompts, fill in the blanks, and copy or share them in one tap.
 
 ## Full description (4000 max)
 
@@ -18,13 +18,15 @@ Prompt Heart is the home for the AI prompts that work. Save them like notes, fil
 
 ONE TAP, DONE
 • Tap any prompt on the home screen to copy it
-• Pin favourites and find anything with search and #tags
+• Share a prompt to any app from its menu
+• Pin favourites, and search by words, #tags or category
 • See your most-used and recently copied prompts at a glance
 
 TEMPLATES THAT FILL THEMSELVES IN
 • Write {{placeholders}} once, like {{topic}} or {{tone|friendly}}
 • Fill them in with a live preview before you copy
 • Defaults mean most prompts are ready with a single tap
+• Blanks remember what you typed last time
 
 YOUR AI APPS, ONE TAP AWAY
 • Every AI app gets its own folder
@@ -79,8 +81,9 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 - App category: **Productivity**
 - Tags (pick up to 5): Productivity, Notes, Note taking, Artificial intelligence, Organizer (pick whichever Play offers)
 - Email: inigo@tosstheworld.org
-- Website: https://inigo-code.github.io/prompt-heart-site/
-- Privacy policy: https://inigo-code.github.io/prompt-heart-site/privacy.html
+- Website: https://heartapps.github.io/prompt-heart/
+- Privacy policy (App content → Privacy policy): https://heartapps.github.io/prompt-heart/privacy.html
+- Account deletion URL (App content → Data safety): https://heartapps.github.io/prompt-heart/delete-account.html
 
 ## Graphics (in `graphics/`)
 
@@ -90,7 +93,13 @@ Prompt Heart is an independent app. It isn't affiliated with or endorsed by Open
 | Feature graphic | `feature-graphic.png` | 1024 × 500 |
 | Phone screenshots | `screenshots/01.png` to `06.png` | 1080 × 1920 |
 
-## Release notes for 1.8.2 (500 max)
+## Release notes for the first production release, 1.8.2 (500 max)
+
+<en-IN>
+Welcome to Prompt Heart on Google Play. Save your best AI prompts, fill in the blanks, copy in one tap, and open ChatGPT, Claude, Gemini and more. New in this version: share a prompt to any app from its menu, blanks remember what you typed last time, and search finds prompts by their category too. Sync is optional and private, and there are no ads.
+</en-IN>
+
+## Release notes for 1.8.2 in testing (500 max)
 
 <en-IN>
 Share a prompt to any app from its menu. Blanks now remember what you typed last time, even after the app closes, and search finds prompts by their category too. If your prompts ever fail to open, Prompt Heart says so and keeps them safe. App lock no longer flashes when it is off, only the prompts you can see stay selected after a search, and deleting a prompt for good also removes its old versions.
