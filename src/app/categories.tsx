@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, TextInput } from '@/components/AppText';
 import { ActionSheet } from '@/components/ActionSheet';
-import { font, useTheme } from '@/lib/theme';
+import { font, useTheme, visibleOn } from '@/lib/theme';
 import { useVisibleFolders } from '@/lib/useAiApps';
 import { FOLDER_COLORS, usePromptStore } from '@/store/PromptStore';
 import type { Folder } from '@/store/types';
@@ -104,7 +104,7 @@ export default function CategoriesScreen() {
                 updateFolder(item.id, { color: FOLDER_COLORS[(i + 1) % FOLDER_COLORS.length] });
               }}
               accessibilityLabel="Change colour"
-              style={[styles.dot, { backgroundColor: item.color }]}
+              style={[styles.dot, { backgroundColor: visibleOn(item.color, theme.card) }]}
             />
             {editing === item.id ? (
               <TextInput

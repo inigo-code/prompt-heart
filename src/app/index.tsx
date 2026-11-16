@@ -20,7 +20,7 @@ import { aiAppForFolder } from '@/lib/ai';
 import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
 import { greeting, useHour } from '@/lib/greeting';
-import { font, shadow, useTheme } from '@/lib/theme';
+import { font, shadow, useTheme, visibleOn } from '@/lib/theme';
 import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { canShare, useCopyPrompt, useSharePrompt } from '@/lib/useCopyPrompt';
@@ -546,7 +546,7 @@ export default function HomeScreen() {
               label: f.name,
               leading: app ? <AppBadge app={app} size={30} /> : (
                 <View style={[styles.sheetDotWrap, { backgroundColor: f.color + '26' }]}>
-                  <View style={[styles.sheetDot, { backgroundColor: f.color }]} />
+                  <View style={[styles.sheetDot, { backgroundColor: visibleOn(f.color, theme.elevated) }]} />
                 </View>
               ),
               onPress: () => moveTo(f.id, f.name),

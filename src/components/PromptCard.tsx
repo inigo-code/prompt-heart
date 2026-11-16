@@ -10,7 +10,7 @@ import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
 import { formatStamp, previewText } from '@/lib/format';
 import { extractVariables } from '@/lib/templates';
-import { font } from '@/lib/theme';
+import { font, visibleOn } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import type { Folder, Prompt } from '@/store/types';
 
@@ -155,7 +155,7 @@ export const PromptCard = memo(function PromptCard({
             <View style={styles.meta}>
               {folder && (
                 <View style={styles.metaItem}>
-                  <View style={[styles.dot, { backgroundColor: folder.color }]} />
+                  <View style={[styles.dot, { backgroundColor: visibleOn(folder.color, theme.card) }]} />
                   <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
                     {folder.name}
                   </Text>

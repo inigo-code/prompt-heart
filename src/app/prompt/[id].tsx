@@ -19,7 +19,7 @@ import { applyFormat, formatStamp } from '@/lib/format';
 import type { FormatKind, Selection } from '@/lib/format';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
-import { font, useTheme } from '@/lib/theme';
+import { font, useTheme, visibleOn } from '@/lib/theme';
 import { createUndo, textChange } from '@/lib/undo';
 import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
@@ -333,7 +333,7 @@ function PromptEditor() {
         {!editing && folder && (
           <View style={styles.row}>
             <View style={[styles.tag, { backgroundColor: theme.chip }]}>
-              <View style={[styles.folderDot, { backgroundColor: folder.color }]} />
+              <View style={[styles.folderDot, { backgroundColor: visibleOn(folder.color, theme.chip) }]} />
               <Text style={{ color: theme.text, fontSize: font.footnote, fontWeight: '600' }}>{folder.name}</Text>
             </View>
           </View>

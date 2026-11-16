@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/AppText';
-import { font } from '@/lib/theme';
+import { font, visibleOn } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 type Props = {
@@ -38,7 +38,7 @@ export function Chip({ label, active, color, leading, variant = 'filter', theme,
         pressed && { opacity: 0.75 },
       ]}
     >
-      {leading ?? (color && <View style={[styles.dot, { backgroundColor: color }]} />)}
+      {leading ?? (color && <View style={[styles.dot, { backgroundColor: visibleOn(color, active ? theme.chipActive : theme.chip) }]} />)}
       <Text style={[styles.label, { color: active ? theme.chipActiveText : theme.text }]}>{label}</Text>
     </Pressable>
   );

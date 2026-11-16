@@ -48,6 +48,26 @@ const dark: typeof light = {
 
 export type Theme = typeof light;
 
+function luminance(hex: string): number | null {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(((n >> 16) & 255) / 255) + 0.7152 * lin(((n >> 8) & 255) / 255) + 0.0722 * lin((n & 255) / 255);
+}
+
+/**
+ * A category or app colour as a dot that stays visible on `bg`. A colour too close to the ground
+ * (Grok's near-black on a dark card or on the dark selected chip) is swapped for a soft light or dark grey.
+ */
+export function visibleOn(color: string, bg: string): string {
+  const c = luminance(color);
+  const b = luminance(bg);
+  if (c === null || b === null) return color;
+  if ((Math.max(c, b) + 0.05) / (Math.min(c, b) + 0.05) >= 1.6) return color;
+  return b < 0.4 ? '#CFCAC2' : '#5A554F';
+}
+
 /**
  * The type scale. Every text size in the app is one of these steps; pick the nearest one rather than
  * a new number. (Sizes computed from a component's own size, like avatar initials, stay computed.)

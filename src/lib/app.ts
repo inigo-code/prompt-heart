@@ -29,14 +29,8 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-13-share-and-fixes',
+  id: '2026-11-16-category-dots',
   items: [
-    'Share a prompt to any app from its menu',
-    'Blanks remember what you typed last time, even after the app closes',
-    'Search now finds prompts by their category too',
-    'If your prompts ever fail to open, the app says so and keeps them safe',
-    'App lock no longer flashes its screen when it is turned off',
-    'Select, then search, and only the prompts you can see stay selected',
-    'Deleting a prompt for good now removes its version history too',
+    'In dark mode, dark category colours such as Grok’s stay visible on cards and chips',
   ],
 };
