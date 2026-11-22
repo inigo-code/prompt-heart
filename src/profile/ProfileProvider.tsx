@@ -91,7 +91,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   }, [profile]);
 
   const userId = user?.id ?? null;
-  const metaName = typeof user?.meta.full_name === 'string' ? user.meta.full_name : '';
+  // null when the account has no name yet; '' when it was cleared (on any device), which is a real choice.
+  const metaName = typeof user?.meta.full_name === 'string' ? user.meta.full_name : null;
   const metaBio = typeof user?.meta.bio === 'string' ? user.meta.bio : null;
   const metaAvatar = typeof user?.meta.avatar_version === 'number' ? user.meta.avatar_version : null;
   const metaHasAvatarKey = !!user && 'avatar_version' in user.meta;
@@ -113,8 +114,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready || !userId || !supabase) return;
     const client = supabase;
-    // Name: the account's copy wins (see `effectiveName`); if it has none yet, give it ours.
-    if (!metaName && profile.name) updateProfile({ full_name: profile.name }).catch(() => {});
+    // Name: the account's copy wins (see `effectiveName`); if it has none yet, give it ours. A name cleared
+    // on another device stays cleared.
+    if (metaName === null && profile.name) updateProfile({ full_name: profile.name }).catch(() => {});
     // Bio: the same, except an empty bio on the account is a real choice (it was cleared elsewhere).
     if (metaBio === null && profile.bio) updateProfile({ bio: profile.bio }).catch(() => {});
 
@@ -170,7 +172,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     await new File(saved.uri).copy(avatarFile(version));
     deleteAvatarFiles(version);
     setProfile((p) => ({ ...p, avatarVersion: version, avatarSyncedFor: null }));
-    if (userId) await uploadAvatar(version, userId);
+    // Without a connection the new photo still shows here, and uploads the next time the app syncs the profile.
+    if (userId) await uploadAvatar(version, userId).catch(() => {});
     return true;
   }, [userId, uploadAvatar]);
 
@@ -193,7 +196,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const email = user?.email ?? null;
   // Signed in, the account's name wins, so a rename on another device shows up here.
-  const effectiveName = userId && metaName ? metaName : profile.name;
+  const effectiveName = userId && metaName !== null ? metaName : profile.name;
   const effectiveBio = userId && metaBio !== null ? metaBio : profile.bio;
 
   const value = useMemo<ProfileContext>(() => {

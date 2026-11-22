@@ -320,11 +320,6 @@ function SignedIn({ theme }: { theme: Theme }) {
         {status === 'waiting' && (
           <Text style={[styles.p, styles.countdown, { color: theme.text }]}>{secondsLeft ? `Syncs in ${secondsLeft} s` : 'Syncing soon'}</Text>
         )}
-        {status === 'waiting' && (
-          <Text style={[styles.p, { color: theme.textMuted }]}>
-            To save data, the app syncs at most once a minute. Tap Sync now to send changes straight away.
-          </Text>
-        )}
         {status === 'error' && error && <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>}
         {imageUsage && (
           <Text style={[styles.p, { color: imageUsage.waiting ? theme.text : theme.textMuted }]}>

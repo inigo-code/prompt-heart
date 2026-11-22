@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, TextInput } from '@/components/AppText';
 import { ActionSheet } from '@/components/ActionSheet';
-import { font, useTheme, visibleOn } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { useVisibleFolders } from '@/lib/useAiApps';
 import { FOLDER_COLORS, usePromptStore } from '@/store/PromptStore';
 import type { Folder } from '@/store/types';
@@ -20,9 +20,8 @@ export default function CategoriesScreen() {
   const folders = useVisibleFolders();
 
   const [name, setName] = useState('');
-  // null = use the next colour in the palette, so each new category gets a different one.
-  const [picked, setColor] = useState<string | null>(null);
-  const color = picked ?? FOLDER_COLORS[folders.length % FOLDER_COLORS.length];
+  // Colours aren't shown any more, but every category still has one (it syncs, and older versions show it).
+  const color = FOLDER_COLORS[folders.length % FOLDER_COLORS.length];
   const [editing, setEditing] = useState<string | null>(null);
   const [renameText, setRenameText] = useState('');
   const [menuFor, setMenuFor] = useState<Folder | null>(null);
@@ -44,7 +43,6 @@ export default function CategoriesScreen() {
     if (!name.trim()) return;
     createFolder(name, color);
     setName('');
-    setColor(null);
   };
 
   const countFor = (id: string) => prompts.filter((p) => p.folderId === id).length;
@@ -61,21 +59,6 @@ export default function CategoriesScreen() {
           placeholderTextColor={theme.textMuted}
           style={[styles.input, { color: theme.text }]}
         />
-        <View style={styles.swatches}>
-          {FOLDER_COLORS.map((c) => (
-            <Pressable
-              key={c}
-              accessibilityLabel={`Colour ${c}`}
-              accessibilityState={{ selected: color === c }}
-              onPress={() => setColor(c)}
-              style={[styles.swatchRing, { borderColor: color === c ? c : 'transparent' }]}
-            >
-              <View style={[styles.swatch, { backgroundColor: c }]}>
-                {color === c && <Ionicons name="checkmark" size={15} color="#ffffff" />}
-              </View>
-            </Pressable>
-          ))}
-        </View>
         <Pressable
           onPress={add}
           disabled={!name.trim()}
@@ -98,15 +81,6 @@ export default function CategoriesScreen() {
               index === folders.length - 1 ? styles.last : { borderBottomWidth: StyleSheet.hairlineWidth },
             ]}
           >
-            <Pressable
-              onPress={() => {
-                const i = FOLDER_COLORS.indexOf(item.color);
-                updateFolder(item.id, { color: FOLDER_COLORS[(i + 1) % FOLDER_COLORS.length] });
-              }}
-              accessibilityLabel={`Change the colour of ${item.name}`}
-              hitSlop={10}
-              style={[styles.swatchSquare, { backgroundColor: visibleOn(item.color, theme.card) }]}
-            />
             {editing === item.id ? (
               <TextInput
                 value={renameText}
@@ -133,7 +107,7 @@ export default function CategoriesScreen() {
         ListEmptyComponent={<Text style={[styles.empty, { color: theme.textMuted }]}>No categories yet.</Text>}
         ListFooterComponent={
           folders.length > 0 ? (
-            <Text style={[styles.hint, { color: theme.textMuted }]}>Tap a name to rename it, or its colour to change the colour.</Text>
+            <Text style={[styles.hint, { color: theme.textMuted }]}>Tap a name to rename it.</Text>
           ) : undefined
         }
       />
@@ -159,9 +133,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   newBox: { margin: 16, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   input: { fontSize: font.headline, paddingVertical: 4 },
-  swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  swatchRing: { width: 35, height: 35, borderRadius: 17.5, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
-  swatch: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   addBtn: { height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   addText: { fontSize: font.body, fontWeight: '700' },
   // Rows form one grouped card: outer edges and rounded corners on the first and last row, dividers between.
@@ -178,7 +149,6 @@ const styles = StyleSheet.create({
   last: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
   countText: { fontSize: font.body, fontVariant: ['tabular-nums'] },
   more: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -10 },
-  swatchSquare: { width: 20, height: 20, borderRadius: 6 },
   rowName: { flex: 1, fontSize: font.headline, fontWeight: '600' },
   empty: { textAlign: 'center', paddingTop: 40 },
   hint: { textAlign: 'center', fontSize: font.caption, paddingTop: 12 },

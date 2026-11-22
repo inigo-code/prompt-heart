@@ -76,8 +76,9 @@ export default function ImportScreen() {
 
       {(files.length > 0 || errors.length > 0) && (
         <View style={[styles.plan, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          {files.map((f) => (
-            <View key={f.name} style={styles.fileRow}>
+          {files.map((f, i) => (
+            // Two picked files can share a name (from different folders).
+            <View key={`${i}-${f.name}`} style={styles.fileRow}>
               <Ionicons name="document-text-outline" size={18} color={theme.textMuted} />
               <Text style={[styles.fileName, { color: theme.text }]} numberOfLines={1}>
                 {f.name}
@@ -102,7 +103,7 @@ export default function ImportScreen() {
                 <View style={styles.preview}>
                   {plan.prompts.slice(0, 5).map((p, i) => (
                     <Text key={`${p.title}-${i}`} style={[styles.previewItem, { color: theme.textMuted }]} numberOfLines={1}>
-                      • {p.title}
+                      {p.title}
                     </Text>
                   ))}
                   {plan.prompts.length > 5 && <Text style={[styles.previewItem, { color: theme.textMuted }]}>and {plan.prompts.length - 5} more</Text>}

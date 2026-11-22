@@ -29,7 +29,7 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-22-quiet-copies',
+  id: '2026-11-22-review-fixes',
   items: [
     'Copying a prompt no longer starts a sync each time; copy counts go along with the next one',
     'Opens smoothly, with no black flash or dark strip on the way in',
@@ -37,6 +37,7 @@ export const WHATS_NEW = {
     'The home-screen widget matches, with plain rows and no coloured dots',
     'The cloud button shows whether your prompts are synced, waiting or need a look',
     'Your profile shows plain numbers and the prompts you copy most',
-    'Fixes: an old link to a deleted prompt, and signing out while changes are still uploading',
+    'Categories are just names now: the colour picker is gone, since colours no longer show',
+    'Fixes: an old link to a deleted prompt, signing out while changes are still uploading, and a name cleared on another phone',
   ],
 };
