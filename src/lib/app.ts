@@ -29,8 +29,9 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-22-review-fixes',
+  id: '1.8.3',
   items: [
+    'A smaller, leaner app: version 1.8.3 is optimised when it’s built, so it uses less memory',
     'Copying a prompt no longer starts a sync each time; copy counts go along with the next one',
     'Opens smoothly, with no black flash or dark strip on the way in',
     'A calmer look: the app icon and name up top, and simpler cards, lists and menus',
