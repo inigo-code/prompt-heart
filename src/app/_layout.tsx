@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { Onboarding } from '@/components/Onboarding';
+import { SplashOverlay, letSplashGo } from '@/components/SplashOverlay';
 import { StoreTrouble } from '@/components/StoreTrouble';
 import { ToastProvider } from '@/components/Toast';
 import { UpdatePrompt } from '@/components/UpdatePrompt';
@@ -22,17 +23,13 @@ import { PromptStoreProvider, usePromptStore } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 import { useWidgetSync } from '@/widget/sync';
 
-// Keep the splash up until the first frame is ready to draw.
+// Keep the native splash up until SplashOverlay, drawn the same, is on screen to take over.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Receiving shares needs the native module, which web and Expo Go don't have.
 const shareDisabled = Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
-  }, []);
-
   return (
     <ShareIntentProvider options={{ disabled: shareDisabled, resetOnBackground: true }}>
       <SettingsProvider>
@@ -64,10 +61,17 @@ function Navigator() {
   const { hasShareIntent } = useShareIntentContext();
   useEnsureAiFolders();
   useWidgetSync();
-  const { settings, ready } = useSettings();
-  const { loadFailed } = usePromptStore();
+  const { settings, ready, loadFailed: settingsFailed } = useSettings();
+  const { ready: promptsReady, loadFailed } = usePromptStore();
   // Over the home screen only, so a link or a shared item that opened the app isn't covered.
   const welcome = ready && !settings.onboarded && pathname === '/' && !loadFailed;
+
+  // The native splash hands over to SplashOverlay, which lifts once the prompts and settings are in. This
+  // is only a safety net, should the overlay never draw.
+  useEffect(() => {
+    const timer = setTimeout(letSplashGo, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // On Android, shared content arrives through the native module rather than a deep link,
   // so open the Share screen whenever something has been shared and not yet handled.
@@ -105,6 +109,7 @@ function Navigator() {
       {welcome && <Onboarding />}
       {/* Over everything else (but under App lock), so the samples never stand in for your prompts. */}
       <StoreTrouble />
+      <SplashOverlay ready={(promptsReady || loadFailed) && (ready || settingsFailed)} hold={!ready && !settingsFailed} />
     </>
   );
 }

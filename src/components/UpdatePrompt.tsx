@@ -69,7 +69,7 @@ function UpdatePromptInner() {
   return (
     <>
     <NewsGate pending={isUpdatePending} />
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setDismissed(true)}>
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={() => setDismissed(true)}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <AppMark size={56} />
@@ -102,7 +102,7 @@ function UpdatePromptInner() {
 export function WhatsNew({ onClose }: { onClose: () => void }) {
   const theme = useTheme();
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
         <Animated.View entering={FadeInDown.duration(280)} style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]} accessibilityViewIsModal>
           <AppMark size={56} />

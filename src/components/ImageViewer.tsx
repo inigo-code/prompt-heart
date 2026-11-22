@@ -13,7 +13,7 @@ export function ImageViewer({ imageId, onClose, onRemove }: Props) {
   const uri = imageId ? localImageUri(imageId) : null;
 
   return (
-    <Modal visible={imageId !== null} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={imageId !== null} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
       <View style={styles.backdrop}>
         {uri ? (
           <Image source={{ uri }} style={styles.image} resizeMode="contain" />
