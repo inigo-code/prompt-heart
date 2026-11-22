@@ -1,15 +1,14 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { Text } from '@/components/AppText';
-import { font, visibleOn } from '@/lib/theme';
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 type Props = {
   label: string;
   active?: boolean;
-  color?: string;
-  /** Replaces the colour dot, e.g. an AI app badge. */
+  /** Shown before the label, e.g. an AI app's badge. */
   leading?: ReactNode;
   /** "action" chips (like "+ New category") are outlined so they don't read as filters. Only a chosen filter is filled. */
   variant?: 'filter' | 'action';
@@ -19,7 +18,7 @@ type Props = {
   accessibilityLabel?: string;
 };
 
-export function Chip({ label, active, color, leading, variant = 'filter', theme, onPress, onLongPress, accessibilityLabel }: Props) {
+export function Chip({ label, active, leading, variant = 'filter', theme, onPress, onLongPress, accessibilityLabel }: Props) {
   const action = variant === 'action';
   return (
     <Pressable
@@ -38,7 +37,7 @@ export function Chip({ label, active, color, leading, variant = 'filter', theme,
         pressed && { opacity: 0.75 },
       ]}
     >
-      {leading ?? (color && <View style={[styles.dot, { backgroundColor: visibleOn(color, active ? theme.chipActive : theme.chip) }]} />)}
+      {leading}
       <Text style={[styles.label, { color: active ? theme.chipActiveText : theme.text }]}>{label}</Text>
     </Pressable>
   );
@@ -53,7 +52,6 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 17,
   },
-  withLeading: { paddingLeft: 4 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  withLeading: { paddingLeft: 5 },
   label: { fontSize: font.body, fontWeight: '600' },
 });

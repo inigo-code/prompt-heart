@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Text } from '@/components/AppText';
-import { font, shadow } from '@/lib/theme';
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 
 // Small building blocks for settings-style screens.
@@ -11,7 +11,9 @@ import type { Theme } from '@/lib/theme';
 export function Section({ theme, title, children, footer }: { theme: Theme; title: string; children: ReactNode; footer?: string }) {
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: theme.accentInk }]} accessibilityRole="header">
+        {title}
+      </Text>
       <View style={[styles.group, { backgroundColor: theme.card, borderColor: theme.border }]}>{children}</View>
       {footer && <Text style={[styles.footer, { color: theme.textMuted }]}>{footer}</Text>}
     </View>
@@ -44,11 +46,7 @@ export function Row({ theme, icon, leading, label, value, onPress, busy, destruc
         pressed && onPress ? { backgroundColor: theme.chip } : null,
       ]}
     >
-      {leading ?? (
-        <View style={[styles.iconWrap, { backgroundColor: destructive ? theme.danger + '22' : theme.chip }]}>
-          <Ionicons name={icon ?? 'ellipse-outline'} size={17} color={destructive ? theme.danger : theme.text} />
-        </View>
-      )}
+      {leading ?? (icon ? <Ionicons name={icon} size={22} color={destructive ? theme.danger : theme.textMuted} style={styles.icon} /> : null)}
       <Text style={[styles.label, { color }]} numberOfLines={2}>
         {label}
       </Text>
@@ -115,7 +113,7 @@ export function Segmented<T extends string | number>({ theme, options, value, on
             accessibilityState={{ selected: active }}
             style={({ pressed }) => [
               styles.segment,
-              active ? { backgroundColor: theme.accent, boxShadow: shadow.subtle } : pressed ? { backgroundColor: theme.border } : null,
+              active ? { backgroundColor: theme.accent } : pressed ? { backgroundColor: theme.border } : null,
             ]}
           >
             {o.icon && <Ionicons name={o.icon} size={15} color={color} />}
@@ -148,12 +146,12 @@ export function ControlRow({ theme, label, value, children, last }: {
 }
 
 const styles = StyleSheet.create({
-  section: { gap: 8 },
-  sectionTitle: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 6 },
+  section: { gap: 10 },
+  sectionTitle: { fontSize: font.footnote, fontWeight: '700', paddingHorizontal: 4 },
   group: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  footer: { fontSize: font.caption, paddingHorizontal: 6, lineHeight: 18 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, minHeight: 52, paddingVertical: 8 },
-  iconWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  footer: { fontSize: font.caption, paddingHorizontal: 4, lineHeight: 18 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 16, minHeight: 56, paddingVertical: 8 },
+  icon: { width: 24, textAlign: 'center' },
   label: { flex: 1, fontSize: font.body, fontWeight: '600' },
   value: { fontSize: font.body, maxWidth: '45%' },
   control: { paddingHorizontal: 16, paddingVertical: 12, gap: 10 },

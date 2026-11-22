@@ -1,6 +1,4 @@
-import { Fredoka_700Bold } from '@expo-google-fonts/fredoka/700Bold';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import { useFonts } from 'expo-font';
 import { Stack, router, usePathname } from 'expo-router';
 import { ShareIntentProvider, useShareIntentContext } from 'expo-share-intent';
 import * as SplashScreen from 'expo-splash-screen';
@@ -24,17 +22,16 @@ import { PromptStoreProvider, usePromptStore } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 import { useWidgetSync } from '@/widget/sync';
 
-// Keep the splash up until the title font is ready, so the home title never flashes in the fallback font.
+// Keep the splash up until the first frame is ready to draw.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Receiving shares needs the native module, which web and Expo Go don't have.
 const shareDisabled = Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({ Fredoka_700Bold });
   useEffect(() => {
-    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
-  }, [fontsLoaded, fontError]);
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   return (
     <ShareIntentProvider options={{ disabled: shareDisabled, resetOnBackground: true }}>

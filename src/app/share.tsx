@@ -10,6 +10,7 @@ import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { Chip } from '@/components/Chip';
 import { useToast } from '@/components/Toast';
 import { APP_NAME } from '@/lib/app';
+import { shownError } from '@/lib/errors';
 import { saveImage } from '@/lib/images';
 import { font, useTheme } from '@/lib/theme';
 import { useVisibleFolders } from '@/lib/useAiApps';
@@ -71,7 +72,7 @@ export default function ShareScreen() {
       toast('Saved to ' + APP_NAME);
       router.replace({ pathname: '/prompt/[id]', params: { id: prompt.id } });
     } catch (e) {
-      toast(`Couldn't save: ${e instanceof Error ? e.message : String(e)}`);
+      toast(shownError(e, "Couldn't save it. Try again."));
       setSaving(false);
     }
   };
@@ -82,7 +83,7 @@ export default function ShareScreen() {
         <Stack.Screen options={{ title: 'Save to ' + APP_NAME }} />
         <Ionicons name="share-outline" size={36} color={theme.textMuted} />
         <Text style={[styles.muted, { color: theme.textMuted }]}>
-          {error ? `Couldn't read what was shared: ${error}` : `Nothing was shared. Use Share → ${APP_NAME} in another app.`}
+          {error ? "Couldn't read what was shared. Try sharing it again." : `Nothing was shared. Use Share → ${APP_NAME} in another app.`}
         </Text>
         <Pressable
           onPress={() => router.replace('/')}
@@ -115,7 +116,7 @@ export default function ShareScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
           <Chip label="No category" theme={theme} active={folderId === null} onPress={() => setFolderId(null)} />
           {folders.map((f) => (
-            <Chip key={f.id} label={f.name} color={f.color} theme={theme} active={folderId === f.id} onPress={() => setFolderId(f.id)} />
+            <Chip key={f.id} label={f.name} theme={theme} active={folderId === f.id} onPress={() => setFolderId(f.id)} />
           ))}
         </ScrollView>
 

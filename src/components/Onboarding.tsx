@@ -3,12 +3,12 @@ import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeInLeft, FadeInRight, FadeOut, FadeOutLeft, FadeOutRight, ZoomIn, cubicBezier } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInLeft, FadeInRight, FadeOut, FadeOutLeft, FadeOutRight, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, TextInput } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
-import { BRAND_FONT, HeartMark } from '@/components/BrandTitle';
+import { AppMark } from '@/components/BrandTitle';
 import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { Tap } from '@/components/Tap';
 import { AI_APPS } from '@/lib/ai';
@@ -20,27 +20,14 @@ import { useSettings } from '@/settings/SettingsProvider';
 import { useSync } from '@/sync/SyncProvider';
 
 const STEPS = 3;
-const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const SAMPLE = 'Write a short, friendly message about {{topic}}. Keep it under 60 words.';
 
-function Dots({ step, theme }: { step: number; theme: Theme }) {
+function StepCount({ step, theme }: { step: number; theme: Theme }) {
   return (
-    <View style={styles.dots} accessibilityLabel={`Step ${step + 1} of ${STEPS}`}>
-      {Array.from({ length: STEPS }, (_, i) => (
-        <Animated.View
-          key={i}
-          style={[
-            styles.dot,
-            {
-              width: i === step ? 22 : 8,
-              backgroundColor: i === step ? theme.accent : theme.border,
-              transitionProperty: ['width', 'backgroundColor'],
-              transitionDuration: 220,
-              transitionTimingFunction: EASE_OUT,
-            },
-          ]}
-        />
-      ))}
+    <View style={styles.steps}>
+      <Text style={[styles.stepText, { color: theme.textMuted }]} accessibilityLabel={`Step ${step + 1} of ${STEPS}`}>
+        {step + 1} of {STEPS}
+      </Text>
     </View>
   );
 }
@@ -48,8 +35,8 @@ function Dots({ step, theme }: { step: number; theme: Theme }) {
 function Welcome({ theme }: { theme: Theme }) {
   return (
     <View style={styles.welcome}>
-      <Animated.View entering={ZoomIn.springify().damping(14).stiffness(170)}>
-        <HeartMark theme={theme} size={132} />
+      <Animated.View entering={ZoomIn.springify().damping(16).stiffness(180)}>
+        <AppMark size={112} />
       </Animated.View>
       <Text style={[styles.brand, { color: theme.text }]} accessibilityRole="header">
         {APP_NAME}
@@ -134,13 +121,13 @@ function ChooseApps({ theme }: { theme: Theme }) {
               accessibilityRole="switch"
               accessibilityState={{ checked: on }}
               accessibilityLabel={app.label}
-              style={[styles.app, { backgroundColor: on ? theme.accentSoft : theme.card, borderColor: on ? theme.accent : theme.border }]}
+              style={[styles.app, { backgroundColor: theme.card, borderColor: on ? theme.accent : theme.border }]}
             >
               <AppBadge app={app} size={28} />
               <Text style={[styles.appText, { color: theme.text }]} numberOfLines={1}>
                 {app.label}
               </Text>
-              {on && <Ionicons name="checkmark-circle" size={18} color={theme.text} />}
+              <Ionicons name={on ? 'checkbox' : 'square-outline'} size={22} color={on ? theme.accentInk : theme.textMuted} />
             </Tap>
           );
         })}
@@ -183,7 +170,7 @@ export function Onboarding() {
     <Animated.View exiting={FadeOut.duration(220)} style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: theme.bg }]}>
       <KeyboardSafe>
         <View style={[styles.top, { paddingTop: insets.top + 8 }]}>
-          <Dots step={step} theme={theme} />
+          <StepCount step={step} theme={theme} />
           <Pressable onPress={finish} hitSlop={12} accessibilityRole="button" style={({ pressed }) => [styles.skip, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={[styles.skipText, { color: theme.textMuted }]}>Skip</Text>
           </Pressable>
@@ -229,16 +216,16 @@ export function Onboarding() {
 const styles = StyleSheet.create({
   root: { zIndex: 10 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 8 },
-  dots: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 44 },
-  dot: { height: 8, borderRadius: 4 },
+  steps: { height: 44, justifyContent: 'center' },
+  stepText: { fontSize: font.footnote, fontWeight: '600' },
   skip: { height: 44, paddingHorizontal: 4, justifyContent: 'center' },
   skipText: { fontSize: font.body, fontWeight: '700' },
   scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 16 },
   page: { gap: 16 },
   welcome: { alignItems: 'center', gap: 12 },
-  brand: { fontFamily: BRAND_FONT, fontSize: 40, letterSpacing: -0.4, marginTop: 8 },
+  brand: { fontSize: 34, fontWeight: '800', letterSpacing: -0.8, marginTop: 12 },
   center: { textAlign: 'center', maxWidth: 300 },
-  title: { fontFamily: BRAND_FONT, fontSize: 32, lineHeight: 38, letterSpacing: -0.3 },
+  title: { fontSize: 28, fontWeight: '800', lineHeight: 34, letterSpacing: -0.6 },
   lead: { fontSize: font.headline, lineHeight: 24 },
   input: { fontSize: font.headline, height: 56, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1.5, marginTop: 8 },
   preview: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },

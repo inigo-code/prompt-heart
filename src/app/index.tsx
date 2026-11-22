@@ -9,7 +9,7 @@ import { Text, TextInput } from '@/components/AppText';
 import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
 import { Avatar } from '@/components/Avatar';
-import { BrandTitle, HeartMark } from '@/components/BrandTitle';
+import { BrandTitle } from '@/components/BrandTitle';
 import { Chip } from '@/components/Chip';
 import { PromptCard } from '@/components/PromptCard';
 import { TagSheet } from '@/components/TagSheet';
@@ -19,8 +19,7 @@ import { useToast } from '@/components/Toast';
 import { aiAppForFolder } from '@/lib/ai';
 import type { AiApp } from '@/lib/ai';
 import { APP_NAME } from '@/lib/app';
-import { greeting, useHour } from '@/lib/greeting';
-import { font, shadow, useTheme, visibleOn } from '@/lib/theme';
+import { font, shadow, useTheme } from '@/lib/theme';
 import { openAiApp } from '@/lib/launch';
 import { useEnabledAiApps, useVisibleFolders } from '@/lib/useAiApps';
 import { canShare, useCopyPrompt, useSharePrompt } from '@/lib/useCopyPrompt';
@@ -30,7 +29,6 @@ import { useSettings } from '@/settings/SettingsProvider';
 import type { SortKey } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import type { Prompt } from '@/store/types';
-import { SYNC_AMBER, SYNC_BLUE, SYNC_GREEN } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
 import type { SyncStatus } from '@/sync/SyncProvider';
 
@@ -57,17 +55,16 @@ const SYNC_LABEL: Record<SyncStatus, string> = {
   error: 'sync problem',
 };
 
-/** Avatar dot: green synced, blue syncing, amber ring for changes waiting, red problem, none when signed out. */
-const syncDot = (status: SyncStatus, theme: ReturnType<typeof useTheme>) =>
-  status === 'synced'
-    ? SYNC_GREEN
-    : status === 'waiting'
-      ? SYNC_AMBER
-      : status === 'syncing' || status === 'idle'
-        ? SYNC_BLUE
-        : status === 'error'
-          ? theme.danger
-          : undefined;
+/** The sync button's icon says where sync stands, so the header needs no status dots. */
+const SYNC_ICON: Record<SyncStatus, keyof typeof Ionicons.glyphMap> = {
+  unconfigured: 'cloud-outline',
+  'signed-out': 'cloud-outline',
+  idle: 'cloud-outline',
+  syncing: 'cloud-outline',
+  waiting: 'cloud-upload-outline',
+  synced: 'cloud-done-outline',
+  error: 'cloud-offline-outline',
+};
 
 const ALL: Filter = { kind: 'all' };
 const filterKey = (f: Filter) => (f.kind === 'folder' ? `folder:${f.id}` : f.kind === 'tag' ? `tag:${f.tag}` : f.kind);
@@ -85,7 +82,6 @@ export default function HomeScreen() {
   const { status: syncStatus, syncNow, progress } = useSync();
   const [pulling, setPulling] = useState(false);
   const profile = useProfile();
-  const hour = useHour();
   const folders = useVisibleFolders();
   const aiApps = useEnabledAiApps();
   const launchAppFor = useCallback(
@@ -208,12 +204,11 @@ export default function HomeScreen() {
     toast('Moved to Trash', { label: 'Undo', onPress: () => restorePrompt(p.id) });
   };
 
-  const chip = (label: string, f: Filter, color?: string, leading?: ReactNode) => (
+  const chip = (label: string, f: Filter, leading?: ReactNode) => (
     <Chip
       // Keyed by what it filters: two categories can share a name, or be called "All" or "Pinned".
       key={filterKey(f)}
       label={label}
-      color={color}
       leading={leading}
       theme={theme}
       active={sameFilter(filter, f)}
@@ -246,35 +241,31 @@ export default function HomeScreen() {
         <View style={[styles.titleRow, selecting && styles.hidden]}>
           <View style={styles.titleBlock}>
             <BrandTitle theme={theme} />
-            <Text style={[styles.hello, { color: theme.text }]} numberOfLines={1}>
-              {greeting(hour, profile.displayName)}
-            </Text>
-            <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-              {prompts.length} prompt{prompts.length === 1 ? '' : 's'}
-              {folders.length ? ` · ${folders.length} categor${folders.length === 1 ? 'y' : 'ies'}` : ''}
-            </Text>
           </View>
           <View style={styles.headerActions}>
             <Pressable
               onPress={() => sync(false)}
               hitSlop={6}
-              accessibilityLabel={syncStatus === 'syncing' ? 'Syncing' : syncStatus === 'waiting' ? 'Sync now (changes waiting)' : 'Sync now'}
+              accessibilityLabel={`Sync now (${SYNC_LABEL[syncStatus]})`}
               style={({ pressed }) => [styles.iconBtn, { backgroundColor: pressed ? theme.chip : 'transparent' }]}
             >
               {syncStatus === 'syncing' ? (
-                <ActivityIndicator size="small" color={theme.accent} />
+                <ActivityIndicator size="small" color={theme.textMuted} />
               ) : (
-                <Ionicons name="sync" size={22} color={syncStatus === 'error' ? theme.danger : theme.text} />
+                <Ionicons
+                  name={SYNC_ICON[syncStatus]}
+                  size={23}
+                  color={syncStatus === 'error' ? theme.danger : syncStatus === 'waiting' ? theme.accentInk : theme.text}
+                />
               )}
-              {syncStatus === 'waiting' && <View style={[styles.waitingDot, { backgroundColor: SYNC_AMBER, borderColor: theme.bg }]} />}
             </Pressable>
             <Pressable
               onPress={() => router.push('/profile')}
               hitSlop={6}
-              accessibilityLabel={`Profile and sync (${SYNC_LABEL[syncStatus]})`}
-              style={({ pressed }) => [styles.avatarBtn, { transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+              accessibilityLabel="Profile"
+              style={({ pressed }) => [styles.iconBtn, { opacity: pressed ? 0.7 : 1 }]}
             >
-              <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={36} dot={syncDot(syncStatus, theme)} dotRing={syncStatus === 'waiting'} />
+              <Avatar theme={theme} uri={profile.avatarUri} name={profile.displayName} size={32} />
             </Pressable>
             <IconButton theme={theme} icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
           </View>
@@ -316,10 +307,7 @@ export default function HomeScreen() {
       {settings.showAiBar && aiApps.length > 0 && (
         <View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiBar}>
-          <View style={styles.aiBarLabel}>
-            <Ionicons name="open-outline" size={14} color={theme.textMuted} />
-            <Text style={[styles.aiBarLabelText, { color: theme.textMuted }]}>Open</Text>
-          </View>
+          <Text style={[styles.aiBarLabel, { color: theme.textMuted }]}>Open</Text>
           {aiApps.map((app) => (
             <Pressable
               key={app.key}
@@ -349,7 +337,7 @@ export default function HomeScreen() {
           {chip('Recently copied', { kind: 'copied' })}
           {folders.map((f) => {
             const app = aiAppForFolder(f.id);
-            return chip(f.name, { kind: 'folder', id: f.id }, f.color, app ? <AppBadge app={app} size={24} /> : undefined);
+            return chip(f.name, { kind: 'folder', id: f.id }, app ? <AppBadge app={app} size={24} /> : undefined);
           })}
           {allTags.map((t) => chip(`#${t}`, { kind: 'tag', tag: t }))}
           <Chip
@@ -423,7 +411,6 @@ export default function HomeScreen() {
           aiApps.length > 0 && !settings.dismissedTips.includes('ai-launch') ? (
             <TipCard
               theme={theme}
-              icon={<HeartMark theme={theme} size={22} />}
               title="Open prompts in your AI apps"
               onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'ai-launch'] })}
               action={{ label: 'Choose apps', onPress: () => router.push('/settings') }}
@@ -433,7 +420,6 @@ export default function HomeScreen() {
           ) : !settings.dismissedTips.includes('library') ? (
             <TipCard
               theme={theme}
-              icon={<Ionicons name="library-outline" size={20} color={theme.text} />}
               title="Need ideas? Try the prompt library"
               onDismiss={() => update({ dismissedTips: [...settings.dismissedTips, 'library'] })}
               action={{ label: 'Browse prompts', onPress: () => router.push('/library') }}
@@ -461,9 +447,6 @@ export default function HomeScreen() {
         ListEmptyComponent={
           ready ? (
             <View style={styles.empty}>
-              <View style={[styles.emptyIcon, { backgroundColor: theme.chip }]}>
-                <Ionicons name={query || filter.kind !== 'all' ? 'search' : 'albums-outline'} size={30} color={theme.text} />
-              </View>
               <Text style={[styles.emptyTitle, { color: theme.text }]}>
                 {query || filter.kind !== 'all' ? 'Nothing matches' : 'No prompts yet'}
               </Text>
@@ -481,7 +464,6 @@ export default function HomeScreen() {
                   accessibilityRole="button"
                   style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
                 >
-                  <Ionicons name="close-circle-outline" size={16} color={theme.text} />
                   <Text style={[styles.emptyBtnText, { color: theme.text }]}>
                     {query && filter.kind !== 'all' ? 'Clear search and filter' : query ? 'Clear search' : 'Show all prompts'}
                   </Text>
@@ -493,7 +475,6 @@ export default function HomeScreen() {
                   accessibilityRole="button"
                   style={({ pressed }) => [styles.emptyBtn, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
                 >
-                  <Ionicons name="library-outline" size={16} color={theme.accentText} />
                   <Text style={[styles.emptyBtnText, { color: theme.accentText }]}>Browse the prompt library</Text>
                 </Pressable>
               )}
@@ -512,7 +493,7 @@ export default function HomeScreen() {
         }}
         style={[styles.fab, { backgroundColor: theme.accent, bottom: insets.bottom + 24 }]}
       >
-        <Ionicons name="add" size={30} color={theme.accentText} />
+        <Ionicons name="add" size={28} color={theme.accentText} />
       </Tap>
       )}
 
@@ -544,11 +525,8 @@ export default function HomeScreen() {
             const app = aiAppForFolder(f.id);
             return {
               label: f.name,
-              leading: app ? <AppBadge app={app} size={30} /> : (
-                <View style={[styles.sheetDotWrap, { backgroundColor: f.color + '26' }]}>
-                  <View style={[styles.sheetDot, { backgroundColor: visibleOn(f.color, theme.elevated) }]} />
-                </View>
-              ),
+              icon: 'folder-outline' as const,
+              leading: app ? <AppBadge app={app} size={26} /> : undefined,
               onPress: () => moveTo(f.id, f.name),
             };
           }),
@@ -672,18 +650,14 @@ function IconButton({ theme, icon, label, tint, onPress }: {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  top: { paddingHorizontal: 16, gap: 12 },
+  top: { paddingHorizontal: 16, gap: 14 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   titleBlock: { flex: 1, minWidth: 0 },
-  hello: { fontSize: font.body, fontWeight: '700', marginTop: 1 },
-  avatarBtn: { padding: 2 },
-  subtitle: { fontSize: font.footnote, marginTop: 2 },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 0, marginRight: -6 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  waitingDot: { position: 'absolute', top: 7, right: 7, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, height: 48, borderRadius: 24 },
   searchInput: { flex: 1, fontSize: font.body, height: '100%' },
-  aiBar: { gap: 8, paddingHorizontal: 16, paddingTop: 12 },
+  aiBar: { gap: 8, paddingHorizontal: 16, paddingTop: 12, alignItems: 'center' },
   aiPill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 4, paddingRight: 12, height: 34, borderRadius: 17, borderWidth: StyleSheet.hairlineWidth },
   aiPillText: { fontSize: font.footnote, fontWeight: '700' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
@@ -714,25 +688,21 @@ const styles = StyleSheet.create({
   toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 },
   toolBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 32 },
   toolBtnShrink: { flexShrink: 1, minWidth: 0 },
-  aiBarLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 2 },
-  aiBarLabelText: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  aiBarLabel: { fontSize: font.footnote, fontWeight: '600', marginRight: 2 },
   toolbarText: { fontSize: font.footnote, fontWeight: '600', flexShrink: 1 },
   list: { paddingHorizontal: 16, gap: 12, paddingTop: 4 },
   gridRow: { gap: 12 },
-  empty: { alignItems: 'center', gap: 8, paddingTop: 70, paddingHorizontal: 32 },
-  emptyIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  empty: { alignItems: 'center', gap: 6, paddingTop: 64, paddingHorizontal: 32 },
   emptyTitle: { fontSize: font.headline, fontWeight: '700' },
   emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },
-  emptyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingHorizontal: 16, borderRadius: 21, marginTop: 10 },
+  emptyBtn: { alignItems: 'center', justifyContent: 'center', height: 44, paddingHorizontal: 20, borderRadius: 22, marginTop: 12 },
   emptyBtnText: { fontSize: font.body, fontWeight: '700' },
-  sheetDotWrap: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  sheetDot: { width: 14, height: 14, borderRadius: 7 },
   fab: {
     position: 'absolute',
-    right: 20,
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: shadow.raised,

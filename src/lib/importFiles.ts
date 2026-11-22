@@ -163,7 +163,7 @@ export function parseImport(file: string, text: string): ParsedFile {
     try {
       data = JSON.parse(trimmed);
     } catch {
-      throw new Error(`${file} isn't valid JSON.`);
+      throw new Error(`${file} couldn't be read. It may be damaged.`);
     }
     format = 'json';
     prompts = fromJson(data);

@@ -215,7 +215,7 @@ The runtime version uses the `fingerprint` policy, so an update only reaches bui
 
 ## 💛 Credits
 
-Made with care by **[Inigo](https://github.com/inigo-code)**. The title font is [Fredoka](https://fonts.google.com/specimen/Fredoka), and icons are from [Ionicons](https://ionic.io/ionicons).
+Made with care by **[Inigo](https://github.com/inigo-code)**. Icons are from [Ionicons](https://ionic.io/ionicons).
 
 ## ©️ Copyright
 

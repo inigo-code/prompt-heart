@@ -1,83 +1,55 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/AppText';
 import { AppBadge } from '@/components/AppBadge';
-import { Achievements } from '@/components/profile/Achievements';
-import { ActivityGraph, ActivityKey } from '@/components/profile/ActivityGraph';
-import { Section } from '@/components/SettingsUI';
+import { Row, Section } from '@/components/SettingsUI';
 import { aiApp } from '@/lib/ai';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import { useInsights } from '@/profile/useInsights';
 
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
-/** The profile's "how you use your prompts": numbers, your most-used four, a year of activity, badges. */
+/** The profile's "how you use your prompts": plain numbers, the prompts you copy most, and where they go. */
 export function InsightsSection({ theme }: { theme: Theme }) {
   const data = useInsights();
   const maxCategory = data.topCategories[0]?.count ?? 1;
   const maxOpens = data.opens[0]?.count ?? 1;
-  const unlocked = data.achievements.filter((a) => a.tier).length;
 
   return (
     <>
-      <View style={styles.figures} accessibilityRole="summary">
-        <Figure theme={theme} value={data.prompts} label={data.prompts === 1 ? 'prompt' : 'prompts'} />
-        <Figure theme={theme} value={data.copies} label={data.copies === 1 ? 'copy' : 'copies'} />
-        <Figure theme={theme} value={data.templates} label="with blanks" />
-        <Figure theme={theme} value={data.currentStreak} label="day streak" accent />
-      </View>
+      <Section theme={theme} title="Your prompts">
+        <Row theme={theme} label="Prompts" value={data.prompts.toLocaleString()} />
+        <Row theme={theme} label="Times copied" value={data.copies.toLocaleString()} />
+        <Row theme={theme} label="With blanks to fill" value={data.templates.toLocaleString()} />
+        <Row theme={theme} label="Active days in the last year" value={data.activeDays.toLocaleString()} last={data.longestStreak < 2} />
+        {data.longestStreak >= 2 && <Row theme={theme} label="Most days in a row" value={plural(data.longestStreak, 'day')} last />}
+      </Section>
 
-      <Animated.View entering={FadeInDown.duration(260).delay(0)}>
-      <Section theme={theme} title="Your most-used four">
+      <Section theme={theme} title="Copied most">
         {data.topFour.length ? (
-          <View style={styles.four}>
-            {data.topFour.map((p) => (
-              <Pressable
-                key={p.id}
-                onPress={() => router.push({ pathname: '/prompt/[id]', params: { id: p.id } })}
-                accessibilityRole="button"
-                accessibilityLabel={`${p.title}, copied ${plural(p.copies, 'time')}`}
-                style={({ pressed }) => [styles.fourItem, { backgroundColor: theme.bg, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
-              >
-                <Text style={[styles.fourCount, { color: theme.text }]}>{p.copies}×</Text>
-                <Text style={[styles.fourTitle, { color: theme.text }]}>
-                  {p.title}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+          data.topFour.map((p, i) => (
+            <Row
+              key={p.id}
+              theme={theme}
+              label={p.title || 'Untitled'}
+              value={`${p.copies.toLocaleString()}×`}
+              onPress={() => router.push({ pathname: '/prompt/[id]', params: { id: p.id } })}
+              last={i === data.topFour.length - 1}
+            />
+          ))
         ) : (
-          <Text style={[styles.empty, { color: theme.textMuted }]}>Copy a prompt and it shows up here. The four you copy most stay on top.</Text>
+          <Row theme={theme} label="Copy a prompt and it shows up here" last />
         )}
       </Section>
-      </Animated.View>
-
-      <Animated.View entering={FadeInDown.duration(260).delay(50)}>
-      <Section
-        theme={theme}
-        title="A year of prompting"
-        footer={`${plural(data.activeDays, 'active day')} · longest streak ${plural(data.longestStreak, 'day')}${
-          data.busiestMonth ? ` · busiest month ${MONTH_NAMES[Number(data.busiestMonth.key.slice(5, 7)) - 1]}` : ''
-        }.`}
-      >
-        <View style={styles.graph}>
-          <ActivityGraph weeks={data.weeks} theme={theme} />
-          <ActivityKey theme={theme} />
-        </View>
-      </Section>
-      </Animated.View>
 
       {data.topCategories.length > 0 && (
         <Section theme={theme} title="Top categories">
           <View style={styles.bars}>
             {data.topCategories.map((c) => (
-              <Bar key={c.name} theme={theme} label={c.name} value={c.count} max={maxCategory} color={c.color} dot={c.color} />
+              <Bar key={c.name} theme={theme} label={c.name} value={c.count} max={maxCategory} />
             ))}
           </View>
         </Section>
@@ -88,73 +60,47 @@ export function InsightsSection({ theme }: { theme: Theme }) {
           <View style={styles.bars}>
             {data.opens.map((o) => {
               const app = aiApp(o.key);
-              return <Bar key={o.key} theme={theme} label={app?.label ?? o.key} value={o.count} max={maxOpens} color={app?.color ?? theme.accent} leading={app ? <AppBadge app={app} size={22} /> : undefined} />;
+              return (
+                <Bar
+                  key={o.key}
+                  theme={theme}
+                  label={app?.label ?? o.key}
+                  value={o.count}
+                  max={maxOpens}
+                  leading={app ? <AppBadge app={app} size={22} /> : undefined}
+                />
+              );
             })}
           </View>
         </Section>
       )}
-
-      <Animated.View entering={FadeInDown.duration(260).delay(100)}>
-      <Section theme={theme} title={`Achievements · ${unlocked} of ${data.achievements.length}`}>
-        <View style={styles.badges}>
-          <Achievements list={data.achievements} theme={theme} />
-        </View>
-      </Section>
-      </Animated.View>
     </>
   );
 }
 
-function Figure({ theme, value, label, accent }: { theme: Theme; value: number; label: string; accent?: boolean }) {
-  return (
-    <View style={[styles.figure, { backgroundColor: theme.card, borderColor: theme.border }]} accessible accessibilityLabel={`${value} ${label}`}>
-      <View style={styles.figureTop}>
-        {accent && <Ionicons name="flame" size={16} color={theme.accentInk} />}
-        <Text style={[styles.figureValue, { color: theme.text }]}>{value.toLocaleString()}</Text>
-      </View>
-      <Text style={[styles.figureLabel, { color: theme.textMuted }]} numberOfLines={2}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function Bar({ theme, label, value, max, color, dot, leading }: { theme: Theme; label: string; value: number; max: number; color: string; dot?: string; leading?: ReactNode }) {
+function Bar({ theme, label, value, max, leading }: { theme: Theme; label: string; value: number; max: number; leading?: ReactNode }) {
   return (
     <View style={styles.bar} accessible accessibilityLabel={`${label}: ${value}`}>
       <View style={styles.barHead}>
-        {leading ?? (dot ? <View style={[styles.dot, { backgroundColor: dot }]} /> : null)}
+        {leading}
         <Text style={[styles.barLabel, { color: theme.text }]} numberOfLines={2}>
           {label}
         </Text>
-        <Text style={[styles.barValue, { color: theme.textMuted }]}>{value}</Text>
+        <Text style={[styles.barValue, { color: theme.textMuted }]}>{value.toLocaleString()}</Text>
       </View>
       <View style={[styles.track, { backgroundColor: theme.chip }]}>
-        <View style={[styles.fill, { width: `${Math.max(4, Math.round((value / max) * 100))}%`, backgroundColor: color }]} />
+        <View style={[styles.fill, { width: `${Math.max(3, Math.round((value / max) * 100))}%`, backgroundColor: theme.accent }]} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  figures: { flexDirection: 'row', gap: 8 },
-  figure: { flex: 1, minWidth: 0, alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 2 },
-  figureTop: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  figureValue: { fontSize: font.title, fontWeight: '800' },
-  figureLabel: { fontSize: font.caption, textAlign: 'center' },
-  four: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, padding: 12 },
-  fourItem: { width: '48.6%', minHeight: 88, borderRadius: 14, padding: 12, gap: 6 },
-  fourCount: { fontSize: font.title, fontWeight: '800' },
-  fourTitle: { fontSize: font.footnote, fontWeight: '700', lineHeight: 20 },
-  empty: { fontSize: font.body, lineHeight: 22, padding: 16 },
-  graph: { padding: 16, gap: 10 },
-  bars: { padding: 16, gap: 14 },
-  bar: { gap: 6 },
-  barHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  barLabel: { flex: 1, fontSize: font.body, fontWeight: '700' },
-  barValue: { fontSize: font.body, fontWeight: '700' },
-  track: { height: 8, borderRadius: 4, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 4 },
-  badges: { padding: 12 },
+  bars: { padding: 16, gap: 16 },
+  bar: { gap: 8 },
+  barHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  barLabel: { flex: 1, fontSize: font.body, fontWeight: '600' },
+  barValue: { fontSize: font.body, fontVariant: ['tabular-nums'] },
+  track: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: 3 },
 });

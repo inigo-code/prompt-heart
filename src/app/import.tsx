@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/AppText';
 import { useToast } from '@/components/Toast';
 import { pickImportFiles } from '@/lib/backup';
+import { shownError } from '@/lib/errors';
 import { newId } from '@/lib/id';
 import { planImport } from '@/lib/importFiles';
 import type { ParsedFile } from '@/lib/importFiles';
@@ -43,7 +44,7 @@ export default function ImportScreen() {
       setFiles(picked.files);
       setErrors(picked.errors);
     } catch (e) {
-      toast(`Couldn’t read the files: ${e instanceof Error ? e.message : String(e)}`);
+      toast(shownError(e, 'Couldn’t read those files. Try again, or pick other files.'));
     } finally {
       setBusy(false);
     }
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
   previewItem: { fontSize: font.footnote },
   add: { height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
   addText: { fontSize: font.body, fontWeight: '800' },
-  heading: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 6, marginTop: 8 },
+  heading: { fontSize: font.footnote, fontWeight: '700', paddingHorizontal: 4, marginTop: 8 },
   sources: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
   source: { flexDirection: 'row', gap: 12, padding: 14, alignItems: 'flex-start' },
   sourceIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },

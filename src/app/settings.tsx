@@ -11,6 +11,7 @@ import { useToast } from '@/components/Toast';
 import { AI_APPS } from '@/lib/ai';
 import { APP_NAME, HEART_APPS } from '@/lib/app';
 import { exportBackup, exportCsv, exportMarkdown, pickBackup, restoreBackupImages } from '@/lib/backup';
+import { shownError } from '@/lib/errors';
 import { ACCENTS, useTheme } from '@/lib/theme';
 import { LIBRARY_PROMPTS } from '@/library/prompts';
 import { useAppLock } from '@/lock/AppLockProvider';
@@ -22,7 +23,6 @@ import type { AccentKey } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import { useSync } from '@/sync/SyncProvider';
 
-const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 const SYNC_LABEL = {
   unconfigured: 'Not set up',
@@ -51,7 +51,7 @@ export default function SettingsScreen() {
       const msg = await fn();
       if (msg) toast(msg);
     } catch (e) {
-      toast(errorText(e));
+      toast(shownError(e, kind === 'import' ? "Couldn't import that file. Check it's a Prompt Heart backup." : "Couldn't export your prompts. Try again."));
     } finally {
       setBusy(null);
     }

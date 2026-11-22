@@ -103,8 +103,9 @@ export default function CategoriesScreen() {
                 const i = FOLDER_COLORS.indexOf(item.color);
                 updateFolder(item.id, { color: FOLDER_COLORS[(i + 1) % FOLDER_COLORS.length] });
               }}
-              accessibilityLabel="Change colour"
-              style={[styles.dot, { backgroundColor: visibleOn(item.color, theme.card) }]}
+              accessibilityLabel={`Change the colour of ${item.name}`}
+              hitSlop={10}
+              style={[styles.swatchSquare, { backgroundColor: visibleOn(item.color, theme.card) }]}
             />
             {editing === item.id ? (
               <TextInput
@@ -121,10 +122,10 @@ export default function CategoriesScreen() {
                 {item.name}
               </Text>
             )}
-            <View style={[styles.count, { backgroundColor: theme.chip }]}>
-              <Text style={[styles.countText, { color: theme.textMuted }]}>{countFor(item.id)}</Text>
-            </View>
-            <Pressable hitSlop={8} onPress={() => setMenuFor(item)} accessibilityLabel="Category options">
+            <Text style={[styles.countText, { color: theme.textMuted }]} accessibilityLabel={`${countFor(item.id)} prompts`}>
+              {countFor(item.id)}
+            </Text>
+            <Pressable style={styles.more} onPress={() => setMenuFor(item)} accessibilityLabel={`Options for ${item.name}`}>
               <Ionicons name="ellipsis-horizontal" size={20} color={theme.textMuted} />
             </Pressable>
           </View>
@@ -132,7 +133,7 @@ export default function CategoriesScreen() {
         ListEmptyComponent={<Text style={[styles.empty, { color: theme.textMuted }]}>No categories yet.</Text>}
         ListFooterComponent={
           folders.length > 0 ? (
-            <Text style={[styles.hint, { color: theme.textMuted }]}>Tap a name to rename, tap the dot to change colour.</Text>
+            <Text style={[styles.hint, { color: theme.textMuted }]}>Tap a name to rename it, or its colour to change the colour.</Text>
           ) : undefined
         }
       />
@@ -169,15 +170,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
-    height: 52,
+    height: 56,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderRightWidth: StyleSheet.hairlineWidth,
   },
   first: { borderTopWidth: StyleSheet.hairlineWidth, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
   last: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
-  count: { minWidth: 26, height: 22, borderRadius: 11, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' },
-  countText: { fontSize: font.caption, fontWeight: '700' },
-  dot: { width: 18, height: 18, borderRadius: 9 },
+  countText: { fontSize: font.body, fontVariant: ['tabular-nums'] },
+  more: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center', marginRight: -10 },
+  swatchSquare: { width: 20, height: 20, borderRadius: 6 },
   rowName: { flex: 1, fontSize: font.headline, fontWeight: '600' },
   empty: { textAlign: 'center', paddingTop: 40 },
   hint: { textAlign: 'center', fontSize: font.caption, paddingTop: 12 },

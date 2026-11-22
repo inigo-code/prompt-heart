@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react';
 import { AppState } from 'react-native';
 
+import { errorText, shownError } from '@/lib/errors';
 import { CLOUD_IMAGE_LIMIT, IMAGE_BUCKET, deleteRemoteImages, downloadMissingImages, imagesSupported, listRemoteImages, uploadImage } from '@/lib/images';
 import { usePromptStore } from '@/store/PromptStore';
 import type { SyncStoreApi } from '@/store/PromptStore';
@@ -132,7 +133,7 @@ async function pushImages(client: SupabaseClient, userId: string, store: SyncSto
       uploaded.push(id);
     } catch (e) {
       // The server refuses uploads over the limit (row-level security); keep the rest waiting.
-      if (/row-level security|policy/i.test(e instanceof Error ? e.message : String((e as { message?: string })?.message))) {
+      if (/row-level security|policy/i.test(errorText(e))) {
         waiting.push(id);
         remote.add(id); // treat as full for the rest of this pass
         continue;
@@ -223,7 +224,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     storeRef.current = store;
   });
-  const running = useRef(false);
+  // The sync in progress, so a second request (pull to refresh, Sync now) waits for it to finish.
+  const running = useRef<Promise<void> | null>(null);
   const again = useRef(false);
   // Automatic syncs keep a few seconds apart; manual ones (syncNow) call runSync directly, any time.
   const runSyncRef = useRef<() => Promise<void>>(async () => {});
@@ -241,39 +243,44 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     if (ready && userId && meta.userId !== userId) resetForUser(userId);
   }, [ready, userId, meta.userId, resetForUser]);
 
-  const runSync = useCallback(async () => {
+  const runSync = useCallback((): Promise<void> => {
     // Until the saved prompts are read (or while reading them failed), the store only holds the samples.
-    if (!supabase || !userId || !ready) return;
+    // A sync before the store has switched to this account (the moment after signing in) would send the
+    // previous account's queue, so it waits for the switch; the sign-in sync follows straight after.
+    if (!supabase || !userId || !ready || storeRef.current.getSnapshot().sync.userId !== userId) return Promise.resolve();
     if (running.current) {
       again.current = true;
-      return;
+      return running.current;
     }
-    running.current = true;
-    autoSync.started();
-    setState((s) => ({ ...s, status: 'syncing' }));
-    let imagesToRetry = 0;
-    try {
-      do {
-        again.current = false;
-        const usage = await pushImages(supabase, userId, storeRef.current, setProgress);
-        if (usage) setImageUsage(usage);
+    const client = supabase;
+    const run = (async () => {
+      autoSync.started();
+      setState((s) => ({ ...s, status: 'syncing' }));
+      let imagesToRetry = 0;
+      try {
+        do {
+          again.current = false;
+          const usage = await pushImages(client, userId, storeRef.current, setProgress);
+          if (usage) setImageUsage(usage);
+          setProgress(null);
+          await push(client, userId, storeRef.current);
+          await pull(client, userId, storeRef.current);
+          // Each image shows as soon as it lands, so a new phone fills in while the rest download.
+          imagesToRetry = await pullImages(client, userId, storeRef.current, setProgress, () => setImagesVersion((v) => v + 1));
+          setProgress(null);
+        } while (again.current);
+        setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
+      } catch (e) {
         setProgress(null);
-        await push(supabase, userId, storeRef.current);
-        await pull(supabase, userId, storeRef.current);
-        // Each image shows as soon as it lands, so a new phone fills in while the rest download.
-        imagesToRetry = await pullImages(supabase, userId, storeRef.current, setProgress, () => setImagesVersion((v) => v + 1));
-        setProgress(null);
-      } while (again.current);
-      setState({ status: 'synced', error: null, lastSyncedAt: Date.now() });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
-      setProgress(null);
-      setState((s) => ({ ...s, status: 'error', error: message }));
-    } finally {
-      running.current = false;
-      autoSync.finished();
-      if (imagesToRetry > 0) autoSync.request(RETRY_MS);
-    }
+        setState((s) => ({ ...s, status: 'error', error: shownError(e, "Couldn't reach your account. It will try again soon.") }));
+      } finally {
+        running.current = null;
+        autoSync.finished();
+        if (imagesToRetry > 0) autoSync.request(RETRY_MS);
+      }
+    })();
+    running.current = run;
+    return run;
   }, [userId, ready, autoSync]);
 
   useEffect(() => {
@@ -326,13 +333,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, [active, state.status, autoSync]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) throw error;
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { data, error } = await supabase.auth.signUp({ email: email.trim(), password });
     if (error) throw error;
     return data.session !== null;
@@ -341,25 +348,25 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   // The email codes need {{ .Token }} in the Supabase "Confirm signup" and "Reset password" email
   // templates; see supabase/EMAIL_SETUP.md.
   const confirmSignUp = useCallback(async (email: string, code: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'signup' });
     if (error) throw error;
   }, []);
 
   const resendSignUpCode = useCallback(async (email: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() });
     if (error) throw error;
   }, []);
 
   const sendPasswordReset = useCallback(async (email: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
     if (error) throw error;
   }, []);
 
   const resetPassword = useCallback(async (email: string, code: string, password: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'recovery' });
     if (error) throw error;
     const { error: updateError } = await supabase.auth.updateUser({ password });
@@ -367,13 +374,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(async (data: Record<string, unknown>) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.updateUser({ data });
     if (error) throw error;
   }, []);
 
   const updateEmail = useCallback(async (email: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const next = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.updateUser({ email: next });
     if (error) throw error;
@@ -381,7 +388,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePassword = useCallback(async (password: string) => {
-    if (!supabase) throw new Error('Cloud sync is not configured.');
+    if (!supabase) throw new Error('Cloud sync isn’t available in this version.');
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
   }, []);
@@ -402,8 +409,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     if (error) {
       throw new Error(
         /delete_my_account/.test(error.message)
-          ? "Account deletion isn't set up on the server yet (run supabase/delete_my_account.sql)."
-          : error.message,
+          ? "Deleting accounts isn't available right now. Write to us and we'll delete it for you."
+          : shownError(error, "Couldn't delete the account. Try again."),
       );
     }
     await client.auth.signOut({ scope: 'local' }).catch(() => {});

@@ -81,9 +81,6 @@ export default function TrashScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <View style={[styles.emptyIcon, { backgroundColor: theme.chip }]}>
-              <Ionicons name="trash-outline" size={32} color={theme.text} />
-            </View>
             <Text style={[styles.emptyTitle, { color: theme.text }]}>Trash is empty</Text>
             <Text style={[styles.emptyText, { color: theme.textMuted }]}>
               Prompts you delete wait here for {TRASH_DAYS} days, so you can bring them back.
@@ -129,7 +126,6 @@ const styles = StyleSheet.create({
   days: { fontSize: font.caption, fontWeight: '600', marginTop: 2 },
   btn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   empty: { alignItems: 'center', gap: 8, paddingTop: 96, paddingHorizontal: 24 },
-  emptyIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   emptyTitle: { fontSize: font.headline, fontWeight: '700' },
   emptyText: { fontSize: font.body, lineHeight: 22, textAlign: 'center', maxWidth: 300 },
   emptyBtn: { marginTop: 12, height: 44, paddingHorizontal: 20, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },

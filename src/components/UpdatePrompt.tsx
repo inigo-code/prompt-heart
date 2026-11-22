@@ -1,11 +1,10 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, AppState, Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Text } from '@/components/AppText';
-import { HeartMark } from '@/components/BrandTitle';
+import { AppMark } from '@/components/BrandTitle';
 import { APP_NAME, WHATS_NEW } from '@/lib/app';
 import { useAppLock } from '@/lock/AppLockProvider';
 import { font, useTheme } from '@/lib/theme';
@@ -73,7 +72,7 @@ function UpdatePromptInner() {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setDismissed(true)}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
         <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <HeartMark theme={theme} size={64} />
+          <AppMark size={56} />
           <Text style={[styles.title, { color: theme.text }]}>A fresh update is ready</Text>
           <Text style={[styles.body, { color: theme.textMuted }]}>
             {APP_NAME} has downloaded improvements and fixes. Restart to start using them. It only takes a second, and your
@@ -106,18 +105,15 @@ export function WhatsNew({ onClose }: { onClose: () => void }) {
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={[styles.backdrop, { backgroundColor: theme.overlay }]}>
         <Animated.View entering={FadeInDown.duration(280)} style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]} accessibilityViewIsModal>
-          <View style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
-            <Ionicons name="sparkles" size={26} color={theme.accent} />
-          </View>
+          <AppMark size={56} />
           <Text style={[styles.title, { color: theme.text }]} accessibilityRole="header">
             What’s new in {APP_NAME}
           </Text>
           <View style={styles.list}>
-            {WHATS_NEW.items.map((item) => (
-              <View key={item} style={styles.item}>
-                <View style={[styles.dot, { backgroundColor: theme.accent }]} />
-                <Text style={[styles.itemText, { color: theme.text }]}>{item}</Text>
-              </View>
+            {WHATS_NEW.items.map((item, i) => (
+              <Text key={item} style={[styles.itemText, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.border }, { color: theme.text }]}>
+                {item}
+              </Text>
             ))}
           </View>
           <Pressable
@@ -136,13 +132,10 @@ export function WhatsNew({ onClose }: { onClose: () => void }) {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
   card: { width: '100%', maxWidth: 380, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, padding: 24, alignItems: 'center', gap: 10 },
-  title: { fontSize: font.title, fontWeight: '800', textAlign: 'center', marginTop: 4 },
+  title: { fontSize: font.title, fontWeight: '800', textAlign: 'center', marginTop: 6, letterSpacing: -0.3 },
   body: { fontSize: font.body, lineHeight: 22, textAlign: 'center' },
-  badge: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
-  list: { alignSelf: 'stretch', gap: 12, marginTop: 6 },
-  item: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  dot: { width: 8, height: 8, borderRadius: 4, marginTop: 7 },
-  itemText: { flex: 1, fontSize: font.body, lineHeight: 22 },
+  list: { alignSelf: 'stretch', marginTop: 6 },
+  itemText: { fontSize: font.body, lineHeight: 22, paddingVertical: 10 },
   primary: { alignSelf: 'stretch', height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   primaryText: { fontSize: font.headline, fontWeight: '800' },
   secondary: { paddingVertical: 8, paddingHorizontal: 20 },

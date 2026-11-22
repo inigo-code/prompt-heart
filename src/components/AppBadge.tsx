@@ -3,10 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/AppText';
 import type { AiApp } from '@/lib/ai';
 
-/** Round brand-coloured chip with the app's short name, e.g. "Cl" for Claude. */
+/** A small app-icon tile in the app's brand colour with its short name, e.g. "Cl" for Claude. */
 export function AppBadge({ app, size = 28 }: { app: AiApp; size?: number }) {
   return (
-    <View style={[styles.badge, { width: size, height: size, borderRadius: size / 2, backgroundColor: app.color }]}>
+    <View style={[styles.badge, { width: size, height: size, borderRadius: Math.round(size * 0.28), backgroundColor: app.color }]}>
       <Text style={[styles.text, { fontSize: size * (app.badge.length > 2 ? 0.32 : 0.4) }]} numberOfLines={1}>
         {app.badge}
       </Text>

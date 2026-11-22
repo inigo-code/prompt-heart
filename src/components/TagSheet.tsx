@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: font.body, height: 46, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12 },
   addBtn: { height: 46, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   addText: { fontSize: font.body, fontWeight: '700' },
-  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: font.footnote, fontWeight: '600' },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tag: { paddingHorizontal: 12, height: 36, borderRadius: 18, justifyContent: 'center' },
 });

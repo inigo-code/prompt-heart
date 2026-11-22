@@ -3,6 +3,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 
+import { shownError } from '@/lib/errors';
 import { APP_NAME, APP_SLUG } from '@/lib/app';
 import { imageBase64, imagesSupported, writeImageBase64 } from '@/lib/images';
 import { parseImport, toCsv } from '@/lib/importFiles';
@@ -97,7 +98,7 @@ export async function pickImportFiles(): Promise<{ files: ParsedFile[]; errors: 
     try {
       files.push(parseImport(asset.name, await readText(asset.uri)));
     } catch (e) {
-      errors.push(e instanceof Error ? e.message : String(e));
+      errors.push(shownError(e, `${asset.name} couldn't be read.`));
     }
   }
   return { files, errors };
@@ -114,7 +115,7 @@ export async function pickBackup(): Promise<Backup | null> {
   try {
     data = JSON.parse(text) as Backup;
   } catch {
-    throw new Error("That file isn't a valid backup (it isn't JSON).");
+    throw new Error(`That file isn't a ${APP_NAME} backup.`);
   }
   if (data.format !== FORMAT || !Array.isArray(data.prompts) || !Array.isArray(data.folders)) {
     throw new Error(`That file isn't a ${APP_NAME} backup.`);

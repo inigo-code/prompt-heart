@@ -38,8 +38,8 @@ export default function HistoryScreen() {
       data={versions}
       keyExtractor={(v) => String(v.at)}
       ListHeaderComponent={
-        <View style={[styles.current, { backgroundColor: theme.accentSoft, borderColor: theme.accent + '55' }]}>
-          <Text style={[styles.label, { color: theme.textMuted }]}>Current</Text>
+        <View style={styles.current}>
+          <Text style={[styles.label, { color: theme.accentInk }]}>Current version</Text>
           <Text style={[styles.title, { color: theme.text }]}>
             {prompt?.title || 'Untitled'}
           </Text>
@@ -58,7 +58,7 @@ export default function HistoryScreen() {
           </Text>
         </View>
       }
-      renderItem={({ item, index }) => {
+      renderItem={({ item }) => {
         const expanded = open === item.at;
         return (
           <Pressable
@@ -69,7 +69,6 @@ export default function HistoryScreen() {
             style={[styles.card, { backgroundColor: theme.card, borderColor: expanded ? theme.accent : theme.border }]}
           >
             <View style={styles.row}>
-              <View style={[styles.dot, { backgroundColor: index === 0 ? theme.accent : theme.textMuted }]} />
               <Text style={[styles.time, { color: theme.text }]}>{formatStamp(item.at)}</Text>
               <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={theme.textMuted} />
             </View>
@@ -111,12 +110,11 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   list: { padding: 16, gap: 10 },
-  current: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 3, marginBottom: 6 },
-  label: { fontSize: font.caption, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
-  meta: { fontSize: font.caption },
+  current: { paddingHorizontal: 4, paddingBottom: 8, gap: 2 },
+  label: { fontSize: font.footnote, fontWeight: '700' },
+  meta: { fontSize: font.footnote },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
   time: { flex: 1, fontSize: font.footnote, fontWeight: '700' },
   title: { fontSize: font.body, fontWeight: '700' },
   body: { fontSize: font.body, lineHeight: 22 },

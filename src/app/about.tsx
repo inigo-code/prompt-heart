@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/AppText';
 import { AboutCard } from '@/components/AboutCard';
-import { BrandTitle } from '@/components/BrandTitle';
+import { AppMark } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
 import { APP_NAME, APP_TAGLINE, DEVELOPER, HEART_APPS, LINKS, SUPPORT_EMAIL } from '@/lib/app';
 import { font, useTheme } from '@/lib/theme';
@@ -20,7 +20,7 @@ const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'image-outline', text: 'Reference images that never get copied' },
   { icon: 'share-outline', text: `Share text or images into ${APP_NAME} from any app` },
   { icon: 'apps-outline', text: 'A home-screen widget: one tap to copy' },
-  { icon: 'person-outline', text: 'Your profile: most-used prompts, streaks and achievements' },
+  { icon: 'person-outline', text: 'Your profile: the prompts you copy most, and where they go' },
   { icon: 'download-outline', text: 'Import from spreadsheets, Notion, JSON and Markdown' },
   { icon: 'cloud-done-outline', text: 'Cloud sync across devices, works offline' },
 ];
@@ -36,8 +36,10 @@ export default function AboutScreen() {
   return (
     <ScrollView style={{ backgroundColor: theme.bg }} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
       <View style={styles.hero}>
-        <Image source={require('../../assets/icon.png')} style={styles.icon} />
-        <BrandTitle theme={theme} size={28} align="center" />
+        <AppMark size={96} />
+        <Text style={[styles.appName, { color: theme.text }]} accessibilityRole="header">
+          {APP_NAME}
+        </Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>{APP_TAGLINE}</Text>
         <Pressable
           onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
@@ -138,7 +140,7 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 24 },
   hero: { alignItems: 'center', gap: 6, paddingTop: 12 },
-  icon: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
+  appName: { fontSize: font.title2, fontWeight: '800', letterSpacing: -0.5, marginTop: 10 },
   tagline: { fontSize: font.body },
   family: { flexDirection: 'row', alignItems: 'center', marginTop: 6, height: 30, paddingHorizontal: 14, borderRadius: 15, borderWidth: 1 },
   familyText: { fontSize: font.caption, fontWeight: '800', letterSpacing: 1.5 },

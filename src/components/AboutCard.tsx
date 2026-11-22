@@ -7,6 +7,7 @@ import { Text } from '@/components/AppText';
 import { APP_NAME } from '@/lib/app';
 import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
+import { shownError } from '@/lib/errors';
 import { formatStamp } from '@/lib/format';
 
 // Updates download on launch and apply on the next restart; this lets you check and apply one right away.
@@ -38,7 +39,7 @@ export function AboutCard({ theme }: { theme: Theme }) {
       if (fetched.isNew) await Updates.reloadAsync();
       else setMessage("You're on the latest version.");
     } catch (e) {
-      setMessage(`Couldn't check for updates: ${e instanceof Error ? e.message : String(e)}`);
+      setMessage(shownError(e, "Couldn't check for updates. Try again later."));
     } finally {
       setBusy(false);
     }
@@ -71,7 +72,7 @@ export function AboutCard({ theme }: { theme: Theme }) {
 
 const styles = StyleSheet.create({
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
-  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: font.footnote, fontWeight: '600' },
   line: { fontSize: font.headline, fontWeight: '700' },
   meta: { fontSize: font.footnote },
   btn: { height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 4 },

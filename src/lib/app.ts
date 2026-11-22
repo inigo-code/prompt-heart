@@ -29,8 +29,11 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-16-category-dots',
+  id: '2026-11-22-cleaner-look',
   items: [
-    'In dark mode, dark category colours such as Grok’s stay visible on cards and chips',
+    'A calmer look: the app icon and name up top, and simpler cards, lists and menus',
+    'The cloud button shows whether your prompts are synced, waiting or need a look',
+    'Your profile shows plain numbers and the prompts you copy most',
+    'Clearer messages when something goes wrong, like a lost connection',
   ],
 };

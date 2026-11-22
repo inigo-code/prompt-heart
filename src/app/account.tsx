@@ -7,12 +7,11 @@ import { KeyboardSafe } from '@/components/KeyboardSafe';
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { font, useTheme } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
-import { SYNC_AMBER } from '@/sync/statusColors';
 import { useSync } from '@/sync/SyncProvider';
 import type { SyncStatus } from '@/sync/SyncProvider';
+import { errorText, shownError } from '@/lib/errors';
 import { formatStamp } from '@/lib/format';
 
-const errorText = (e: unknown) => (e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e));
 
 export default function AccountScreen() {
   const theme = useTheme();
@@ -25,8 +24,8 @@ export default function AccountScreen() {
           <Card theme={theme}>
             <Text style={[styles.h, { color: theme.text }]}>Cloud sync isn&apos;t set up</Text>
             <Text style={[styles.p, { color: theme.textMuted }]}>
-              Add your Supabase project URL and publishable key to app/.env.local, then restart the app. The README
-              explains the steps. Until then, your prompts are saved on this device only.
+              This version of the app can’t sync. Your prompts are saved on this phone, and you can back them up from
+              Settings at any time.
             </Text>
           </Card>
         ) : sync.status === 'signed-out' ? (
@@ -87,7 +86,7 @@ function authError(e: unknown) {
   if (/expired|invalid.*(otp|token)|token.*(invalid|expired)/i.test(text)) return "That code didn't work or has expired. Check it, or send a new one.";
   if (/invalid login credentials/i.test(text)) return 'Wrong email or password.';
   if (/email not confirmed/i.test(text)) return 'Confirm your email first: enter the code we sent you.';
-  return text;
+  return shownError(e, "That didn't work. Try again.");
 }
 
 function SignIn({ theme }: { theme: Theme }) {
@@ -311,7 +310,7 @@ function SignedIn({ theme }: { theme: Theme }) {
 
       <Card theme={theme}>
         <View style={styles.statusRow}>
-          <Ionicons name={s.icon} size={22} color={status === 'error' ? theme.danger : status === 'waiting' ? SYNC_AMBER : theme.accent} />
+          <Ionicons name={s.icon} size={22} color={status === 'error' ? theme.danger : status === 'waiting' ? theme.accentInk : theme.textMuted} />
           <Text style={[styles.statusText, { color: theme.text }]}>{s.label}</Text>
         </View>
         <Text style={[styles.p, { color: theme.textMuted }]}>
@@ -362,7 +361,7 @@ const styles = StyleSheet.create({
   card: { padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   h: { fontSize: font.headline, fontWeight: '800' },
   p: { fontSize: font.body, lineHeight: 22 },
-  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: -8 },
+  label: { fontSize: font.footnote, fontWeight: '600', marginBottom: -8 },
   input: { fontSize: font.headline, height: 48, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 16 },
   switch: { fontSize: font.body, textAlign: 'center', paddingVertical: 4 },
   btn: { height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },

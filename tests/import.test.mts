@@ -25,7 +25,7 @@ eq(parseImport('a.json', '[{"name":"Hi","content":"Say hi"}]').prompts[0], { tit
 eq(parseImport('a.json', '{"prompts":[{"title":"T","prompt":"P","tags":["A b","#c"]}]}').prompts[0].tags, ['a-b', 'c'], 'JSON wrapped, tags tidied');
 eq(parseImport('a.json', '["Just a prompt here"]').prompts[0].title, 'Just a prompt here', 'JSON strings');
 eq(parseImport('a.json', '{"Greeter":"Say hello warmly"}').prompts[0], { title: 'Greeter', body: 'Say hello warmly', tags: [], category: null }, 'JSON map');
-assert.throws(() => parseImport('bad.json', '{nope'), /isn't valid JSON/);
+assert.throws(() => parseImport('bad.json', '{nope'), /couldn't be read/);
 n++;
 
 // Markdown: our own export reads back (categories from ##, prompts from ###, tags line, fenced body).

@@ -14,6 +14,7 @@ import { InsightsSection } from '@/components/profile/InsightsSection';
 import { SignOutSheet } from '@/components/SignOutSheet';
 import { Row, Section } from '@/components/SettingsUI';
 import { useToast } from '@/components/Toast';
+import { shownError } from '@/lib/errors';
 import { deleteLocalImage } from '@/lib/images';
 import type { Theme } from '@/lib/theme';
 import { font, useTheme } from '@/lib/theme';
@@ -24,7 +25,14 @@ import { useHistory } from '@/store/HistoryProvider';
 import { usePromptStore } from '@/store/PromptStore';
 import { useSync } from '@/sync/SyncProvider';
 
-const errorText = (e: unknown) => (e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e));
+
+const FAILED: Record<string, string> = {
+  photo: "Couldn't change your photo. Try again.",
+  name: "Couldn't save your name. Try again.",
+  email: "Couldn't change your email. Try again.",
+  password: "Couldn't change your password. Try again.",
+  delete: "Couldn't delete your account. Try again.",
+};
 
 const SYNC_LABEL = {
   unconfigured: 'Not set up',
@@ -73,7 +81,7 @@ export default function ProfileScreen() {
       const msg = await fn();
       if (msg) toast(msg);
     } catch (e) {
-      toast(errorText(e));
+      toast(shownError(e, FAILED[key] ?? "That didn't work. Try again."));
     } finally {
       setBusy(null);
     }

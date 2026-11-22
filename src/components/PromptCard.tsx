@@ -10,7 +10,7 @@ import { ImageThumb } from '@/components/ImageThumb';
 import type { AiApp } from '@/lib/ai';
 import { formatStamp, previewText } from '@/lib/format';
 import { extractVariables } from '@/lib/templates';
-import { font, visibleOn } from '@/lib/theme';
+import { font } from '@/lib/theme';
 import type { Theme } from '@/lib/theme';
 import type { Folder, Prompt } from '@/store/types';
 
@@ -84,7 +84,7 @@ export const PromptCard = memo(function PromptCard({
         hitSlop={6}
         accessibilityRole="button"
         accessibilityLabel={`Copy ${prompt.title || 'prompt'}`}
-        style={[styles.copyBtn, { backgroundColor: copied ? theme.accent : theme.accentSoft }]}
+        style={[styles.copyBtn, { backgroundColor: copied ? theme.accent : theme.chip }]}
       >
         {copied ? (
           <Animated.View entering={ZoomIn.duration(140)}>
@@ -143,31 +143,14 @@ export const PromptCard = memo(function PromptCard({
               {prompt.title || 'Untitled'}
             </Text>
           </View>
-          <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
-            {formatStamp(prompt.updatedAt)}
-          </Text>
           {!!prompt.body && (
             <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={lines}>
               {previewText(prompt.body)}
             </Text>
           )}
-          {(folder || vars > 0) && (
-            <View style={styles.meta}>
-              {folder && (
-                <View style={styles.metaItem}>
-                  <View style={[styles.dot, { backgroundColor: visibleOn(folder.color, theme.card) }]} />
-                  <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
-                    {folder.name}
-                  </Text>
-                </View>
-              )}
-              {vars > 0 && (
-                <Text style={[styles.metaText, { color: theme.textMuted }]}>
-                  {vars} {vars === 1 ? 'blank' : 'blanks'}
-                </Text>
-              )}
-            </View>
-          )}
+          <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
+            {[folder?.name, vars > 0 ? `${vars} ${vars === 1 ? 'blank' : 'blanks'}` : null, formatStamp(prompt.updatedAt)].filter(Boolean).join('  ·  ')}
+          </Text>
         </View>
 
         {!grid && actions}
@@ -178,23 +161,20 @@ export const PromptCard = memo(function PromptCard({
 });
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 12, paddingLeft: 14, gap: 8, overflow: 'hidden' },
+  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 14, paddingLeft: 16, paddingRight: 12, gap: 8, overflow: 'hidden' },
   gridCard: { flex: 1, maxWidth: '48.5%' },
   gridImage: { width: '100%', height: 128 },
   gridActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 'auto' },
   moreBadge: { position: 'absolute', right: 6, bottom: 6, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
   moreText: { color: '#fff', fontSize: font.caption, fontWeight: '800' },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  text: { flex: 1, gap: 3 },
+  text: { flex: 1, gap: 4 },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 5 },
   pin: { marginTop: 4 },
+  metaText: { fontSize: font.footnote, fontWeight: '500', marginTop: 2 },
   title: { flex: 1, fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
   body: { fontSize: font.body, lineHeight: 22 },
-  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 12, rowGap: 2, marginTop: 2 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  metaText: { fontSize: font.footnote, fontWeight: '600', flexShrink: 1 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  copyBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  copyBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   check: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 });

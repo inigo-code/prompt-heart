@@ -101,7 +101,6 @@ export default function LibraryScreen() {
               key={c.key}
               label={c.label}
               active={category === c.key}
-              leading={<CategoryIcon category={c} />}
               theme={theme}
               accessibilityLabel={`Show ${c.label} prompts`}
               onPress={() => setCategory(category === c.key ? null : c.key)}
@@ -143,14 +142,6 @@ export default function LibraryScreen() {
   );
 }
 
-function CategoryIcon({ category, size = 24 }: { category: LibraryCategory; size?: number }) {
-  return (
-    <View style={[styles.catIcon, { width: size, height: size, borderRadius: size / 2, backgroundColor: category.color + '33' }]}>
-      <Ionicons name={category.icon} size={Math.round(size * 0.55)} color={category.color} />
-    </View>
-  );
-}
-
 const LibraryCard = memo(function LibraryCard({
   item,
   theme,
@@ -180,21 +171,11 @@ const LibraryCard = memo(function LibraryCard({
         { backgroundColor: theme.card, borderColor: theme.border, transform: [{ scale: pressed ? 0.985 : 1 }] },
       ]}
     >
-      <View style={styles.meta}>
-        <View style={[styles.pill, { backgroundColor: category.color + '24' }]}>
-          <Ionicons name={category.icon} size={12} color={category.color} />
-          <Text style={[styles.metaText, { color: theme.text }]}>{category.label}</Text>
-        </View>
-        {blanks > 0 && (
-          <View style={[styles.pill, { backgroundColor: theme.chip }]}>
-            <Ionicons name="code-slash" size={11} color={theme.textMuted} />
-            <Text style={[styles.metaText, { color: theme.textMuted }]}>
-              {blanks} {blanks === 1 ? 'blank' : 'blanks'} to fill
-            </Text>
-          </View>
-        )}
-      </View>
       <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
+      <Text style={[styles.metaText, { color: theme.textMuted }]}>
+        {category.label}
+        {blanks > 0 ? `  ·  ${blanks} ${blanks === 1 ? 'blank' : 'blanks'} to fill` : ''}
+      </Text>
       <Text style={[styles.body, { color: theme.textMuted }]} numberOfLines={expanded ? undefined : 3}>
         {expanded ? item.body : previewText(item.body)}
       </Text>
@@ -217,7 +198,7 @@ const LibraryCard = memo(function LibraryCard({
           style={({ pressed }) => [
             styles.btn,
             styles.btnOutline,
-            { borderColor: saved ? theme.border : theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] },
+            { borderColor: theme.border, transform: [{ scale: pressed ? 0.97 : 1 }] },
           ]}
         >
           <Ionicons name={saved ? 'checkmark-circle' : 'bookmark-outline'} size={15} color={saved ? theme.textMuted : theme.text} />
@@ -231,21 +212,18 @@ const LibraryCard = memo(function LibraryCard({
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   top: { paddingHorizontal: 16, paddingTop: 10 },
-  search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, height: 44, borderRadius: 14 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, height: 48, borderRadius: 24 },
   searchInput: { flex: 1, fontSize: font.body, height: '100%' },
   chips: { gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 },
-  catIcon: { alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 16, paddingTop: 6, gap: 12 },
   intro: { fontSize: font.body, lineHeight: 22, marginBottom: 2 },
-  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
-  meta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
-  pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
-  metaText: { fontSize: font.caption, fontWeight: '600' },
+  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8 },
+  metaText: { fontSize: font.footnote, fontWeight: '500', marginTop: -4 },
   title: { fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
   body: { fontSize: font.body, lineHeight: 22 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 16, borderRadius: 18 },
-  btnOutline: { borderWidth: 1.5, backgroundColor: 'transparent' },
+  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 18, borderRadius: 20 },
+  btnOutline: { borderWidth: 1, backgroundColor: 'transparent' },
   btnText: { fontSize: font.body, fontWeight: '700' },
   empty: { alignItems: 'center', gap: 10, paddingTop: 60, paddingHorizontal: 32 },
   emptyText: { fontSize: font.body, textAlign: 'center', lineHeight: 22 },

@@ -50,7 +50,7 @@ export function FillTemplateSheet({ prompt, variables, initialValues, verb = 'Co
         </View>
         {variables.map((name, i) => (
           <View key={name} style={styles.field}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>{name}</Text>
+            <Text style={[styles.label, { color: theme.text }]}>{blankLabel(name)}</Text>
             <TextInput
               value={values[name] ?? ''}
               onChangeText={(v) => setValues((prev) => ({ ...prev, [name]: v }))}
@@ -97,6 +97,12 @@ export function FillTemplateSheet({ prompt, variables, initialValues, verb = 'Co
   );
 }
 
+/** A blank's name as a field label: "number_of_posts" reads "Number of posts". */
+const blankLabel = (name: string) => {
+  const words = name.replace(/[_-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
 const styles = StyleSheet.create({
   sheet: { maxHeight: '85%', flexShrink: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 20, paddingTop: 8 },
   grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 6 },
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
   fields: { flexGrow: 0, flexShrink: 1 },
   fieldsContent: { gap: 12, paddingBottom: 12 },
   field: { gap: 6 },
-  label: { fontSize: font.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: font.footnote, fontWeight: '600' },
   input: { fontSize: font.body, minHeight: 44, maxHeight: 140, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 12, paddingVertical: 10 },
   preview: { fontSize: font.body, lineHeight: 22, borderRadius: 12, padding: 12 },
   actions: { flexDirection: 'row', gap: 10, paddingTop: 4 },

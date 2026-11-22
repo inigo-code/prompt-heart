@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -8,45 +7,37 @@ import type { Theme } from '@/lib/theme';
 
 type Props = {
   theme: Theme;
-  icon?: ReactNode;
   title: string;
   children: ReactNode;
   onDismiss: () => void;
   action?: { label: string; onPress: () => void };
 };
 
-/** A dismissible hint card, shown once to help new users discover a feature. */
-export function TipCard({ theme, icon, title, children, onDismiss, action }: Props) {
+/** A dismissible hint, shown once to help new users find a feature. Text buttons, the way Material banners work. */
+export function TipCard({ theme, title, children, onDismiss, action }: Props) {
   return (
-    <View style={[styles.card, { backgroundColor: theme.accentSoft, borderColor: theme.accent + '55' }]}>
-      <View style={styles.head}>
-        {icon ?? <Ionicons name="bulb-outline" size={18} color={theme.text} />}
-        <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
-        <Pressable onPress={onDismiss} hitSlop={10} accessibilityLabel="Dismiss tip">
-          <Ionicons name="close" size={18} color={theme.textMuted} />
-        </Pressable>
-      </View>
-      <Text style={[styles.body, { color: theme.text }]}>{children}</Text>
+    <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
+      <Text style={[styles.body, { color: theme.textMuted }]}>{children}</Text>
       <View style={styles.actions}>
+        <Pressable onPress={onDismiss} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
+          <Text style={[styles.btnText, { color: theme.textMuted }]}>Got it</Text>
+        </Pressable>
         {action && (
-          <Pressable onPress={action.onPress} style={[styles.btn, { borderColor: theme.text + '33' }]}>
-            <Text style={[styles.btnText, { color: theme.text }]}>{action.label}</Text>
+          <Pressable onPress={action.onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
+            <Text style={[styles.btnText, { color: theme.accentInk }]}>{action.label}</Text>
           </Pressable>
         )}
-        <Pressable onPress={onDismiss} style={[styles.btn, { backgroundColor: theme.text, borderColor: theme.text }]}>
-          <Text style={[styles.btnText, { color: theme.bg }]}>Got it</Text>
-        </Pressable>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 18, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 8, marginBottom: 4 },
-  head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { flex: 1, fontSize: font.body, fontWeight: '800' },
+  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6, gap: 4, marginBottom: 4 },
+  title: { fontSize: font.body, fontWeight: '700' },
   body: { fontSize: font.footnote, lineHeight: 20 },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 2 },
-  btn: { paddingHorizontal: 16, height: 32, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 4, marginRight: -8 },
+  btn: { height: 40, paddingHorizontal: 12, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   btnText: { fontSize: font.footnote, fontWeight: '700' },
 });

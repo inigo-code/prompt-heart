@@ -15,11 +15,12 @@ import { ImageThumb } from '@/components/ImageThumb';
 import { ImageViewer } from '@/components/ImageViewer';
 import { PromptText } from '@/components/PromptText';
 import { useToast } from '@/components/Toast';
+import { shownError } from '@/lib/errors';
 import { applyFormat, formatStamp } from '@/lib/format';
 import type { FormatKind, Selection } from '@/lib/format';
 import { deleteLocalImage, imagesSupported, pickImages } from '@/lib/images';
 import { estimateTokens, extractVariables } from '@/lib/templates';
-import { font, useTheme, visibleOn } from '@/lib/theme';
+import { font, useTheme } from '@/lib/theme';
 import { createUndo, textChange } from '@/lib/undo';
 import type { UndoKind } from '@/lib/undo';
 import { useEnabledAiApps, useLaunchApp, useVisibleFolders } from '@/lib/useAiApps';
@@ -244,7 +245,7 @@ function PromptEditor() {
       if (id) store.attachImages(id, ids);
       else setId(store.createPrompt({ ...draft, images: ids }).id);
     } catch (e) {
-      toast(`Couldn't add image: ${e instanceof Error ? e.message : String(e)}`);
+      toast(shownError(e, "Couldn't add that image. Try another one."));
     } finally {
       setAttaching(false);
     }
@@ -271,13 +272,13 @@ function PromptEditor() {
         options={{
           headerRight: () => (
             <View style={styles.headerActions}>
-              <Pressable hitSlop={8} accessibilityLabel="Copy prompt" disabled={!prompt} onPress={() => prompt && copy(prompt)}>
+              <Pressable style={styles.headerBtn} accessibilityLabel="Copy prompt" disabled={!prompt} onPress={() => prompt && copy(prompt)}>
                 <Ionicons name="copy-outline" size={22} color={prompt ? theme.text : theme.textMuted} />
               </Pressable>
-              <Pressable hitSlop={8} accessibilityLabel={draft.pinned ? 'Unpin' : 'Pin'} onPress={() => change({ pinned: !draft.pinned })}>
-                <Ionicons name={draft.pinned ? 'pin' : 'pin-outline'} size={22} color={draft.pinned ? theme.accent : theme.text} />
+              <Pressable style={styles.headerBtn} accessibilityLabel={draft.pinned ? 'Unpin' : 'Pin'} onPress={() => change({ pinned: !draft.pinned })}>
+                <Ionicons name={draft.pinned ? 'pin' : 'pin-outline'} size={22} color={draft.pinned ? theme.accentInk : theme.text} />
               </Pressable>
-              <Pressable hitSlop={8} accessibilityLabel="More" disabled={!id} onPress={() => setMenuOpen(true)}>
+              <Pressable style={styles.headerBtn} accessibilityLabel="More" disabled={!id} onPress={() => setMenuOpen(true)}>
                 <Ionicons name="ellipsis-horizontal" size={22} color={id ? theme.text : theme.textMuted} />
               </Pressable>
               <Pressable
@@ -332,10 +333,8 @@ function PromptEditor() {
 
         {!editing && folder && (
           <View style={styles.row}>
-            <View style={[styles.tag, { backgroundColor: theme.chip }]}>
-              <View style={[styles.folderDot, { backgroundColor: visibleOn(folder.color, theme.chip) }]} />
-              <Text style={{ color: theme.text, fontSize: font.footnote, fontWeight: '600' }}>{folder.name}</Text>
-            </View>
+            <Ionicons name="folder-outline" size={16} color={theme.textMuted} />
+            <Text style={[styles.folderName, { color: theme.textMuted }]}>{folder.name}</Text>
           </View>
         )}
         {editing && (
@@ -345,7 +344,6 @@ function PromptEditor() {
               <Chip
                 key={f.id}
                 label={f.name}
-                color={f.color}
                 theme={theme}
                 active={draft.folderId === f.id}
                 onPress={() => change({ folderId: f.id })}
@@ -363,7 +361,7 @@ function PromptEditor() {
             accessibilityLabel={`Copy and open in ${launchApp.label}`}
             style={({ pressed }) => [
               styles.launch,
-              { backgroundColor: launchApp.color + (theme.dark ? '33' : '1F'), borderColor: launchApp.color + '66', opacity: !prompt ? 0.5 : pressed ? 0.75 : 1 },
+              { backgroundColor: theme.card, borderColor: theme.border, opacity: !prompt ? 0.5 : pressed ? 0.75 : 1 },
             ]}
           >
             <AppBadge app={launchApp} size={28} />
@@ -420,7 +418,7 @@ function PromptEditor() {
                 onPress={attach}
                 disabled={attaching}
                 accessibilityLabel="Attach image"
-                style={[styles.addImage, { borderColor: theme.border, backgroundColor: theme.card }]}
+                style={[styles.addImage, { borderColor: theme.border, backgroundColor: theme.chip }]}
               >
                 {attaching ? (
                   <ActivityIndicator color={theme.textMuted} />
@@ -531,8 +529,9 @@ function PromptEditor() {
 
 const styles = StyleSheet.create({
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 4 },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 32, paddingHorizontal: 12, borderRadius: 16 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 36, paddingHorizontal: 14, borderRadius: 18, marginLeft: 4 },
   editText: { fontSize: font.body, fontWeight: '700' },
   content: { paddingHorizontal: 20, paddingTop: 4, gap: 12 },
   title: { fontSize: font.largeTitle, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
@@ -547,8 +546,7 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 12,
-    borderWidth: 1,
-    borderStyle: 'dashed',
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
@@ -556,6 +554,6 @@ const styles = StyleSheet.create({
   addImageText: { fontSize: font.caption, fontWeight: '600', textAlign: 'center' },
   body: { fontSize: font.headline, lineHeight: 24, minHeight: 280, paddingVertical: 8 },
   emptyBody: { fontSize: font.body, paddingVertical: 8, minHeight: 120 },
-  folderDot: { width: 8, height: 8, borderRadius: 4 },
+  folderName: { fontSize: font.footnote, fontWeight: '600' },
   footer: { fontSize: font.caption, textAlign: 'right' },
 });
