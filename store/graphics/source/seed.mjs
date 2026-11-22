@@ -74,7 +74,7 @@ const aiApps = { chatgpt: true, claude: true, gemini: true, grok: true, perplexi
 const settings = (o = {}) => ({
   themeMode: 'dark', accent: 'amber', layout: 'list', sort: 'recent', previewLines: 3, haptics: true, showTokens: true,
   aiApps, showAiBar: true, dismissedTips: ['ai-launch', 'library'], appLock: false, lockAfter: 60,
-  seenUpdate: '2026-11-22-cleaner-look', onboarded: true, widgetWhileLocked: false, ...o,
+  seenUpdate: '2026-11-22-cleaner-widget', onboarded: true, widgetWhileLocked: false, ...o,
 });
 
 const store = { version: 2, sync: { userId: null, lastPulledAt: null, pendingPrompts: [], pendingFolders: [], pendingImageUploads: [], pendingImageDeletes: [] }, folders, prompts };
