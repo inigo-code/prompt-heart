@@ -50,7 +50,7 @@ Private by design
 • Delete your account and its data from the app at any time
 
 Make it yours
-• A profile with your most-used prompts, a year of activity, streaks and achievements
+• A profile with your most-used prompts, times copied and active days
 • Light or dark theme, accent colours, and a list or grid layout
 
 Prompt Heart is an independent app and isn't affiliated with or endorsed by OpenAI, Anthropic or Google.

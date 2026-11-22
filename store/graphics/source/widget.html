@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+/* An Android home screen with the Prompts widget, laid out as src/widget/PromptsWidget.tsx draws it (dark theme, amber). */
+* { margin: 0; box-sizing: border-box; }
+html, body { width: 412px; height: 877px; overflow: hidden; }
+body { font-family: Roboto, system-ui, 'Segoe UI', sans-serif; color: #F2EFEA;
+  background: linear-gradient(170deg, #2a2420 0%, #1a1715 45%, #121110 100%); position: relative; }
+.status { height: 32px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-size: 13px; font-weight: 500; color: #ddd8d0; }
+.clock { margin: 64px 0 0 28px; font-size: 64px; font-weight: 300; letter-spacing: -1px; line-height: 1; }
+.date { margin: 10px 0 0 30px; font-size: 15px; color: #cfc9c1; }
+.widget { margin: 48px 16px 0; padding: 12px; border-radius: 24px; background: #1C1B19; box-shadow: 0 10px 30px -12px rgb(0 0 0 / .6); }
+.head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-left: 4px; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.brand img { width: 24px; height: 24px; border-radius: 7px; }
+.plus { width: 34px; height: 34px; border-radius: 17px; background: #F2B84B; color: #121110; display: grid; place-items: center; font-size: 24px; font-weight: 500; line-height: 1; }
+.row { display: flex; align-items: center; padding: 10px 14px; border-radius: 16px; background: #272522; margin-bottom: 6px; min-height: 58px; }
+.row:last-child { margin-bottom: 0; }
+.row.copied { background: #3A2F17; }
+.row div { flex: 1; min-width: 0; }
+.t { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.n { font-size: 12px; margin-top: 2px; color: #9C968E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a { margin-left: 10px; font-size: 13px; font-weight: 700; color: #9C968E; }
+.copied .a { color: #F2EFEA; }
+.dock { position: absolute; left: 30px; bottom: 70px; display: flex; }
+.app { display: grid; justify-items: center; gap: 6px; font-size: 12px; color: #e8e3dc; }
+.app img, .app i { width: 56px; height: 56px; border-radius: 16px; display: block; }
+.app i { background: #2c2925; }
+.nav { position: absolute; bottom: 14px; left: 50%; width: 110px; height: 4px; margin-left: -55px; border-radius: 2px; background: #bdb7af; }
+</style></head>
+<body>
+<div class="status"><span>10:30</span><span>5G ▮▮▮ 82%</span></div>
+<div class="clock">10:30</div>
+<div class="date">Sunday, 22 November</div>
+<div class="widget">
+  <div class="head"><div class="brand"><img src="icon.png" alt="">Prompt Heart</div><div class="plus">+</div></div>
+  <div class="row"><div><p class="t">Senior code review</p><p class="n">1 blank to fill</p></div><span class="a">Fill</span></div>
+  <div class="row copied"><div><p class="t">Proofread without changing my voice</p><p class="n">Writing</p></div><span class="a">Copied</span></div>
+  <div class="row"><div><p class="t">Cold email that gets replies</p><p class="n">3 blanks to fill</p></div><span class="a">Fill</span></div>
+  <div class="row"><div><p class="t">Meeting notes to action items</p><p class="n">1 blank to fill</p></div><span class="a">Fill</span></div>
+</div>
+<div class="dock"><div class="app"><img src="icon.png" alt="">Prompt Heart</div></div>
+<div class="nav"></div>
+</body></html>

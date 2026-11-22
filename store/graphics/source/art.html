@@ -1,0 +1,111 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+/* Store, README and feature art for Prompt Heart. art.html?s=<scene>. Screens are real captures from out/. */
+:root { --dark: #121110; --ink: #F2EFEA; --muted: #A39C93; --light: #F6F4EF; --ink-l: #1C1A17; --muted-l: #6E6862; --accent: #F2B84B; }
+* { margin: 0; box-sizing: border-box; }
+html, body { overflow: hidden; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--ink); background: var(--dark); position: relative; }
+body.light { background: var(--light); color: var(--ink-l); }
+body.dark { background: linear-gradient(180deg, #1b1916 0%, #121110 55%); }
+body.light { background: linear-gradient(180deg, #FBFAF7 0%, #F1EEE7 100%); }
+
+/* A phone: bezel, then the screen top-aligned; the bottom of the capture runs past the frame. */
+.phone { position: absolute; width: var(--w); height: calc(var(--w) * 2.082); border-radius: calc(var(--w) * 0.098);
+  background: #262320; padding: calc(var(--w) * 0.021); box-shadow: 0 calc(var(--w) * .06) calc(var(--w) * .16) calc(var(--w) * -.05) rgb(0 0 0 / .55), inset 0 0 0 1.5px rgb(255 255 255 / .14); }
+.light .phone { background: #1a1816; box-shadow: 0 calc(var(--w) * .05) calc(var(--w) * .14) calc(var(--w) * -.05) rgb(60 45 20 / .35), inset 0 0 0 1.5px rgb(0 0 0 / .25); }
+.phone .scr { width: 100%; height: 100%; border-radius: calc(var(--w) * 0.08); overflow: hidden; background: #000; }
+.phone img { width: 100%; display: block; }
+
+/* Store screenshot, 1080 x 1920. The phone sits at 205,495, 670 x 1395 (store/social/post.html crops it there). */
+.store { width: 1080px; height: 1920px; }
+.store .cap { position: absolute; left: 90px; right: 90px; top: 150px; height: 290px; display: grid; align-content: center; text-align: center; gap: 26px; }
+.store h1 { font-size: 80px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; text-wrap: balance; }
+.store p { font-size: 36px; line-height: 1.32; color: var(--muted); text-wrap: balance; }
+.light.store p { color: var(--muted-l); }
+.store .phone { --w: 670px; left: 205px; top: 495px; }
+
+/* Feature graphic, 1024 x 500 */
+.feature { width: 1024px; height: 500px; }
+.brand { display: flex; align-items: center; }
+.brand img { border-radius: 24%; }
+.brand b { font-weight: 800; letter-spacing: -0.03em; }
+.feature .copy { position: absolute; left: 64px; top: 0; bottom: 0; width: 490px; display: grid; align-content: center; }
+.feature .brand { gap: 18px; } .feature .brand img { width: 76px; height: 76px; } .feature .brand b { font-size: 56px; }
+.feature h2 { margin-top: 34px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+.feature p { margin-top: 14px; font-size: 21px; line-height: 1.45; color: var(--muted); }
+.feature .a { --w: 230px; left: 760px; top: 46px; }
+.feature .b { --w: 210px; left: 600px; top: 110px; }
+
+/* README hero, 1200 x 645 (rendered at 2x) */
+.hero { width: 1200px; height: 645px; }
+.hero .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 520px; display: grid; align-content: center; }
+.hero .brand { gap: 18px; } .hero .brand img { width: 72px; height: 72px; } .hero .brand b { font-size: 60px; }
+.hero h2 { margin-top: 30px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+.hero p { margin-top: 14px; font-size: 19px; line-height: 1.5; color: var(--muted); }
+.hero ul { margin-top: 30px; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+.hero li { font-size: 16px; font-weight: 600; padding: 11px 0; border-top: 1px solid rgb(255 255 255 / .1); }
+.hero .a { --w: 236px; left: 664px; top: 136px; }
+.hero .b { --w: 270px; left: 790px; top: 50px; z-index: 2; }
+.hero .c { --w: 236px; left: 936px; top: 136px; }
+
+/* README strips, 1200 x 592 (rendered at 2x): six phones with a title and a line under each */
+.strip { width: 1200px; height: 486px; }
+.strip .row { position: absolute; left: 36px; right: 36px; top: 34px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.strip .item { position: relative; padding-top: 362px; text-align: center; }
+.strip .phone { --w: 166px; left: 50%; margin-left: -83px; top: 0; }
+.strip h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.strip p { margin: 5px -4px 0; font-size: 12.5px; line-height: 1.35; color: var(--muted); text-wrap: balance; }
+.light.strip p { color: var(--muted-l); }
+</style></head>
+<body>
+<script>
+const s = new URLSearchParams(location.search).get('s');
+const phone = (img, cls = '') => `<div class="phone ${cls}"><div class="scr"><img src="out/${img}.png" alt=""></div></div>`;
+const brand = '<div class="brand"><img src="icon.png" alt=""><b>Prompt Heart</b></div>';
+const STORE = {
+  '01': ['dark', 'home', 'Your best prompts, one tap away', 'Save what works. Copy it in one tap.'],
+  '02': ['dark', 'fill', 'Fill in the blanks', 'Write a prompt once with {{blanks}}. Fill them in each time you copy.'],
+  '03': ['light', 'detail', 'Copy and open your AI app', 'ChatGPT, Claude, Gemini, Grok, Perplexity and more.'],
+  '04': ['dark', 'library', '100 ready‑made prompts', 'Copy one as it is, or save it and make it yours.'],
+  '05': ['dark', 'widget', 'Right on your home screen', 'Your pinned prompts in a widget. Tap to copy.'],
+  '06': ['light', 'grid', 'Make it yours', 'Light or dark, five accents, list or grid. Sync across your devices if you like.'],
+};
+const STRIPS = {
+  gallery: ['light', [
+    ['home', 'One tap to copy', 'Any prompt, straight from home'],
+    ['fill', 'Fill in the blanks', '{{placeholders}} with a live preview'],
+    ['detail', 'Launch in your AI app', 'Copied, then the app opens'],
+    ['library', '100 ready prompts', 'Copy as they are, or save and edit'],
+    ['history', 'Version history', 'Go back to any earlier version'],
+    ['select', 'Bulk select', 'Move, tag, pin or delete many'],
+  ]],
+  newin: ['dark', [
+    ['widget', 'Home-screen widget', 'Pinned prompts, one tap to copy'],
+    ['home', 'Smaller cards', 'Full titles, with date and time'],
+    ['grid', 'List or grid', 'Titles in full in both views'],
+    ['settings', 'Account first', 'Sign in from the top of Settings'],
+    ['welcome', 'A short welcome', 'Three quick steps for new users'],
+    ['whatsnew', 'What’s new', 'After every update'],
+  ]],
+};
+let html = '';
+if (STORE[s]) {
+  const [theme, img, h, p] = STORE[s];
+  document.body.className = `store ${theme}`;
+  html = `<div class="cap"><h1>${h}</h1><p>${p}</p></div>${phone(img)}`;
+} else if (s === 'feature') {
+  document.body.className = 'feature dark';
+  html = `<div class="copy">${brand}<h2>Your AI prompts, one tap away.</h2><p>Save the prompts that work. Fill in the blanks, copy, and open ChatGPT, Claude, Gemini and more.</p></div>${phone('fill', 'b')}${phone('home', 'a')}`;
+} else if (s === 'hero') {
+  document.body.className = 'hero dark';
+  const feats = ['One-tap copy', 'Fill-in-the-blank prompts', 'Open in your AI app', '100-prompt library', 'Home-screen widget', 'Version history', 'Cloud sync, if you want it', 'App lock'];
+  html = `<div class="copy">${brand}<h2>Your AI prompts, one tap away.</h2><p>Save the prompts that work. Fill in the blanks. Copy or launch them in ChatGPT, Claude, Gemini, Grok and more, from one simple notes app.</p><ul>${feats.map((f) => `<li>${f}</li>`).join('')}</ul></div>${phone('detail', 'a')}${phone('profile', 'c')}${phone('home', 'b')}`;
+} else if (STRIPS[s]) {
+  const [theme, items] = STRIPS[s];
+  document.body.className = `strip ${theme}`;
+  html = `<div class="row">${items.map(([img, h, p]) => `<div class="item">${phone(img)}<h3>${h}</h3><p>${p}</p></div>`).join('')}</div>`;
+}
+document.body.insertAdjacentHTML('beforeend', html);
+</script>
+</body></html>

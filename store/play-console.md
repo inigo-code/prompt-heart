@@ -68,7 +68,7 @@ Data types. For each one: **Collected: yes. Shared: no.** (Supabase and Expo are
 
 Everything else (location, contacts, messages, financial, health, audio, files, calendar, web history, app interactions, crash logs, diagnostics, other device info): **not collected**.
 
-Not collected, though the app keeps them on the phone: the record of which prompts were copied and when (for profile statistics and achievements), and files picked for import. Neither is sent anywhere, so neither goes in the form.
+Not collected, though the app keeps them on the phone: the record of which prompts were copied and when (for profile statistics), and files picked for import. Neither is sent anywhere, so neither goes in the form.
 
 Why "Device or other IDs" is listed: the update service (Expo EAS Update) receives a random installation ID with each update check. It isn't used for tracking, but listing it is the safe reading of Google's rules.
 

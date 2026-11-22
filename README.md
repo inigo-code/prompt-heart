@@ -6,7 +6,7 @@
   <a href="../../releases/latest"><img alt="Download APK" src="https://img.shields.io/badge/Download-Android%20APK-F2B84B?style=for-the-badge&logo=android&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://heartapps.github.io/prompt-heart/fdroid.html"><img alt="Get it with F-Droid" src="https://img.shields.io/badge/Get%20it%20with-F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white&labelColor=1C1A17"></a>
   <a href="https://heartapps.github.io/prompt-heart/"><img alt="Website" src="https://img.shields.io/badge/Website-Try%20it%20in%20your%20browser-F2B84B?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1C1A17"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.8.1-F2B84B?style=for-the-badge&labelColor=1C1A17">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.8.2-F2B84B?style=for-the-badge&labelColor=1C1A17">
   <img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo-SDK%2058-000020?style=for-the-badge&logo=expo&logoColor=white">
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.88-61DAFB?style=for-the-badge&logo=react&logoColor=black">
   <img alt="Supabase" src="https://img.shields.io/badge/Sync-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
@@ -21,73 +21,73 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
 </p>
 
 <p align="center">
-🌐 <a href="https://heartapps.github.io/prompt-heart/"><b>heartapps.github.io/prompt-heart</b></a>: fill in a real prompt from the library, right in your browser.
+<a href="https://heartapps.github.io/prompt-heart/"><b>heartapps.github.io/prompt-heart</b></a>: fill in a real prompt from the library, right in your browser.
 </p>
 
 <br/>
 
-## ✨ Highlights
+## Highlights
 
 <table>
   <tr>
     <td width="33%" valign="top">
-      <h4>⚡ One-tap copy</h4>
+      <h4>One-tap copy</h4>
       Every prompt has its own copy button. Copying takes the text only; reference images never come along.
     </td>
     <td width="33%" valign="top">
-      <h4>🧩 Smart templates</h4>
+      <h4>Smart templates</h4>
       Write <code>{{topic}}</code> and fill it in when you copy, with a live preview. <code>{{tone|friendly}}</code> sets a default.
     </td>
     <td width="33%" valign="top">
-      <h4>🚀 Launch in your AI app</h4>
+      <h4>Launch in your AI app</h4>
       Every AI app gets its own folder. Tap <b>Open in Claude</b>: your prompt is copied and the Claude app opens, ready to paste.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>✍️ Read, then edit</h4>
+      <h4>Read, then edit</h4>
       Prompts open read-only, so a stray tap can't change them. <b>Edit</b> adds bold, lists, headings, code and <code>{{blanks}}</code>, with undo and redo.
     </td>
     <td valign="top">
-      <h4>🗂️ Organise anything</h4>
+      <h4>Organise anything</h4>
       Categories, #tags, pins, search, grid or list, a Recently copied view, and <b>bulk select</b> to move, tag or delete many at once.
     </td>
     <td valign="top">
-      <h4>🕘 Version history</h4>
+      <h4>Version history</h4>
       A version is kept each time you start editing. Preview, copy or restore any earlier one, so a good prompt is never lost.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>🏆 Your prompting</h4>
-      Your profile shows the four prompts you use most, a year of activity, streaks, where your prompts go, and eleven achievements in five tiers.
+      <h4>Your profile</h4>
+      Your profile shows plain numbers: your prompts, times copied, active days, the prompts you copy most and where they go.
     </td>
     <td valign="top">
-      <h4>📌 Home-screen widget</h4>
+      <h4>Home-screen widget</h4>
       Your pinned prompts on your home screen, one tap to copy. Your name, photo and bio follow you to your other phones.
     </td>
     <td valign="top">
-      <h4>📥 Bring your prompts</h4>
+      <h4>Bring your prompts</h4>
       Import from spreadsheets, Notion, the awesome-chatgpt-prompts list, JSON, Markdown or text. Or share text, links and screenshots in from any app.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>☁️ Sync &amp; backup</h4>
+      <h4>Sync &amp; backup</h4>
       Cloud sync across devices that works offline and stays light on data, plus JSON, Markdown and spreadsheet (CSV) export.
     </td>
     <td valign="top">
-      <h4>🔒 App lock</h4>
+      <h4>App lock</h4>
       Unlock with your fingerprint, face or screen lock, and keep your prompts hidden in the recent-apps screen.
     </td>
     <td valign="top">
-      <h4>✨ Always up to date</h4>
+      <h4>Always up to date</h4>
       Improvements arrive by themselves, and after each update a short note shows what's new. Light and dark themes, five accents.
     </td>
   </tr>
   <tr>
     <td colspan="3" valign="top">
-      <h4>📚 Prompt library</h4>
+      <h4>Prompt library</h4>
       100 ready-made prompts for image generation, productivity, business, marketing, writing, coding, research, learning, careers and better prompting itself. Copy one as it is, or save it to your prompts and make it your own.
     </td>
   </tr>
@@ -105,7 +105,7 @@ Save them in seconds, fill in the blanks when you need them, and copy or launch 
   <img src="docs/new-in-1.8.png" alt="Screens: the home-screen widget, smaller cards, list or grid, Account first in Settings, the welcome, and What's new" width="100%" />
 </p>
 
-## ⬇️ Install
+## Install
 
 ### With F-Droid (recommended, updates automatically)
 
@@ -136,24 +136,24 @@ Both ways install the same signed APK, so you can switch between them without lo
 
 > Prompt Heart asks for very little: **Internet**, for sync and updates, **Vibrate**, for copy feedback, and **Biometric**, only used if you turn on App lock. Photos are picked with Android's own photo picker, so the app never needs access to your gallery.
 
-## 🔒 Your data
+## Your data
 
 - **Offline first.** Prompts, images and history live on your phone and work without a connection.
 - **Private sync.** With an account, your prompts, images, name, bio and photo sync through Supabase. Row Level Security means every account can only read its own rows, and images sit in a private bucket under your own folder.
-- **Version history and the copy log stay on your device**, so sync stays fast and light. The copy log only counts copies per day for your profile's activity graph.
+- **Version history and the copy log stay on your device**, so sync stays fast and light. The copy log only counts copies per day for your profile's numbers.
 - **Light on the cloud.** Up to 20 images per account sync; any extras stay on your phone. Images are resized to about 100 KB.
 - **Optional App lock.** Unlock with your fingerprint, face or phone screen lock, and keep your prompts hidden in the recent-apps screen.
 - **You're in control.** Change your email or password, export everything, or delete your account and all of its cloud data from **Profile**.
 
 Read the full [privacy policy](https://heartapps.github.io/prompt-heart/privacy.html), or see [how to delete your account](https://heartapps.github.io/prompt-heart/delete-account.html).
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] One-tap copy, templates, categories, tags, search
 - [x] Cloud sync, image attachments, save from other apps
 - [x] AI app folders and launching, bulk select, version history, update pop-up
 - [x] Prompt library, App lock, sign-in emails and password reset
-- [x] Read-only prompts with formatting and undo; profile insights and achievements; import from other apps
+- [x] Read-only prompts with formatting and undo; profile insights; import from other apps
 - [ ] Google Play release
 - [ ] Home-screen widget for pinned prompts
 - [ ] Shared libraries for teams
@@ -213,11 +213,11 @@ The runtime version uses the `fingerprint` policy, so an update only reaches bui
 
 </details>
 
-## 💛 Credits
+## Credits
 
 Made with care by **[Inigo](https://github.com/inigo-code)**. Icons are from [Ionicons](https://ionic.io/ionicons).
 
-## ©️ Copyright
+## Copyright
 
 Copyright © 2026 Inigo. All rights reserved.
 
