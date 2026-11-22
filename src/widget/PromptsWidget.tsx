@@ -42,10 +42,7 @@ function Row({ prompt, theme, copied, stretch, last }: { prompt: WidgetPrompt; t
       }}
     >
       <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
-        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {prompt.color ? <FlexWidget style={{ width: 8, height: 8, borderRadius: 4, marginRight: 7, backgroundColor: hex(prompt.color) }} /> : null}
-          <TextWidget text={prompt.title} maxLines={1} truncate="END" style={{ fontSize: 15, fontWeight: '700', color: hex(theme.text) }} />
-        </FlexWidget>
+        <TextWidget text={prompt.title} maxLines={1} truncate="END" style={{ fontSize: 15, fontWeight: '700', color: hex(theme.text) }} />
         <TextWidget text={prompt.note} maxLines={1} truncate="END" style={{ fontSize: 12, marginTop: 2, color: hex(theme.textMuted) }} />
       </FlexWidget>
       <TextWidget
