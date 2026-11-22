@@ -34,6 +34,8 @@ export type SyncMeta = {
   lastPulledAt: string | null;
   /** Ids changed locally that the server hasn't confirmed yet. */
   pendingPrompts: string[];
+  /** Ids copied since the last sync. Copy counts go along with the next sync rather than starting one. */
+  pendingCopies: string[];
   pendingFolders: string[];
   /** Image ids to upload to / remove from cloud storage. */
   pendingImageUploads: string[];

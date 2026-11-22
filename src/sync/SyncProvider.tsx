@@ -78,7 +78,8 @@ function chunks<T>(items: T[], size: number): T[][] {
 async function push(client: SupabaseClient, userId: string, store: SyncStoreApi) {
   const d = store.getSnapshot();
   const pf = new Set(d.sync.pendingFolders);
-  const pp = new Set(d.sync.pendingPrompts);
+  // Copied prompts go along too, so their counts reach your other devices.
+  const pp = new Set([...d.sync.pendingPrompts, ...d.sync.pendingCopies]);
   const folders = d.folders.filter((f) => pf.has(f.id));
   const prompts = d.prompts.filter((p) => pp.has(p.id));
   if (folders.length === 0 && prompts.length === 0 && pf.size === 0 && pp.size === 0) return;
@@ -171,7 +172,7 @@ async function pullTable<R extends { server_updated_at?: string }>(
   }
 }
 
-/** Local changes or image work that haven't reached the cloud yet. */
+/** Local changes or image work that haven't reached the cloud yet (copy counts don't count: they just go along). */
 function hasUnsentChanges(store: SyncStoreApi) {
   const s = store.getSnapshot().sync;
   return s.pendingPrompts.length + s.pendingFolders.length + s.pendingImageUploads.length + s.pendingImageDeletes.length > 0;
@@ -243,19 +244,23 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     if (ready && userId && meta.userId !== userId) resetForUser(userId);
   }, [ready, userId, meta.userId, resetForUser]);
 
-  const runSync = useCallback((): Promise<void> => {
+  // `manual`: Sync now or pull to refresh. An automatic sync with nothing of yours to send (a check for
+  // changes from your other devices, carrying any copy counts) runs quietly, without the syncing state.
+  const runSync = useCallback((manual = false): Promise<void> => {
     // Until the saved prompts are read (or while reading them failed), the store only holds the samples.
     // A sync before the store has switched to this account (the moment after signing in) would send the
     // previous account's queue, so it waits for the switch; the sign-in sync follows straight after.
     if (!supabase || !userId || !ready || storeRef.current.getSnapshot().sync.userId !== userId) return Promise.resolve();
     if (running.current) {
       again.current = true;
+      if (manual) setState((s) => ({ ...s, status: 'syncing' }));
       return running.current;
     }
     const client = supabase;
+    const quiet = !manual && !hasUnsentChanges(storeRef.current);
     const run = (async () => {
       autoSync.started();
-      setState((s) => ({ ...s, status: 'syncing' }));
+      if (!quiet) setState((s) => ({ ...s, status: 'syncing' }));
       let imagesToRetry = 0;
       try {
         do {
@@ -293,7 +298,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, [active, autoSync]);
   useEffect(() => () => autoSync.cancel(), [autoSync]);
 
-  // On sign-in, and after local edits (including copies).
+  // On sign-in, and after local edits (not copies, which go along with the next sync).
   useEffect(() => {
     if (active) autoSync.request(localRevision === 0 ? 0 : LOCAL_DEBOUNCE_MS);
   }, [active, localRevision, autoSync]);
@@ -424,6 +429,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setState({ status: 'idle', error: null, lastSyncedAt: null });
   }, []);
 
+  const syncNow = useCallback(() => runSync(true), [runSync]);
+
   const heldBackImages = imageUsage?.waiting ?? 0;
   const unsentCount =
     meta.pendingPrompts.length +
@@ -452,7 +459,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       unsentCount,
       nextSyncAt: userId ? nextSyncAt : null,
       imagesVersion,
-      syncNow: runSync,
+      syncNow,
       progress,
       imageUsage: userId ? imageUsage : null,
       signIn,
@@ -463,7 +470,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       resetPassword,
       signOut,
     }),
-    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, runSync, signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
+    [userId, session, state, meta, unsentCount, nextSyncAt, imagesVersion, progress, imageUsage, syncNow, signIn, signUp, confirmSignUp, resendSignUpCode, sendPasswordReset, resetPassword, signOut, updateProfile, updateEmail, updatePassword, deleteAccount],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

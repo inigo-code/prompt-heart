@@ -78,6 +78,8 @@ function PromptEditor() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
   const [attaching, setAttaching] = useState(false);
+  // Moved to Trash from here: the screen is on its way out, so it doesn't turn into "no longer exists" first.
+  const [trashedHere, setTrashedHere] = useState(false);
   // Saved prompts open read-only so a stray tap can't change them; Edit switches to the editor.
   const [editing, setEditing] = useState(params.id === 'new');
   // Reading shows the saved prompt, so text synced from another device appears here, and Edit starts from it.
@@ -196,7 +198,9 @@ function PromptEditor() {
   useEffect(
     () => () => {
       const { id: lastId, draft: d, images: imgs } = latest.current;
-      if (lastId && !d.title.trim() && !d.body.trim() && imgs.length === 0) store.purgePrompt(lastId);
+      // Only a prompt that's still here: one that never existed (an old link) or is already gone has nothing to remove.
+      const live = lastId !== null && store.sync.getSnapshot().prompts.some((p) => p.id === lastId && p.deletedAt === null);
+      if (live && !d.title.trim() && !d.body.trim() && imgs.length === 0) store.purgePrompt(lastId);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -258,7 +262,8 @@ function PromptEditor() {
   const words = draft.body.trim() ? draft.body.trim().split(/\s+/).length : 0;
   const variables = extractVariables(draft.body);
 
-  if (params.id !== 'new' && !existing && !id) {
+  // A saved prompt that isn't here (deleted, or an old link from the widget): typing into it would go nowhere.
+  if (params.id !== 'new' && !existing && !trashedHere) {
     return (
       <View style={[styles.missing, { backgroundColor: theme.bg }]}>
         <Text style={{ color: theme.textMuted }}>This prompt no longer exists.</Text>
@@ -516,6 +521,7 @@ function PromptEditor() {
             onPress: () => {
               if (!id) return;
               const trashed = id;
+              setTrashedHere(true);
               store.deletePrompt(trashed);
               toast('Moved to Trash', { label: 'Undo', onPress: () => store.restorePrompt(trashed) });
               leave();

@@ -28,7 +28,7 @@ export default function ShareScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { createPrompt } = usePromptStore();
+  const { createPrompt, ready } = usePromptStore();
   const folders = useVisibleFolders();
   const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntentContext();
 
@@ -97,6 +97,8 @@ export default function ShareScreen() {
   }
 
   const empty = !body.trim() && !title.trim() && sharedImages.length === 0;
+  // Opened cold from another app's Share: saving before your prompts are read would be lost when they load.
+  const blocked = empty || !ready;
 
   return (
     <KeyboardSafe style={{ backgroundColor: theme.bg }}>
@@ -148,11 +150,11 @@ export default function ShareScreen() {
           </Pressable>
           <Pressable
             onPress={save}
-            disabled={saving || empty}
+            disabled={saving || blocked}
             accessibilityRole="button"
             accessibilityLabel="Save prompt"
-            accessibilityState={{ disabled: saving || empty, busy: saving }}
-            style={({ pressed }) => [styles.primary, { backgroundColor: theme.accent, opacity: empty ? 0.5 : pressed ? 0.8 : 1 }]}
+            accessibilityState={{ disabled: saving || blocked, busy: saving }}
+            style={({ pressed }) => [styles.primary, { backgroundColor: theme.accent, opacity: blocked ? 0.5 : pressed ? 0.8 : 1 }]}
           >
             {saving ? <ActivityIndicator color={theme.accentText} /> : <Text style={[styles.btnText, { color: theme.accentText }]}>Save prompt</Text>}
           </Pressable>

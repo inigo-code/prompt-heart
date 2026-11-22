@@ -23,7 +23,16 @@ export function useSignOut() {
 
   return useCallback(
     async (eraseDevice: boolean) => {
-      if (pendingCount > 0) await syncNow().catch(() => {});
+      const unsent = () => {
+        const s = store.sync.getSnapshot().sync;
+        return s.pendingPrompts.length + s.pendingFolders.length;
+      };
+      if (pendingCount > 0 || store.sync.getSnapshot().sync.pendingCopies.length > 0) await syncNow().catch(() => {});
+      // A failed sync doesn't throw (it shows on the cloud button), so check what's still waiting. Erasing
+      // now would lose those changes for good; keeping them on the phone is fine, they upload next sign-in.
+      if (eraseDevice && unsent() > 0) {
+        throw new Error("Your latest changes haven't uploaded yet, so nothing was removed. Connect and try again.");
+      }
       await signOut();
       profile.clear();
       if (eraseDevice) {

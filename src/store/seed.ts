@@ -6,7 +6,7 @@ const now = Date.now();
 // (on any device) wins over the seed copy when syncing.
 export const seedData: StoreData = {
   version: 2,
-  sync: { userId: null, lastPulledAt: null, pendingPrompts: [], pendingFolders: [], pendingImageUploads: [], pendingImageDeletes: [] },
+  sync: { userId: null, lastPulledAt: null, pendingPrompts: [], pendingCopies: [], pendingFolders: [], pendingImageUploads: [], pendingImageDeletes: [] },
   folders: [
     { id: 'f-writing', name: 'Writing', color: '#F2B84B', createdAt: now, modifiedAt: 0, deletedAt: null },
     { id: 'f-coding', name: 'Coding', color: '#5B8DEF', createdAt: now, modifiedAt: 0, deletedAt: null },

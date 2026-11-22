@@ -107,7 +107,13 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
 
   const writeClipboard = useCallback(
     async (prompt: Prompt, text: string, options?: CopyOptions) => {
-      await Clipboard.setStringAsync(text);
+      try {
+        await Clipboard.setStringAsync(text);
+      } catch {
+        // Nothing was copied, so nothing is counted and no app opens.
+        toast("Couldn't copy that. Try again.");
+        return;
+      }
       if (settings.haptics && Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       }

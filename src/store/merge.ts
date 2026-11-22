@@ -56,6 +56,7 @@ export const emptySyncMeta = (): SyncMeta => ({
   userId: null,
   lastPulledAt: null,
   pendingPrompts: [],
+  pendingCopies: [],
   pendingFolders: [],
   pendingImageUploads: [],
   pendingImageDeletes: [],

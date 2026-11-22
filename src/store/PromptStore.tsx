@@ -357,12 +357,15 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       // Prompts copied straight from the library aren't saved, so there's nothing to count (or sync).
       if (!snapshot.current.prompts.some((p) => p.id === id)) return;
       // A copy isn't an edit: modifiedAt stays, so this can never win over newer text from another
-      // device. The server only raises the copy stats (supabase/copy_stats.sql).
-      commitLocal((d) =>
-        local(d, { folders: d.folders, prompts: d.prompts.map((p) => (p.id === id ? { ...p, copyCount: p.copyCount + 1, lastCopiedAt: Math.max(p.lastCopiedAt ?? 0, at) } : p)) }, [id]),
-      );
+      // device. The server only raises the copy stats (supabase/copy_stats.sql). Nor does it start a
+      // sync (localRevision stays): the count goes along with the next one.
+      setData((d) => ({
+        ...d,
+        prompts: d.prompts.map((p) => (p.id === id ? { ...p, copyCount: p.copyCount + 1, lastCopiedAt: Math.max(p.lastCopiedAt ?? 0, at) } : p)),
+        sync: { ...d.sync, pendingCopies: addIds(d.sync.pendingCopies, [id]) },
+      }));
     },
-    [commitLocal],
+    [],
   );
 
   const createFolder = useCallback(
@@ -467,6 +470,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
       sync: {
         ...d.sync,
         pendingPrompts: clearPending(d.sync.pendingPrompts, d.prompts, sent.prompts, promptVersion),
+        pendingCopies: clearPending(d.sync.pendingCopies, d.prompts, sent.prompts, promptVersion),
         pendingFolders: clearPending(d.sync.pendingFolders, d.folders, sent.folders),
       },
     }));
@@ -491,6 +495,7 @@ export function PromptStoreProvider({ children }: { children: ReactNode }) {
         userId,
         lastPulledAt: null,
         pendingPrompts: d.prompts.map((p) => p.id),
+        pendingCopies: [],
         pendingFolders: d.folders.map((f) => f.id),
         pendingImageUploads: [...new Set(d.prompts.flatMap((p) => p.images))],
         pendingImageDeletes: [],
