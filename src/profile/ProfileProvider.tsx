@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 
 import { IMAGE_BUCKET, imagesSupported } from '@/lib/images';
 import { readWithRetries } from '@/lib/readRetry';
+import { stepOut } from '@/lock/trips';
 import { useSync } from '@/sync/SyncProvider';
 import { supabase } from '@/sync/supabase';
 
@@ -164,7 +165,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   );
 
   const pickAvatar = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 });
+    const result = await stepOut(() => ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 }));
     if (result.canceled || !result.assets?.[0]) return false;
     const ctx = ImageManipulator.manipulate(result.assets[0].uri).resize({ width: AVATAR_SIZE, height: AVATAR_SIZE });
     const saved = await (await ctx.renderAsync()).saveAsync({ format: SaveFormat.JPEG, compress: 0.85 });

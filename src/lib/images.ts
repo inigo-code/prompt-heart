@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
 
 import { newId } from '@/lib/id';
+import { stepOut } from '@/lock/trips';
 
 // Attachments are stored on the device as <id>.jpg in the app's documents folder,
 // and in the private "prompt-images" bucket as <user id>/<id>.jpg.
@@ -52,12 +53,14 @@ export async function saveImage(sourceUri: string): Promise<string> {
 
 /** Opens the photo library; returns ids of the saved copies (empty if cancelled). */
 export async function pickImages(limit = 6): Promise<string[]> {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images'],
-    allowsMultipleSelection: true,
-    selectionLimit: limit,
-    quality: 1,
-  });
+  const result = await stepOut(() =>
+    ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: limit,
+      quality: 1,
+    }),
+  );
   if (result.canceled || !result.assets) return [];
   const ids: string[] = [];
   for (const asset of result.assets) ids.push(await saveImage(asset.uri));

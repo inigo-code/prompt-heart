@@ -12,6 +12,7 @@ import { AppPrivacy } from '../../modules/app-privacy';
 import { authenticate, lockSupport } from './authenticate';
 import type { AuthResult } from './authenticate';
 import { shouldLockOnReturn } from './lockTiming';
+import { backFromTrip } from './trips';
 
 type AppLockContext = {
   /** Asks for fingerprint, face or the phone's screen lock (e.g. before turning App lock on or off). */
@@ -67,7 +68,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
         backgroundedAt.current = Date.now();
       } else if (state === 'active') {
         AppPrivacy?.setHiddenInRecents(true); // the activity may not have existed at first launch
-        if (shouldLockOnReturn(settings.lockAfter, backgroundedAt.current, Date.now())) setUnlocked(false);
+        const now = Date.now();
+        if (!backFromTrip(now) && shouldLockOnReturn(settings.lockAfter, backgroundedAt.current, now)) setUnlocked(false);
         backgroundedAt.current = null;
       }
     });

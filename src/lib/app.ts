@@ -32,6 +32,8 @@ export const WHATS_NEW = {
   id: '1.8.3',
   items: [
     'A smaller, leaner app: version 1.8.3 is optimised when it’s built, so it uses less memory',
+    'App lock no longer asks again when you come back from picking a photo or file, or from sharing',
+    'A new prompt no longer keeps its first letter as an “earlier version” in its history',
     'Copying a prompt no longer starts a sync each time; copy counts go along with the next one',
     'Opens smoothly, with no black flash or dark strip on the way in',
     'A calmer look: the app icon and name up top, and simpler cards, lists and menus',

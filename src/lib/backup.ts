@@ -1,3 +1,4 @@
+
 import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -8,6 +9,7 @@ import { APP_NAME, APP_SLUG } from '@/lib/app';
 import { imageBase64, imagesSupported, writeImageBase64 } from '@/lib/images';
 import { parseImport, toCsv } from '@/lib/importFiles';
 import type { ParsedFile } from '@/lib/importFiles';
+import { stepOut } from '@/lock/trips';
 import type { Folder, Prompt } from '@/store/types';
 
 const FORMAT = 'promptheart-backup';
@@ -39,7 +41,7 @@ async function share(name: string, contents: string, mimeType: string) {
   if (file.exists) file.delete();
   file.create();
   await file.write(contents);
-  await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: `Save ${APP_NAME} backup` });
+  await stepOut(() => Sharing.shareAsync(file.uri, { mimeType, dialogTitle: `Save ${APP_NAME} backup` }));
 }
 
 /** Exports live prompts and categories (with images) as one JSON file via the share sheet. */
@@ -86,11 +88,13 @@ const readText = async (uri: string) => (Platform.OS === 'web' ? (await fetch(ur
  * the prompts in them. Returns null if cancelled; files that can't be read are listed in `errors`.
  */
 export async function pickImportFiles(): Promise<{ files: ParsedFile[]; errors: string[] } | null> {
-  const res = await DocumentPicker.getDocumentAsync({
-    type: ['text/csv', 'text/comma-separated-values', 'application/json', 'text/markdown', 'text/plain', 'text/tab-separated-values', '*/*'],
-    copyToCacheDirectory: true,
-    multiple: true,
-  });
+  const res = await stepOut(() =>
+    DocumentPicker.getDocumentAsync({
+      type: ['text/csv', 'text/comma-separated-values', 'application/json', 'text/markdown', 'text/plain', 'text/tab-separated-values', '*/*'],
+      copyToCacheDirectory: true,
+      multiple: true,
+    }),
+  );
   if (res.canceled || !res.assets?.length) return null;
   const files: ParsedFile[] = [];
   const errors: string[] = [];
@@ -106,7 +110,7 @@ export async function pickImportFiles(): Promise<{ files: ParsedFile[]; errors: 
 
 /** Lets the user pick a backup file; returns null if cancelled. Throws on files that aren't backups. */
 export async function pickBackup(): Promise<Backup | null> {
-  const res = await DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain', '*/*'], copyToCacheDirectory: true });
+  const res = await stepOut(() => DocumentPicker.getDocumentAsync({ type: ['application/json', 'text/plain', '*/*'], copyToCacheDirectory: true }));
   if (res.canceled || !res.assets?.[0]) return null;
   const asset = res.assets[0];
   const text = Platform.OS === 'web' ? await (await fetch(asset.uri)).text() : await new File(asset.uri).text();

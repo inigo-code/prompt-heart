@@ -15,6 +15,7 @@ import { readWithRetries } from '@/lib/readRetry';
 import { BLANKS_STORAGE_KEY } from '@/lib/storageKeys';
 import { extractDefaults, extractVariables } from '@/lib/templates';
 import { LIBRARY_ID_PREFIX } from '@/library/prompts';
+import { stepOut } from '@/lock/trips';
 import { useActivity } from '@/profile/ActivityProvider';
 import { useSettings } from '@/settings/SettingsProvider';
 import { usePromptStore } from '@/store/PromptStore';
@@ -142,7 +143,7 @@ export function CopyPromptProvider({ children }: { children: ReactNode }) {
   // The same text Copy gives; the title goes along as the subject, for apps like email that use one.
   const shareText = useCallback(
     (prompt: Prompt, text: string) => {
-      Share.share({ message: text, ...(prompt.title ? { title: prompt.title } : {}) }, { dialogTitle: 'Share prompt' }).catch((e: unknown) => {
+      stepOut(() => Share.share({ message: text, ...(prompt.title ? { title: prompt.title } : {}) }, { dialogTitle: 'Share prompt' })).catch((e: unknown) => {
         // Closing the browser's share box isn't a failure.
         if ((e as { name?: string } | null)?.name !== 'AbortError') toast("Couldn't share this prompt");
       });

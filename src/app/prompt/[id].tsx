@@ -60,6 +60,8 @@ function PromptEditor() {
   const history = useHistory();
   // One version is saved per editing session, right before the first change to the text.
   const snapped = useRef(false);
+  // A prompt made in this editor has no earlier text to keep, so its first letters aren't saved as a version.
+  const createdHere = useRef(false);
   const aiApps = useEnabledAiApps();
   const folders = useVisibleFolders();
 
@@ -128,7 +130,11 @@ function PromptEditor() {
     const next = { ...draft, ...patch };
     setDraft(next);
     if (id) store.updatePrompt(id, patch);
-    else if (next.title.trim() || next.body.trim()) setId(store.createPrompt(next).id);
+    else if (next.title.trim() || next.body.trim()) {
+      createdHere.current = true;
+      snapped.current = true;
+      setId(store.createPrompt(next).id);
+    }
   };
 
   // Undo steps: a word of typing (with the spaces after it), a paste, or one format button press.
@@ -219,7 +225,9 @@ function PromptEditor() {
         undo.reset({ title: p.title, body: p.body });
         setUndoable({ canUndo: false, canRedo: false });
       }
-      snapped.current = false;
+      // Getting the new prompt's id runs this too; that isn't a new editing session.
+      if (createdHere.current) createdHere.current = false;
+      else snapped.current = false;
     }, [id, getSnapshot, undo]),
   );
 
