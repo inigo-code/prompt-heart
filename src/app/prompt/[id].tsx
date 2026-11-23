@@ -58,7 +58,8 @@ function PromptEditor() {
   const copy = useCopyPrompt();
   const share = useSharePrompt();
   const history = useHistory();
-  // One version is saved per editing session, right before the first change to the text.
+  // One version is saved per editing session (each time editing starts, or the screen comes back into view),
+  // right before the first change to the text.
   const snapped = useRef(false);
   // A prompt made in this editor has no earlier text to keep, so its first letters aren't saved as a version.
   const createdHere = useRef(false);
@@ -188,6 +189,8 @@ function PromptEditor() {
     }
     setDraft(draft);
     setEditing(true);
+    // Each time editing starts is a new session: the text as it stands is kept before the first change.
+    snapped.current = false;
   };
 
   const finishEditing = () => {

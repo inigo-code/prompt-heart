@@ -8,25 +8,30 @@ const TRIP_MAX_MS = 2 * 60 * 1000;
 // Coming back to the app and the picker's answer can arrive in either order; this covers the gap.
 const SETTLE_MS = 1500;
 
+// Trips still waiting for their answer. A profile photo is two screens (the picker, then cropping) with a
+// moment back in the app between them, so a trip isn't over until its answer is in.
+let open = 0;
+// When the current trip began.
 let tripAt: number | null = null;
 
-/** Runs `open` (a picker or share sheet) as a short trip out of the app, so App lock doesn't ask again after it. */
-export async function stepOut<T>(open: () => Promise<T>): Promise<T> {
-  const mine = Date.now();
-  tripAt = mine;
+/** Runs `show` (a picker or share sheet) as a short trip out of the app, so App lock doesn't ask again after it. */
+export async function stepOut<T>(show: () => Promise<T>): Promise<T> {
+  open++;
+  tripAt = Date.now();
   try {
-    return await open();
+    return await show();
   } finally {
+    open--;
     // Still away (in the share sheet, say): the return to the app settles it. Otherwise it's over.
     setTimeout(() => {
-      if (tripAt === mine && AppState.currentState === 'active') tripAt = null;
+      if (open === 0 && AppState.currentState === 'active') tripAt = null;
     }, SETTLE_MS);
   }
 }
 
-/** On coming back to the app: whether it was from a short trip. Each trip counts once. */
+/** On coming back to the app: whether it was from a short trip. A finished trip counts once. */
 export function backFromTrip(now: number): boolean {
   const short = tripAt !== null && now - tripAt < TRIP_MAX_MS;
-  tripAt = null;
+  if (open === 0) tripAt = null;
   return short;
 }
