@@ -108,7 +108,8 @@
             }
           ]
         }
-      ]
+      ],
+      "./plugins/withOptionalHardware"
     ],
     "scheme": "promptnotes",
     "experiments": {
