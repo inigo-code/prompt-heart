@@ -80,7 +80,7 @@ and set the subject:
 | Confirm signup | `Your Prompt Heart code: {{ .Token }}` | [confirm-signup.html](email-templates/confirm-signup.html) |
 | Reset password | `Your Prompt Heart password code: {{ .Token }}` | [reset-password.html](email-templates/reset-password.html) |
 
-The logo is loaded from `https://inigo-code.github.io/prompt-heart-site/email-logo.png`. Some email
+The logo is loaded from `https://heartapps.github.io/prompt-heart/email-logo.png`. Some email
 apps hide images until you tap "Show images"; the emails still read correctly without them.
 
 The small picture next to a sender in the inbox list isn't part of the email. Gmail only shows one for

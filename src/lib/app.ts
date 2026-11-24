@@ -11,16 +11,16 @@ export const DEVELOPER = {
 
 /** Public pages (GitHub Pages, repo inigo-code/prompt-heart-site). The Play Store listing links to them too. */
 export const LINKS = {
-  privacy: 'https://inigo-code.github.io/prompt-heart-site/privacy.html',
-  deleteAccount: 'https://inigo-code.github.io/prompt-heart-site/delete-account.html',
+  privacy: 'https://heartapps.github.io/prompt-heart/privacy.html',
+  deleteAccount: 'https://heartapps.github.io/prompt-heart/delete-account.html',
 };
 
 /** Prompt Heart is one of the Heart Apps. Wording matches the Heart Apps site and Watch Heart (~/.claude/heart-apps.md). */
 export const HEART_APPS = {
   name: 'Heart Apps',
   line: 'Free Android apps by Inigo. No ads, no tracking, nothing to buy.',
-  home: 'https://inigo-code.github.io/',
-  others: [{ name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://inigo-code.github.io/watch-heart-site/' }],
+  home: 'https://heartapps.github.io/',
+  others: [{ name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://heartapps.github.io/watch-heart/' }],
 };
 export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
 
