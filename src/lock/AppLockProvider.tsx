@@ -105,32 +105,36 @@ export function useAppLock() {
 function LockScreen({ confirm, onUnlocked, unread }: { confirm: (reason: string) => Promise<AuthResult>; onUnlocked: () => void; unread: boolean }) {
   const theme = useTheme();
   const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
 
+  // Unlock stays tappable while a prompt is pending: a prompt that is showing covers the screen, so a tap means it was
+  // lost, and asking again clears it (see authenticate.ts). Greying the button out until an answer came left it dead.
   const unlock = useCallback(async () => {
-    setBusy(true);
-    try {
-      // Without any screen lock on the phone there's nothing to check against; don't lock people out.
-      if ((await lockSupport()) === 'no-screen-lock') {
-        onUnlocked();
-        return;
-      }
-      const result = await confirm('Unlock Prompt Heart');
-      if (result === 'ok') onUnlocked();
-      else if (result === 'locked-out') setMessage('Too many tries. Wait a moment, then try again.');
-      else if (result === 'failed') setMessage("That didn't work. Try again.");
-      else setMessage(null);
-    } finally {
-      setBusy(false);
+    // Without any screen lock on the phone there's nothing to check against; don't lock people out.
+    if ((await lockSupport()) === 'no-screen-lock') {
+      onUnlocked();
+      return;
     }
+    const result = await confirm('Unlock Prompt Heart');
+    if (result === 'ok') onUnlocked();
+    else if (result === 'locked-out') setMessage('Too many tries. Wait a moment, then try again.');
+    else if (result === 'failed') setMessage("That didn't work. Try again.");
+    else setMessage(null);
   }, [confirm, onUnlocked]);
 
-  // Ask straight away when the lock screen appears (on the phone; the web preview waits for Unlock).
+  // Ask straight away when the lock screen appears (on the phone; the web preview waits for Unlock), once the app is
+  // on screen: a prompt asked for while it is still coming back gets lost.
   const asked = useRef(false);
   useEffect(() => {
     if (asked.current || Platform.OS === 'web') return;
-    asked.current = true;
-    void unlock();
+    const go = () => {
+      asked.current = true;
+      void unlock();
+    };
+    if (AppState.currentState === 'active') return go();
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active' && !asked.current) go();
+    });
+    return () => sub.remove();
   }, [unlock]);
 
   return (
@@ -145,10 +149,9 @@ function LockScreen({ confirm, onUnlocked, unread }: { confirm: (reason: string)
       </View>
       <Pressable
         onPress={() => void unlock()}
-        disabled={busy}
         accessibilityRole="button"
         accessibilityLabel="Unlock Prompt Heart"
-        style={({ pressed }) => [styles.button, { backgroundColor: theme.accent, opacity: busy ? 0.6 : pressed ? 0.85 : 1 }]}
+        style={({ pressed }) => [styles.button, { backgroundColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}
       >
         <Ionicons name="lock-open-outline" size={18} color={theme.accentText} />
         <Text style={[styles.buttonText, { color: theme.accentText }]}>Unlock</Text>
