@@ -72,6 +72,7 @@ export default function ProfileScreen() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
+  const [removePhoto, setRemovePhoto] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -283,8 +284,15 @@ export default function ProfileScreen() {
         onClose={() => setPhotoMenu(false)}
         actions={[
           { label: profile.avatarUri ? 'Choose a new photo' : 'Choose a photo', icon: 'image-outline', onPress: () => run('photo', async () => ((await profile.pickAvatar()) ? 'Photo updated' : undefined)) },
-          ...(profile.avatarUri ? [{ label: 'Remove photo', icon: 'trash-outline' as const, destructive: true, onPress: () => run('photo', async () => (await profile.removeAvatar(), 'Photo removed')) }] : []),
+          ...(profile.avatarUri ? [{ label: 'Remove photo', icon: 'trash-outline' as const, destructive: true, onPress: () => setRemovePhoto(true) }] : []),
         ]}
+      />
+
+      <ActionSheet
+        visible={removePhoto}
+        title="Remove your profile photo? It's removed from this phone and from your account."
+        onClose={() => setRemovePhoto(false)}
+        actions={[{ label: 'Remove photo', icon: 'trash-outline', destructive: true, onPress: () => run('photo', async () => (await profile.removeAvatar(), 'Photo removed')) }]}
       />
 
       <ActionSheet

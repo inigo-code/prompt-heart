@@ -25,6 +25,8 @@ export default function CategoriesScreen() {
   const [editing, setEditing] = useState<string | null>(null);
   const [renameText, setRenameText] = useState('');
   const [menuFor, setMenuFor] = useState<Folder | null>(null);
+  // Deleting a category has no undo, so it asks first.
+  const [deleting, setDeleting] = useState<Folder | null>(null);
 
   const startRename = (f: Folder) => {
     setRenameText(f.name);
@@ -120,10 +122,25 @@ export default function CategoriesScreen() {
           menuFor
             ? [
                 { label: 'Rename', icon: 'create-outline', onPress: () => startRename(menuFor) },
-                { label: 'Delete category', icon: 'trash-outline', destructive: true, onPress: () => deleteFolder(menuFor.id) },
+                { label: 'Delete category', icon: 'trash-outline', destructive: true, onPress: () => setDeleting(menuFor) },
               ]
             : []
         }
+      />
+
+      <ActionSheet
+        visible={deleting !== null}
+        title={
+          deleting
+            ? `Delete the category “${deleting.name}”? ${
+                countFor(deleting.id) === 0
+                  ? 'It has no prompts.'
+                  : `Its ${countFor(deleting.id) === 1 ? 'prompt stays' : `${countFor(deleting.id)} prompts stay`}, uncategorised.`
+              } This can't be undone.`
+            : undefined
+        }
+        onClose={() => setDeleting(null)}
+        actions={deleting ? [{ label: 'Delete category', icon: 'trash-outline', destructive: true, onPress: () => deleteFolder(deleting.id) }] : []}
       />
     </View>
   );

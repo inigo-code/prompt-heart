@@ -80,6 +80,8 @@ function PromptEditor() {
   const [tagInput, setTagInput] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
+  // An image waiting for "Remove it?": the file is deleted from the phone and the account, with no undo.
+  const [removingImage, setRemovingImage] = useState<string | null>(null);
   const [attaching, setAttaching] = useState(false);
   // Moved to Trash from here: the screen is on its way out, so it doesn't turn into "no longer exists" first.
   const [trashedHere, setTrashedHere] = useState(false);
@@ -497,7 +499,23 @@ function PromptEditor() {
         </Text>
       </ScrollView>
 
-      <ImageViewer imageId={viewing} onClose={() => setViewing(null)} onRemove={editing ? removeImage : undefined} />
+      <ImageViewer imageId={viewing} onClose={() => setViewing(null)} onRemove={editing ? setRemovingImage : undefined} />
+
+      <ActionSheet
+        visible={removingImage !== null}
+        title="Remove this image from the prompt? This can't be undone."
+        onClose={() => setRemovingImage(null)}
+        actions={[
+          {
+            label: 'Remove image',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: () => {
+              if (removingImage) removeImage(removingImage);
+            },
+          },
+        ]}
+      />
 
       <ActionSheet
         visible={menuOpen}

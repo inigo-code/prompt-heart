@@ -29,8 +29,9 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-27-unlock',
+  id: '2026-11-27-ask-first',
   items: [
+    'Removing an image, deleting a category, removing your profile photo and resetting settings now ask first, so a stray tap can’t undo your work',
     'Unlock always answers now: sometimes the fingerprint check went missing as you came back to the app, and Unlock stayed greyed out until Prompt Heart was closed',
   ],
 };

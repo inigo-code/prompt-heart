@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ActionSheet } from '@/components/ActionSheet';
 import { AppBadge } from '@/components/AppBadge';
 import { Avatar } from '@/components/Avatar';
 import { ControlRow, Row, Section, Segmented, ToggleRow } from '@/components/SettingsUI';
@@ -44,6 +45,7 @@ export default function SettingsScreen() {
   const sync = useSync();
   const profile = useProfile();
   const [busy, setBusy] = useState<'backup' | 'markdown' | 'csv' | 'import' | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const run = async (kind: 'backup' | 'markdown' | 'csv' | 'import', fn: () => Promise<string | null>) => {
     setBusy(kind);
@@ -298,10 +300,23 @@ export default function SettingsScreen() {
           label="Reset settings"
           destructive
           last
-          onPress={() => {
-            reset();
-            toast('Settings reset to defaults');
-          }}
+          onPress={() => setResetting(true)}
+        />
+        <ActionSheet
+          visible={resetting}
+          title="Reset settings to their defaults? Your prompts, your account and App lock aren't touched."
+          onClose={() => setResetting(false)}
+          actions={[
+            {
+              label: 'Reset settings',
+              icon: 'refresh-outline',
+              destructive: true,
+              onPress: () => {
+                reset();
+                toast('Settings reset to defaults');
+              },
+            },
+          ]}
         />
       </Section>
     </ScrollView>
