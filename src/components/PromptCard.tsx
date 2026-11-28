@@ -51,8 +51,8 @@ export const PromptCard = memo(function PromptCard({
   // The Card preview setting is 2, 4 or 6: cards show one, two or three lines of the prompt.
   const lines = Math.ceil(previewLines / 2);
   // A grid card is half as wide: it shows the day without the time, and its line may wrap once instead of
-  // cutting the date in half.
-  const stamp = grid ? formatStamp(prompt.updatedAt).split(',')[0] : formatStamp(prompt.updatedAt);
+  // cutting the date in half ("28 Nov" stays on one line).
+  const stamp = grid ? formatStamp(prompt.updatedAt).split(',')[0].replace(/ /g, '\u00A0') : formatStamp(prompt.updatedAt);
   // A plain prompt copies straight away, so its button confirms with a tick; one with blanks opens its sheet.
   const [copied, setCopied] = useState(false);
   const tick = useRef<ReturnType<typeof setTimeout> | null>(null);

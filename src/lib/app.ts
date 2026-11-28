@@ -34,6 +34,6 @@ export const WHATS_NEW = {
     'Easier to read: grey text, red and the green and rose colours are a little darker where they were too pale',
     'Easier to tap: chips, tags, the colour circles, the close button when selecting and other small buttons have bigger targets',
     'Category and image rows in a prompt scroll to the edge of the screen instead of stopping short',
-    'Grid cards show the whole date, and tips stay out of the way while you search or filter',
+    'Grid cards show the day in one piece instead of cutting it off, and tips stay out of the way while you search or filter',
   ],
 };
