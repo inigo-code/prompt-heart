@@ -70,6 +70,7 @@ export function TagSheet({ visible, title, existingTags, onAdd, onClose }: Props
                 onPress={() => add(t)}
                 accessibilityRole="button"
                 accessibilityLabel={`Add tag ${t}`}
+                hitSlop={{ top: 4, bottom: 4 }}
                 style={({ pressed }) => [styles.tag, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
               >
                 <Text style={{ color: theme.text, fontSize: font.body, fontWeight: '600' }}>#{t}</Text>
@@ -92,5 +93,5 @@ const styles = StyleSheet.create({
   addText: { fontSize: font.body, fontWeight: '700' },
   label: { fontSize: font.footnote, fontWeight: '600' },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tag: { paddingHorizontal: 12, height: 36, borderRadius: 18, justifyContent: 'center' },
+  tag: { paddingHorizontal: 14, height: 40, borderRadius: 20, justifyContent: 'center' },
 });

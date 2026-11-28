@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   newBox: { margin: 16, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   input: { fontSize: font.headline, paddingVertical: 4 },
-  addBtn: { height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  addBtn: { height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   addText: { fontSize: font.body, fontWeight: '700' },
   // Rows form one grouped card: outer edges and rounded corners on the first and last row, dividers between.
   row: {

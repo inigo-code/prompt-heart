@@ -25,6 +25,8 @@ export function Chip({ label, active, leading, variant = 'filter', theme, onPres
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={350}
+      // 34 tall on screen, 48 under the finger.
+      hitSlop={{ top: 7, bottom: 7 }}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={action ? undefined : { selected: !!active }}

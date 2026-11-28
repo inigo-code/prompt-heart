@@ -163,7 +163,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     gap: 6,
-    height: 36,
+    // With the 3 px track around it, the control is 48 tall: a full touch target.
+    height: 42,
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',

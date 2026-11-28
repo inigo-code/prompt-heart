@@ -184,6 +184,7 @@ const LibraryCard = memo(function LibraryCard({
           onPress={() => onCopy(item)}
           accessibilityRole="button"
           accessibilityLabel={`Copy ${item.title}`}
+          hitSlop={{ top: 4, bottom: 4 }}
           style={({ pressed }) => [styles.btn, { backgroundColor: theme.accent, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Ionicons name="copy-outline" size={15} color={theme.accentText} />
@@ -195,6 +196,7 @@ const LibraryCard = memo(function LibraryCard({
           accessibilityRole="button"
           accessibilityLabel={saved ? `${item.title} is saved to your prompts` : `Save ${item.title} to your prompts`}
           accessibilityState={{ disabled: saved }}
+          hitSlop={{ top: 4, bottom: 4 }}
           style={({ pressed }) => [
             styles.btn,
             styles.btnOutline,

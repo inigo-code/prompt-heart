@@ -329,6 +329,6 @@ const styles = StyleSheet.create({
   appIcon: { width: 30, height: 30, borderRadius: 8 },
   content: { padding: 16, gap: 24 },
   swatches: { flexDirection: 'row', gap: 10 },
-  swatchRing: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
-  swatch: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  swatchRing: { width: 48, height: 48, borderRadius: 24, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
+  swatch: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 });

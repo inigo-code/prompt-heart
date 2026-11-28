@@ -45,6 +45,7 @@ export default function AboutScreen() {
           onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
           accessibilityRole="link"
           accessibilityLabel="A Heart App. Open the Heart Apps website"
+          hitSlop={9}
           style={({ pressed }) => [styles.family, { borderColor: gold.border, backgroundColor: gold.fill, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Text style={[styles.familyText, { color: gold.text }]}>A HEART APP</Text>
@@ -92,6 +93,7 @@ export default function AboutScreen() {
         <Pressable
           onPress={() => WebBrowser.openBrowserAsync(HEART_APPS.home)}
           accessibilityRole="link"
+          hitSlop={6}
           style={({ pressed }) => [styles.allApps, { backgroundColor: theme.chip, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
         >
           <Text style={[styles.allAppsText, { color: theme.text }]}>All {HEART_APPS.name}</Text>

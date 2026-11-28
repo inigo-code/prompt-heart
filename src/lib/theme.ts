@@ -9,7 +9,8 @@ const light = {
   card: '#FFFFFF',
   elevated: '#FFFFFF',
   text: '#1C1A17',
-  textMuted: '#76706A',
+  // Secondary text, 4.5:1 or better on bg, card and chip (WCAG AA).
+  textMuted: '#6B655F',
   border: '#E5E0D7',
   accent: '#D99A1E',
   /** The accent as text or a small icon; readable on cards and backgrounds. */
@@ -19,7 +20,7 @@ const light = {
   chip: '#ECE8E0',
   chipActive: '#1C1A17',
   chipActiveText: '#FFFFFF',
-  danger: '#D14343',
+  danger: '#C23A3A',
   toast: '#1C1A17',
   toastText: '#FFFFFF',
   overlay: 'rgba(0,0,0,0.35)',
@@ -95,13 +96,14 @@ type AccentSpec = { label: string; light: [string, string, string]; dark: [strin
 export const ACCENTS: Record<AccentKey, AccentSpec> = {
   amber: { label: 'Amber', light: ['#D99A1E', '#1C1A17', '#F7E7C4'], dark: ['#F2B84B', '#121110', '#3A2F17'] },
   blue: { label: 'Blue', light: ['#3467D6', '#FFFFFF', '#DCE6FA'], dark: ['#7AA2FF', '#0E1424', '#1B2640'] },
-  green: { label: 'Green', light: ['#258A5C', '#FFFFFF', '#D5EFE2'], dark: ['#52C98F', '#0C1A13', '#163327'] },
+  green: { label: 'Green', light: ['#1F7F52', '#FFFFFF', '#D5EFE2'], dark: ['#52C98F', '#0C1A13', '#163327'] },
   rose: { label: 'Rose', light: ['#C93D70', '#FFFFFF', '#F7DCE6'], dark: ['#F27CA5', '#22101A', '#3A1B28'] },
   violet: { label: 'Violet', light: ['#6E52D9', '#FFFFFF', '#E5DFFA'], dark: ['#A693FF', '#16112B', '#29224A'] },
 };
 
-// The light-theme accents as text. Amber and green are too pale on white at their fill colour.
-const INK_ON_LIGHT: Record<AccentKey, string> = { amber: '#8F5E00', blue: '#3467D6', green: '#1E7A50', rose: '#C93D70', violet: '#6E52D9' };
+// The light-theme accents as text, each 4.5:1 or better on the light backgrounds. Amber, green and rose are too
+// pale on the cream ground at their fill colour.
+const INK_ON_LIGHT: Record<AccentKey, string> = { amber: '#8F5E00', blue: '#3467D6', green: '#1E7A50', rose: '#BF3768', violet: '#6E52D9' };
 
 export function buildTheme(isDark: boolean, accent: AccentKey): Theme {
   const base = isDark ? dark : light;

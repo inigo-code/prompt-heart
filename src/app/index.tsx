@@ -313,6 +313,7 @@ export default function HomeScreen() {
               key={app.key}
               onPress={() => openAiApp(app).catch(() => toast(`Couldn't open ${app.label}`))}
               accessibilityLabel={`Open ${app.label}`}
+              hitSlop={{ top: 7, bottom: 7 }}
               style={({ pressed }) => [styles.aiPill, { backgroundColor: theme.card, borderColor: theme.border, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
             >
               <AppBadge app={app} size={22} />
@@ -408,7 +409,8 @@ export default function HomeScreen() {
           />
         }
         ListHeaderComponent={
-          aiApps.length > 0 && !settings.dismissedTips.includes('ai-launch') ? (
+          // Tips wait while a search or filter is on, so "Nothing matches" isn't pushed down under one.
+          query || filter.kind !== 'all' ? undefined : aiApps.length > 0 && !settings.dismissedTips.includes('ai-launch') ? (
             <TipCard
               theme={theme}
               title="Open prompts in your AI apps"
@@ -669,7 +671,7 @@ const styles = StyleSheet.create({
   progressTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: 4, borderRadius: 2 },
   selectHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56 },
-  selectClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  selectClose: { width: 44, height: 44, marginLeft: -10, alignItems: 'center', justifyContent: 'center' },
   selectCount: { flex: 1, fontSize: font.title, fontWeight: '800' },
   selectAll: { fontSize: font.body, fontWeight: '700' },
   bulkBar: {

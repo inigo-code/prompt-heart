@@ -29,9 +29,11 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-27-ask-first',
+  id: '2026-11-28-design-pass',
   items: [
-    'Removing an image, deleting a category, removing your profile photo and resetting settings now ask first, so a stray tap can’t undo your work',
-    'Unlock always answers now: sometimes the fingerprint check went missing as you came back to the app, and Unlock stayed greyed out until Prompt Heart was closed',
+    'Easier to read: grey text, red and the green and rose colours are a little darker where they were too pale',
+    'Easier to tap: chips, tags, the colour circles, the close button when selecting and other small buttons have bigger targets',
+    'Category and image rows in a prompt scroll to the edge of the screen instead of stopping short',
+    'Grid cards show the whole date, and tips stay out of the way while you search or filter',
   ],
 };

@@ -174,6 +174,7 @@ export default function ProfileScreen() {
                       onPress={cancelAbout}
                       accessibilityRole="button"
                       accessibilityLabel="Cancel editing name and bio"
+                      hitSlop={{ top: 7, bottom: 7 }}
                       style={[styles.nameSave, { backgroundColor: theme.chip }]}
                     >
                       <Text style={[styles.nameSaveText, { color: theme.text }]}>Cancel</Text>
@@ -182,6 +183,7 @@ export default function ProfileScreen() {
                       onPress={saveAbout}
                       accessibilityRole="button"
                       accessibilityLabel="Save name and bio"
+                      hitSlop={{ top: 7, bottom: 7 }}
                       style={[styles.nameSave, { backgroundColor: theme.accent }]}
                     >
                       <Text style={[styles.nameSaveText, { color: theme.accentText }]}>Save</Text>
@@ -199,6 +201,7 @@ export default function ProfileScreen() {
                 onPress={() => setAboutOpen(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Edit name and bio"
+                hitSlop={4}
                 style={[styles.editChip, { backgroundColor: theme.chip }]}
               >
                 <Ionicons name="create-outline" size={17} color={theme.text} />

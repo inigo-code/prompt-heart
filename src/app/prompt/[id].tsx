@@ -356,7 +356,7 @@ function PromptEditor() {
           </View>
         )}
         {editing && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bleed} contentContainerStyle={[styles.row, styles.bleedContent]}>
             <Chip label="No category" theme={theme} active={draft.folderId === null} onPress={() => change({ folderId: null })} />
             {folders.map((f) => (
               <Chip
@@ -401,6 +401,7 @@ function PromptEditor() {
                 disabled={!editing}
                 onPress={() => change({ tags: draft.tags.filter((x) => x !== t) })}
                 accessibilityLabel={editing ? `Remove tag ${t}` : `Tag ${t}`}
+                hitSlop={{ top: 10, bottom: 10 }}
                 style={[styles.tag, { backgroundColor: theme.chip }]}
               >
                 <Text style={{ color: theme.text, fontSize: font.footnote }}>#{t}</Text>
@@ -425,7 +426,7 @@ function PromptEditor() {
         )}
 
         {(images.length > 0 || (editing && imagesSupported)) && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bleed} contentContainerStyle={[styles.row, styles.bleedContent]}>
             {images.map((img) => (
               <Pressable key={img} onPress={() => setViewing(img)} accessibilityLabel="View image">
                 <ImageThumb id={img} theme={theme} size={76} radius={12} />
@@ -572,6 +573,9 @@ const styles = StyleSheet.create({
   title: { fontSize: font.largeTitle, fontWeight: '800', paddingVertical: 6, letterSpacing: -0.5 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   wrap: { flexWrap: 'wrap' },
+  // Sideways rows (categories, images) scroll to the screen's edges instead of being cut off at the margin.
+  bleed: { marginHorizontal: -20 },
+  bleedContent: { paddingHorizontal: 20 },
   tag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 14 },
   tagInput: { minWidth: 80, fontSize: font.body, height: 28, paddingVertical: 0 },
   launch: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },

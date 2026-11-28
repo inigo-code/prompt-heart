@@ -63,6 +63,7 @@ export function ActionSheet({ visible, title, actions, quick, onClose }: Props) 
                   onPress={() => run(q.onPress)}
                   accessibilityRole="button"
                   accessibilityLabel={`${quick.label} ${q.label}`}
+                  hitSlop={{ top: 5, bottom: 5 }}
                   style={({ pressed }) => [styles.quickItem, { backgroundColor: pressed ? theme.chip : theme.bg, borderColor: theme.border }]}
                 >
                   {q.leading}

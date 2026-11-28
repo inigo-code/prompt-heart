@@ -20,11 +20,11 @@ export function TipCard({ theme, title, children, onDismiss, action }: Props) {
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.body, { color: theme.textMuted }]}>{children}</Text>
       <View style={styles.actions}>
-        <Pressable onPress={onDismiss} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
+        <Pressable onPress={onDismiss} hitSlop={{ top: 4, bottom: 4 }} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
           <Text style={[styles.btnText, { color: theme.textMuted }]}>Got it</Text>
         </Pressable>
         {action && (
-          <Pressable onPress={action.onPress} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
+          <Pressable onPress={action.onPress} hitSlop={{ top: 4, bottom: 4 }} accessibilityRole="button" style={({ pressed }) => [styles.btn, pressed && { backgroundColor: theme.chip }]}>
             <Text style={[styles.btnText, { color: theme.accentInk }]}>{action.label}</Text>
           </Pressable>
         )}

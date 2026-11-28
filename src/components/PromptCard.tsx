@@ -50,6 +50,9 @@ export const PromptCard = memo(function PromptCard({
   const extraImages = prompt.images.length - 1;
   // The Card preview setting is 2, 4 or 6: cards show one, two or three lines of the prompt.
   const lines = Math.ceil(previewLines / 2);
+  // A grid card is half as wide: it shows the day without the time, and its line may wrap once instead of
+  // cutting the date in half.
+  const stamp = grid ? formatStamp(prompt.updatedAt).split(',')[0] : formatStamp(prompt.updatedAt);
   // A plain prompt copies straight away, so its button confirms with a tick; one with blanks opens its sheet.
   const [copied, setCopied] = useState(false);
   const tick = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -148,8 +151,8 @@ export const PromptCard = memo(function PromptCard({
               {previewText(prompt.body)}
             </Text>
           )}
-          <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={1}>
-            {[folder?.name, vars > 0 ? `${vars} ${vars === 1 ? 'blank' : 'blanks'}` : null, formatStamp(prompt.updatedAt)].filter(Boolean).join('  ·  ')}
+          <Text style={[styles.metaText, { color: theme.textMuted }]} numberOfLines={grid ? 2 : 1}>
+            {[folder?.name, vars > 0 ? `${vars} ${vars === 1 ? 'blank' : 'blanks'}` : null, stamp].filter(Boolean).join('  ·  ')}
           </Text>
         </View>
 
@@ -170,9 +173,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   text: { flex: 1, gap: 4 },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 5 },
-  pin: { marginTop: 4 },
+  // Centred on the title's first line (lineHeight 24).
+  pin: { marginTop: 5 },
   metaText: { fontSize: font.footnote, fontWeight: '500', marginTop: 2 },
-  title: { flex: 1, fontSize: font.headline, fontWeight: '700', letterSpacing: -0.2 },
+  title: { flex: 1, fontSize: font.headline, lineHeight: 24, fontWeight: '700', letterSpacing: -0.2 },
   body: { fontSize: font.body, lineHeight: 22 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   copyBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
