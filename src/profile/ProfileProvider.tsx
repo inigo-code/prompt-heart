@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 import { IMAGE_BUCKET, imagesSupported } from '@/lib/images';
 import { readWithRetries } from '@/lib/readRetry';
 import { stepOut } from '@/lock/trips';
+import { avatarAction, type PendingRemoval } from '@/profile/avatarSync';
 import { useSync } from '@/sync/SyncProvider';
 import { supabase } from '@/sync/supabase';
 
@@ -25,9 +26,11 @@ type LocalProfile = {
   avatarVersion: number | null;
   /** Account the current photo was last uploaded to or downloaded from. */
   avatarSyncedFor: string | null;
+  /** Photo removed here while the account couldn't be told; finished on the next sync so it doesn't come back. */
+  avatarRemoval: PendingRemoval | null;
 };
 
-const EMPTY: LocalProfile = { name: '', bio: '', avatarVersion: null, avatarSyncedFor: null };
+const EMPTY: LocalProfile = { name: '', bio: '', avatarVersion: null, avatarSyncedFor: null, avatarRemoval: null };
 export const BIO_MAX = 160;
 
 function profileDir() {
@@ -111,6 +114,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     [updateProfile],
   );
 
+  // Removes the photo from the account. Throws if the account couldn't be reached.
+  const removeRemote = useCallback(
+    async (forUser: string) => {
+      if (!supabase) return;
+      const { error } = await supabase.storage.from(IMAGE_BUCKET).remove([remoteAvatar(forUser)]);
+      if (error) throw error;
+      await updateProfile({ avatar_version: null });
+    },
+    [updateProfile],
+  );
+  const finishing = useRef(false);
+
   // Reconcile with the account whenever it (or its saved profile fields) change.
   useEffect(() => {
     if (!ready || !userId || !supabase) return;
@@ -123,28 +138,47 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     if (!imagesSupported) return;
     const local = profile.avatarVersion;
-    if (metaAvatar && metaAvatar !== local && (!local || metaAvatar > local || profile.avatarSyncedFor === userId)) {
+    const action = avatarAction({
+      local,
+      syncedFor: profile.avatarSyncedFor,
+      removal: profile.avatarRemoval,
+      userId,
+      meta: metaAvatar,
+      metaHasKey: metaHasAvatarKey,
+    });
+    if (action === 'download' && metaAvatar) {
       // Newer photo on the account (set on another device): download it.
       (async () => {
         const { data } = await client.storage.from(IMAGE_BUCKET).createSignedUrl(remoteAvatar(userId), 60);
         if (!data?.signedUrl) return;
         await File.downloadFileAsync(data.signedUrl, avatarFile(metaAvatar));
         deleteAvatarFiles(metaAvatar);
-        setProfile((p) => ({ ...p, avatarVersion: metaAvatar, avatarSyncedFor: userId }));
+        setProfile((p) => ({ ...p, avatarVersion: metaAvatar, avatarSyncedFor: userId, avatarRemoval: null }));
       })().catch(() => {});
-    } else if (local && (!metaAvatar || local > metaAvatar) && profile.avatarSyncedFor !== userId) {
+    } else if (action === 'upload' && local) {
       // Photo picked while signed out or offline: upload it.
       Promise.resolve()
         .then(() => uploadAvatar(local, userId))
         .catch(() => {});
-    } else if (!metaAvatar && metaHasAvatarKey && local && profile.avatarSyncedFor === userId) {
+    } else if (action === 'removedElsewhere') {
       // Removed on another device. (Async, like the branches above: this reacts to an outside change.)
       Promise.resolve().then(() => {
         deleteAvatarFiles();
         setProfile((p) => ({ ...p, avatarVersion: null, avatarSyncedFor: null }));
       });
+    } else if (action === 'finishRemoval' && !finishing.current) {
+      // Removed here while offline: tell the account now, so the photo doesn't download again.
+      finishing.current = true;
+      removeRemote(userId)
+        .then(() => setProfile((p) => ({ ...p, avatarRemoval: null })))
+        .catch(() => {})
+        .finally(() => {
+          finishing.current = false;
+        });
+    } else if (action === 'dropRemoval') {
+      Promise.resolve().then(() => setProfile((p) => ({ ...p, avatarRemoval: null })));
     }
-  }, [ready, userId, metaName, metaBio, profile.bio, metaAvatar, metaHasAvatarKey, profile.name, profile.avatarVersion, profile.avatarSyncedFor, updateProfile, uploadAvatar]);
+  }, [ready, userId, metaName, metaBio, profile.bio, metaAvatar, metaHasAvatarKey, profile.name, profile.avatarVersion, profile.avatarSyncedFor, profile.avatarRemoval, updateProfile, uploadAvatar, removeRemote]);
 
   const setName = useCallback(
     async (name: string) => {
@@ -172,7 +206,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const version = Date.now();
     await new File(saved.uri).copy(avatarFile(version));
     deleteAvatarFiles(version);
-    setProfile((p) => ({ ...p, avatarVersion: version, avatarSyncedFor: null }));
+    setProfile((p) => ({ ...p, avatarVersion: version, avatarSyncedFor: null, avatarRemoval: null }));
     // Without a connection the new photo still shows here, and uploads the next time the app syncs the profile.
     if (userId) await uploadAvatar(version, userId).catch(() => {});
     return true;
@@ -180,12 +214,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const removeAvatar = useCallback(async () => {
     deleteAvatarFiles();
-    setProfile((p) => ({ ...p, avatarVersion: null, avatarSyncedFor: null }));
-    if (userId && supabase) {
-      await supabase.storage.from(IMAGE_BUCKET).remove([remoteAvatar(userId)]);
-      await updateProfile({ avatar_version: null });
+    // Remembered until the account hears about it: without a connection the photo is gone here at once, and the
+    // next sync removes it from the account (rather than downloading it again).
+    const removal = userId ? { at: Date.now(), for: userId } : null;
+    setProfile((p) => ({ ...p, avatarVersion: null, avatarSyncedFor: null, avatarRemoval: removal }));
+    if (!userId) return;
+    finishing.current = true; // so the sync effect doesn't send the same removal again meanwhile
+    try {
+      await removeRemote(userId);
+      setProfile((p) => (p.avatarRemoval === removal ? { ...p, avatarRemoval: null } : p));
+    } catch {
+      // Offline: finished on the next sync.
+    } finally {
+      finishing.current = false;
     }
-  }, [userId, updateProfile]);
+  }, [userId, removeRemote]);
 
   // Clearing saves the empty profile even if the saved one couldn't be read, since removing it is the point.
   const clear = useCallback(() => {
