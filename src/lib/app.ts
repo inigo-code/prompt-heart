@@ -20,7 +20,10 @@ export const HEART_APPS = {
   name: 'Heart Apps',
   line: 'Free Android apps by Inigo. No ads, no tracking, nothing to buy.',
   home: 'https://heartapps.github.io/',
-  others: [{ name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://heartapps.github.io/watch-heart/' }],
+  others: [
+    { name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://heartapps.github.io/watch-heart/' },
+    { name: 'Kural Heart', tagline: 'A private journal with Thiruvalluvar', url: 'https://heartapps.github.io/kural-heart/' },
+  ],
 };
 export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
 
@@ -29,11 +32,6 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-28-design-pass',
-  items: [
-    'Easier to read: grey text, red and the green and rose colours are a little darker where they were too pale',
-    'Easier to tap: chips, tags, the colour circles, the close button when selecting and other small buttons have bigger targets',
-    'Category and image rows in a prompt scroll to the edge of the screen instead of stopping short',
-    'Grid cards show the day in one piece instead of cutting it off, and tips stay out of the way while you search or filter',
-  ],
+  id: '2026-11-28-kural-heart',
+  items: ['About now shows Kural Heart, a private journal with Thiruvalluvar, beside Watch Heart in the Heart Apps card'],
 };

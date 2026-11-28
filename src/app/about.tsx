@@ -11,7 +11,10 @@ import { APP_NAME, APP_TAGLINE, DEVELOPER, HEART_APPS, LINKS, SUPPORT_EMAIL } fr
 import { font, useTheme } from '@/lib/theme';
 
 const HEART_APPS_TILE = require('../../assets/brand/heart-apps-tile.png');
-const WATCH_HEART_ICON = require('../../assets/brand/watch-heart.png');
+const APP_ICONS: Record<string, number> = {
+  'Watch Heart': require('../../assets/brand/watch-heart.png'),
+  'Kural Heart': require('../../assets/brand/kural-heart.png'),
+};
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'copy-outline', text: 'One-tap copy from the home screen' },
@@ -82,7 +85,7 @@ export default function AboutScreen() {
             accessibilityLabel={`${app.name}: ${app.tagline}`}
             style={({ pressed }) => [styles.otherApp, { backgroundColor: pressed ? theme.chip : 'transparent', borderTopColor: theme.border }]}
           >
-            <Image source={WATCH_HEART_ICON} style={styles.otherIcon} />
+            <Image source={APP_ICONS[app.name]} style={styles.otherIcon} />
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={[styles.otherName, { color: theme.text }]}>{app.name}</Text>
               <Text style={[styles.otherTagline, { color: theme.textMuted }]}>{app.tagline}</Text>
