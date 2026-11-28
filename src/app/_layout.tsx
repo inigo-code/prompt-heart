@@ -11,6 +11,7 @@ import { SplashOverlay, letSplashGo } from '@/components/SplashOverlay';
 import { StoreTrouble } from '@/components/StoreTrouble';
 import { ToastProvider } from '@/components/Toast';
 import { UpdatePrompt } from '@/components/UpdatePrompt';
+import { startProblemLog } from '@/lib/problemReport';
 import { useTheme } from '@/lib/theme';
 import { useEnsureAiFolders } from '@/lib/useAiApps';
 import { CopyPromptProvider } from '@/lib/useCopyPrompt';
@@ -22,6 +23,9 @@ import { HistoryProvider } from '@/store/HistoryProvider';
 import { PromptStoreProvider, usePromptStore } from '@/store/PromptStore';
 import { SyncProvider } from '@/sync/SyncProvider';
 import { useWidgetSync } from '@/widget/sync';
+
+// Notes errors and crashes for "Report a problem" (About), from the first moment.
+startProblemLog();
 
 // Keep the native splash up until SplashOverlay, drawn the same, is on screen to take over.
 SplashScreen.preventAutoHideAsync().catch(() => {});

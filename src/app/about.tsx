@@ -7,14 +7,13 @@ import { Text } from '@/components/AppText';
 import { AboutCard } from '@/components/AboutCard';
 import { AppMark } from '@/components/BrandTitle';
 import { Row, Section } from '@/components/SettingsUI';
+import { useToast } from '@/components/Toast';
 import { APP_NAME, APP_TAGLINE, DEVELOPER, HEART_APPS, LINKS, SUPPORT_EMAIL } from '@/lib/app';
+import { OTHER_HEART_APPS } from '@/lib/heartAppsList';
+import { reportProblem } from '@/lib/problemReport';
 import { font, useTheme } from '@/lib/theme';
 
 const HEART_APPS_TILE = require('../../assets/brand/heart-apps-tile.png');
-const APP_ICONS: Record<string, number> = {
-  'Watch Heart': require('../../assets/brand/watch-heart.png'),
-  'Kural Heart': require('../../assets/brand/kural-heart.png'),
-};
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
   { icon: 'copy-outline', text: 'One-tap copy from the home screen' },
@@ -30,6 +29,7 @@ const FEATURES: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
 
 export default function AboutScreen() {
   const theme = useTheme();
+  const toast = useToast();
   const insets = useSafeAreaInsets();
   // The Heart Apps chip is gold in both looks; on light paper its text is a deeper gold so it stays readable (5.6:1).
   const gold = theme.dark
@@ -77,7 +77,7 @@ export default function AboutScreen() {
             <Text style={[styles.heartAppsLine, { color: theme.text }]}>{HEART_APPS.line}</Text>
           </View>
         </View>
-        {HEART_APPS.others.map((app) => (
+        {OTHER_HEART_APPS.map((app) => (
           <Pressable
             key={app.name}
             onPress={() => WebBrowser.openBrowserAsync(app.url)}
@@ -85,7 +85,7 @@ export default function AboutScreen() {
             accessibilityLabel={`${app.name}: ${app.tagline}`}
             style={({ pressed }) => [styles.otherApp, { backgroundColor: pressed ? theme.chip : 'transparent', borderTopColor: theme.border }]}
           >
-            <Image source={APP_ICONS[app.name]} style={styles.otherIcon} />
+            <Image source={app.icon} style={styles.otherIcon} />
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={[styles.otherName, { color: theme.text }]}>{app.name}</Text>
               <Text style={[styles.otherTagline, { color: theme.textMuted }]}>{app.tagline}</Text>
@@ -118,6 +118,13 @@ export default function AboutScreen() {
       <Section theme={theme} title="Privacy & support">
         <Row theme={theme} icon="shield-checkmark-outline" label="Privacy policy" onPress={() => WebBrowser.openBrowserAsync(LINKS.privacy)} />
         <Row theme={theme} icon="person-remove-outline" label="Delete your account" onPress={() => WebBrowser.openBrowserAsync(LINKS.deleteAccount)} />
+        <Row
+          theme={theme}
+          icon="bug-outline"
+          label="Report a problem"
+          value="Opens an email"
+          onPress={() => void reportProblem().then((opened) => opened || toast(`No email app found. Write to ${SUPPORT_EMAIL}`))}
+        />
         <Row
           theme={theme}
           icon="mail-outline"

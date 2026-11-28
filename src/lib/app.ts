@@ -20,10 +20,6 @@ export const HEART_APPS = {
   name: 'Heart Apps',
   line: 'Free Android apps by Inigo. No ads, no tracking, nothing to buy.',
   home: 'https://heartapps.github.io/',
-  others: [
-    { name: 'Watch Heart', tagline: 'A diary for films, series and anime', url: 'https://heartapps.github.io/watch-heart/' },
-    { name: 'Kural Heart', tagline: 'A private journal with Thiruvalluvar', url: 'https://heartapps.github.io/kural-heart/' },
-  ],
 };
 export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
 
@@ -32,6 +28,9 @@ export const SUPPORT_EMAIL = 'inigo@tosstheworld.org';
  * new id and its own lines, so people always see what changed. A fresh install never shows it.
  */
 export const WHATS_NEW = {
-  id: '2026-11-28-kural-heart',
-  items: ['About now shows Kural Heart, a private journal with Thiruvalluvar, beside Watch Heart in the Heart Apps card'],
+  id: '2026-11-28-report-a-problem',
+  items: [
+    'About has Report a problem. It opens an email to Inigo with the app version, the phone model and recent errors (never your prompts), and nothing is sent until you tap Send',
+    'Removing your profile photo without a connection no longer brings it back the next time the app syncs',
+  ],
 };

@@ -12,6 +12,7 @@
       "bundleIdentifier": "com.inigocode.promptheart"
     },
     "android": {
+      "versionCode": 25,
       "package": "com.inigocode.promptheart",
       "adaptiveIcon": {
         "backgroundColor": "#121110",
